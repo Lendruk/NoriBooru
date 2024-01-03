@@ -1,0 +1,37 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "id": "6dc31dc7-c729-4aac-ac02-ee9b4f47753b",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "vaults": {
+      "name": "vaults",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

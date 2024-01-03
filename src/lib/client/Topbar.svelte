@@ -1,0 +1,10 @@
+<script>
+	import Breadcrumb from "./Breadcrumb.svelte";
+	import CurrentVault from "./CurrentVault.svelte";
+
+</script>
+
+<div class="bg-zinc-900 flex items-center h-12 rounded-md ml-2 mr-2">
+  <Breadcrumb />
+  <CurrentVault />
+</div>

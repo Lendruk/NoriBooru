@@ -1,0 +1,361 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "id": "bb3fcf69-6530-4fc2-b7be-bcd98be38776",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "media_items": {
+      "name": "media_items",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "extension": {
+          "name": "extension",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_size": {
+          "name": "file_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "playlists": {
+      "name": "playlists",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "randomize_order": {
+          "name": "randomize_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "time_per_item": {
+          "name": "time_per_item",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "playlists_media_items": {
+      "name": "playlists_media_items",
+      "columns": {
+        "playlist_id": {
+          "name": "playlist_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "media_item_id": {
+          "name": "media_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "item_index": {
+          "name": "item_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "playlists_media_items_playlist_id_playlists_id_fk": {
+          "name": "playlists_media_items_playlist_id_playlists_id_fk",
+          "tableFrom": "playlists_media_items",
+          "tableTo": "playlists",
+          "columnsFrom": [
+            "playlist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "playlists_media_items_media_item_id_media_items_id_fk": {
+          "name": "playlists_media_items_media_item_id_media_items_id_fk",
+          "tableFrom": "playlists_media_items",
+          "tableTo": "media_items",
+          "columnsFrom": [
+            "media_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "playlists_media_items_playlist_id_media_item_id_pk": {
+          "columns": [
+            "media_item_id",
+            "playlist_id"
+          ],
+          "name": "playlists_media_items_playlist_id_media_item_id_pk"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "tag_types": {
+      "name": "tag_types",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "tags": {
+      "name": "tags",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "media_count": {
+          "name": "media_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "tag_type_id": {
+          "name": "tag_type_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tags_tag_type_id_tag_types_id_fk": {
+          "name": "tags_tag_type_id_tag_types_id_fk",
+          "tableFrom": "tags",
+          "tableTo": "tag_types",
+          "columnsFrom": [
+            "tag_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "tags_to_media_items": {
+      "name": "tags_to_media_items",
+      "columns": {
+        "tag_id": {
+          "name": "tag_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "media_item_id": {
+          "name": "media_item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tags_to_media_items_tag_id_tags_id_fk": {
+          "name": "tags_to_media_items_tag_id_tags_id_fk",
+          "tableFrom": "tags_to_media_items",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tags_to_media_items_media_item_id_media_items_id_fk": {
+          "name": "tags_to_media_items_media_item_id_media_items_id_fk",
+          "tableFrom": "tags_to_media_items",
+          "tableTo": "media_items",
+          "columnsFrom": [
+            "media_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "tags_to_media_items_tag_id_media_item_id_pk": {
+          "columns": [
+            "media_item_id",
+            "tag_id"
+          ],
+          "name": "tags_to_media_items_tag_id_media_item_id_pk"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
