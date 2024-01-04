@@ -47,3 +47,8 @@ export const POST: RequestHandler = async ({ locals }) => {
   }
   return json({ status: 200, message: "Inbox processed" });
 };
+
+export const GET: RequestHandler = async () => {
+  const inboxFiles = await fs.readdir(INBOX_PATH);
+  return json(inboxFiles);
+};

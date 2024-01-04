@@ -6,10 +6,6 @@
       path: "/"
     },
     {
-      name: "Inbox",
-      path: "/inbox"
-    },
-    {
       name: "Tags",
       path: "/tags"
     },

@@ -1,17 +1,8 @@
 # NoriBooru
 WIP self-hosted media database and management system.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Why?
+I want to learn sveltekit and this seems like an interesting idea to execute.
 
 ## Developing
 
