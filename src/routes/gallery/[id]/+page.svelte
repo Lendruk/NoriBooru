@@ -42,11 +42,10 @@
   }
 </script>
 
-<a href="/gallery">Back</a>
 <div class="flex flex-row">
   <a href={previous ? `/gallery/${previous}` : '#'} class={`flex justify-center items-center w-1/12 ${!previous && 'cursor-not-allowed'}`}>&lt;</a>
   <div class="flex flex-row flex-1">
-    <div>
+    <div class="max-w-[30%]">
       {#if mediaItem?.type === "image"}
         <img class="bg-cover" src={`/api/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
       {/if}
