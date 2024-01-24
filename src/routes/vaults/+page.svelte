@@ -7,6 +7,8 @@
 	export let data: PageData;
   let showCreateMenu = false;
 
+  let vaults = data.vaults;
+
   let newVaultName = "";
   let newVaultPath = "";
 
@@ -33,8 +35,12 @@
     });
 
     if (res.ok) {
-      const vault = await res.json() as Vault;
-      console.log(vault);
+      const vault = await res.json() as Vault[];
+      newVaultName = "";
+      newVaultPath = "";
+      showCreateMenu = false;
+      vaults.push(vault[0]);
+      vaults = vaults.slice();
     } else {
       console.error("Failed to create vault");
     }
@@ -52,8 +58,8 @@
   </h1>
   <div class="bg-slate-800 rounded-sm min-w-[33%]">
     <div class="flex flex-col p-4">
-        {#if data.vaults.length > 0}
-          {#each data.vaults as vault}
+        {#if vaults.length > 0}
+          {#each vaults as vault}
             <div class="p-2 flex flex-1 flex-row items-center justify-between hover:transition-all hover:bg-slate-950">
               {vault.name}
               <button on:click={() => publishVaultToLocalStorage(vault)}><PlayIcon /></button>
