@@ -16,6 +16,6 @@
   }
 </script>
 
-<video class={cssClass} autoplay loop playsinline bind:this={videoElement} on:focus={() => {}} on:mouseover={videoMouseOver} on:mouseleave={videoMouseLeave} bind:muted={muted} muted {src} >
+<video class={cssClass} autoplay loop playsinline bind:this={videoElement} on:focus={() => {}} on:mouseover={videoMouseOver} on:mouseleave={videoMouseLeave} bind:muted={muted} {src} >
   <track kind="captions" />
 </video>

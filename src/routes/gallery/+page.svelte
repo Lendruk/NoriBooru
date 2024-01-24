@@ -132,7 +132,7 @@
         href={`/gallery/${mediaItem.id}`}
       >
         {#if mediaItem.type === "image"}
-          <img class="h-full" src={`/api/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
+          <img class="h-full" src={`/api/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
         {/if}
         {#if mediaItem.type === "video"}
           <Video cssClass="bg-cover w-full h-full" src={`/api/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />

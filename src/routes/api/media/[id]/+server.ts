@@ -27,7 +27,10 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
         await db.delete(mediaItems).where(eq(mediaItems.id, parsedId));
         // Delete the file
         try {
-          await fs.unlink(path.join(vault.path, "media", mediaItem.type + 's', `${mediaItem.fileName}.${mediaItem.extension}`));
+          await Promise.all([
+            fs.unlink(path.join(vault.path, "media", mediaItem.type + 's', `${mediaItem.fileName}.${mediaItem.extension}`)),
+            fs.unlink(path.join(vault.path, "media", mediaItem.type + 's', ".thumb", `${mediaItem.fileName}.jpg`)),
+          ]);
         } catch (error) {
           // TODO - Add fall back for error in file deletion
         }

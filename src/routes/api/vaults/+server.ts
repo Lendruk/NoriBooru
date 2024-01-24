@@ -24,6 +24,7 @@ export const POST: RequestHandler = async ({request}) => {
   
   await fs.mkdir(`${vaultPath}/media`);
   await fs.mkdir(`${vaultPath}/media/images`);
+  await fs.mkdir(`${vaultPath}/media/images/.thumb`);
   await fs.mkdir(`${vaultPath}/media/videos`);
   VaultController.registerVault(newVault[0]);
   return json(newVault);

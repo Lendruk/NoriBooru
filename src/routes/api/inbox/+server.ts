@@ -5,6 +5,7 @@ import { v4 as uuidV4 } from 'uuid';
 import path from 'path';
 import type { Locals } from "$lib/types/Locals";
 import type { VaultInstance } from "$lib/server/db/VaultController";
+import sharp from "sharp";
 
 function fileTypeFromExtension(extension: string) {
   switch(extension) {
@@ -44,6 +45,11 @@ export const POST: RequestHandler = async ({ locals }) => {
     await fs.rename(path.join(process.cwd(), 'media', 'inbox', file), finalPath);
     const stats = await fs.stat(finalPath);
     await db.insert(mediaItems).values({ fileName: id, extension: fileExtension, type: fileType, createdAt: Date.now(), fileSize: stats.size / (1024*1024) }).returning();
+
+    // Create thumbnail in case of images
+    if (fileType === "image") {
+      await sharp(finalPath).jpeg({ quality: 80 }).toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
+    }
   }
   return json({ status: 200, message: "Inbox processed" });
 };
