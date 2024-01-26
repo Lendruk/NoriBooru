@@ -4,6 +4,8 @@
   function processInbox() {
     HttpService.post('/api/inbox', {
       method: 'POST',
+    }).then(() => {
+      inboxFiles = [];
     });
   }
 
