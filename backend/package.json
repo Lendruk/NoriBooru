@@ -1,0 +1,33 @@
+{
+  "name": "@nori-booru/backend",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate:drizzle:master": "drizzle-kit generate:sqlite --config=./master.drizzle.config.ts",
+		"generate:drizzle:vault": "drizzle-kit generate:sqlite --config=./vault.drizzle.config.ts",
+		"generate:drizzle": "npm run generate:master && npm run generate:vault",
+    "build": "tsc",
+    "dev": "nodemon ./src/main.ts",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [],
+  "author": "Lendruk",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "better-sqlite3": "^9.4.0",
+    "drizzle-orm": "^0.29.3",
+    "fastify": "^4.26.0",
+    "sharp": "^0.33.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.14",
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/node": "^20.11.16",
+    "eslint": "^8.56.0",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

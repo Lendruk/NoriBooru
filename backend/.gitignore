@@ -1,0 +1,12 @@
+/node_modules
+/dist
+
+*.db
+
+/media/content
+/media/inbox
+
+/media/server/*.js
+database.sqlite
+/drizzle/*
+/drizzle/meta/*
