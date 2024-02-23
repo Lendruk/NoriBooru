@@ -6,7 +6,6 @@
   import { page } from "$app/stores";
 	import { goto } from '$app/navigation';
   
-
   onMount(() => {
     document.documentElement.className = "darkTheme";
 
