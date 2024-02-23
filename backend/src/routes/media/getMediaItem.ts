@@ -1,15 +1,16 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { db } from '../../db/vault/db';
 import {  Tag, mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq, gt, lt } from 'drizzle-orm';
+import { checkVault } from '../../hooks/checkVault';
 
 const getMediaItem = async (request: Request, reply: FastifyReply) => {
-  const vault = request.vault;
-  if(!vault) {
+  const vaultInstance = request.vault;
+  if(!vaultInstance) {
     return reply.status(400).send('No vault provided');
   }
 
+  const { db } = vaultInstance;
   const { id } = request.params as { id: string };
   const parsedId = Number.parseInt(id);
   const mediaItem = await db.query.mediaItems.findFirst({ where: eq(mediaItems.id, parsedId), with: { tagsToMediaItems: true }});
@@ -31,4 +32,5 @@ export default {
 	method: 'GET',
 	url: '/mediaItems/:id',
 	handler: getMediaItem,
+  onRequest: checkVault,
 } as RouteOptions;

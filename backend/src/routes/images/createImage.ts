@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import * as fs from 'fs/promises';
 import { eq } from 'drizzle-orm';
+import { checkVault } from '../../hooks/checkVault';
 
 const createImage = async (request: Request, reply: FastifyReply) => {
   const vaultInstance = request.vault;
@@ -42,4 +43,5 @@ export default {
 	method: 'POST',
 	url: '/images',
 	handler: createImage,
+  onRequest: checkVault,
 } as RouteOptions;

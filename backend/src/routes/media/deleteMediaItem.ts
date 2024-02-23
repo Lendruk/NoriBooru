@@ -1,10 +1,10 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { db } from '../../db/vault/db';
 import { mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import path from 'path';
 import * as fs from 'fs/promises'; 
+import { checkVault } from '../../hooks/checkVault';
 
 const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
   const vaultInstance = request.vault;
@@ -14,7 +14,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 
   const { id } = request.params as { id: string };
   const parsedId = Number.parseInt(id ?? "");
-  const { vault } = vaultInstance;
+  const { vault, db } = vaultInstance;
   try {
     if (parsedId) {
       const mediaItem = await db.query.mediaItems.findFirst({ where: eq(mediaItems.id, parsedId) });
@@ -48,4 +48,5 @@ export default {
 	method: 'DELETE',
 	url: '/mediaItems/:id',
 	handler: deleteMediaItem,
+  onRequest: checkVault,
 } as RouteOptions;

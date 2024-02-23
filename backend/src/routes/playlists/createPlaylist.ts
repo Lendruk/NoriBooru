@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { db } from '../../db/vault/db';
 import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
+import { checkVault } from '../../hooks/checkVault';
 
 type RequestBody = {
   name: string,
@@ -16,6 +16,7 @@ const createPlaylist = async (request: Request, reply: FastifyReply) => {
     return reply.status(400).send('No vault provided');
   }
 
+  const { db } = vault;
   const body = request.body as RequestBody;
   const playlist = (await db.insert(playlists).values({ name: body.name, createdAt: Date.now(), randomizeOrder: body.randomizeOrder ? 1 : 0 }).returning())[0];
 
@@ -30,4 +31,5 @@ export default {
 	method: 'POST',
 	url: '/playlists',
 	handler: createPlaylist,
+  onRequest: checkVault,
 } as RouteOptions;

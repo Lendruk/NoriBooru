@@ -1,6 +1,6 @@
 <script>
-  import Sidebar from '$lib/client/Sidebar.svelte';
-	import Topbar from '$lib/client/Topbar.svelte';
+  import Sidebar from '$lib/Sidebar.svelte';
+	import Topbar from '$lib/Topbar.svelte';
 	import { onMount } from 'svelte';
   import '../app.css';
   import { page } from "$app/stores";

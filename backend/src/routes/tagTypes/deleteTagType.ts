@@ -2,6 +2,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
 import { tagTypes } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
+import { checkVault } from '../../hooks/checkVault';
 
 const deleteTagType = async (request: Request, reply: FastifyReply) => {
   const vault = request.vault;
@@ -20,4 +21,5 @@ export default {
 	method: 'DELETE',
 	url: '/tagTypes/:id',
 	handler: deleteTagType,
+  onRequest: checkVault,
 } as RouteOptions;

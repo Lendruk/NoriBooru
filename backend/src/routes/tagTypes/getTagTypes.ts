@@ -1,5 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
+import { checkVault } from '../../hooks/checkVault';
 
 const getTagTypes = async (request: Request, reply: FastifyReply) => {
   const vault = request.vault;
@@ -10,11 +11,12 @@ const getTagTypes = async (request: Request, reply: FastifyReply) => {
 
   const { db } = vault;
   const tagTypes = await db.query.tagTypes.findMany();
-	reply.send({ tagTypes });
+	reply.send(tagTypes);
 };
 
 export default {
 	method: 'GET',
 	url: '/tagTypes',
 	handler: getTagTypes,
+  onRequest: checkVault,
 } as RouteOptions;

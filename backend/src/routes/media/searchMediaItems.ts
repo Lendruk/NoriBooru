@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { db } from '../../db/vault/db';
 import { Tag, mediaItems, tagsToMediaItems } from '../../db/vault/schema';
 import { asc, desc, eq } from 'drizzle-orm';
+import { checkVault } from '../../hooks/checkVault';
 
 type BaseMediaItem = {
   id: number;
@@ -26,15 +26,17 @@ const PAGE_SIZE = 30;
 type SortMethods = "newest" | "oldest";
 
 const searchMediaItems = async (request: Request, reply: FastifyReply) => {
-  const vault = request.vault;
+  const vaultInstance = request.vault;
   const query = request.query as { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string };
 
-  if(!vault) {
+  if(!vaultInstance) {
     return reply.status(400).send('No vault provided');
   }
 
-  const positiveTags = JSON.parse(query.positiveTags) as number[] ?? [];
-  const negativeTags = JSON.parse(query.negativeTags) as number[] ?? [];
+  const { db } = vaultInstance;
+  console.log(query);
+  const positiveTags = JSON.parse(query.positiveTags ?? '[]') as number[];
+  const negativeTags = JSON.parse(query.negativeTags ?? '[]') as number[];
   const sortMethod: SortMethods = query.sortMethod ?? "newest";
   let hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
   const page = parseInt(query.page ?? "0");
@@ -43,7 +45,6 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
   .leftJoin(tagsToMediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
   .limit(PAGE_SIZE)
   .offset(page * PAGE_SIZE);
-
   let filteredMediaItems = Object.values(rows.reduce<Record<number, MediaItem>>((acc, row) => {
     const mediaItem = row.media_items;
     const tag = row.tags_to_media_items;
@@ -78,4 +79,5 @@ export default {
 	method: 'GET',
 	url: '/mediaItems',
 	handler: searchMediaItems,
+  onRequest: checkVault,
 } as RouteOptions;

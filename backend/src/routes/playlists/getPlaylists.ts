@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { db } from '../../db/vault/db';
 import { eq, sql } from 'drizzle-orm';
 import { playlists_mediaItems_table } from '../../db/vault/schema';
+import { checkVault } from '../../hooks/checkVault';
 
 export type SimplePlaylist = {
   id: number;
@@ -21,6 +21,7 @@ const getPlaylists = async (request: Request, reply: FastifyReply) => {
   if(!vault) {
     return reply.status(400).send('No vault provided');
   }
+  const { db } = vault;
 
   const playlists = await db.query.playlists.findMany() as SimplePlaylist[];
 
@@ -36,4 +37,5 @@ export default {
 	method: 'GET',
 	url: '/playlists',
 	handler: getPlaylists,
+  onRequest: checkVault,
 } as RouteOptions;

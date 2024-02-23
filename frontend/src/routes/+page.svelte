@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { HttpService } from "$lib/client/services/HttpService";
+	import { HttpService } from "$lib/services/HttpService";
 
   function processInbox() {
-    HttpService.post('/api/inbox', {
+    HttpService.post('/inbox', {
       method: 'POST',
     }).then(() => {
       inboxFiles = [];
@@ -12,7 +12,7 @@
   let inboxFiles: string[] = $state([]);
 
   $effect(() => {
-    HttpService.get<string[]>("/api/inbox").then(files => {
+    HttpService.get<string[]>("/inbox").then(files => {
       inboxFiles = files;
     })
   })

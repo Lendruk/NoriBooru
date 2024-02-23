@@ -1,19 +1,19 @@
 <script lang="ts">
-	import TrashIcon from '$lib/client/icons/TrashIcon.svelte';
-  import PlayIcon from '$lib/client/icons/PlayIcon.svelte';
-	import { HttpService } from '$lib/client/services/HttpService';
-	import type { SimplePlaylist } from '../api/playlists/+server';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+  import PlayIcon from '$lib/icons/PlayIcon.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+  import type {SimplePlaylist} from '$lib/types/SimplePlaylist';
 
   let playlists: SimplePlaylist[] = $state([]);
 
   $effect(() => {
-    HttpService.get<SimplePlaylist[]>(`/api/playlists`).then(res => {
+    HttpService.get<SimplePlaylist[]>(`/playlists`).then(res => {
       playlists = res;
     });
   });
 
   async function deletePlaylist(playlistId: number) {
-    await HttpService.delete(`/api/playlists/${playlistId}`);
+    await HttpService.delete(`/playlists/${playlistId}`);
     playlists = playlists.filter(playlist => playlist.id !== playlistId);
   }
 </script>

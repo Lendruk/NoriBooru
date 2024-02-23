@@ -1,13 +1,14 @@
-import type { Vault } from "$lib/server/db/master/schema";
+import type { Vault } from "$lib/types/Vault";
 
 export class HttpService {
   private static currentVault: Vault | null = null;
+  public static BASE_URL = `http://localhost:8080`;
 
   public static getVaultId(): string | undefined {
     if (this.currentVault) {
       return this.currentVault.id;
     } else {
-      let storageVault = localStorage.getItem("currentVault");
+      const storageVault = localStorage.getItem("currentVault");
 
       if (storageVault) {
         this.currentVault = JSON.parse(storageVault);
@@ -17,7 +18,7 @@ export class HttpService {
   };
 
   public static async get<T>(url: string): Promise<T> {
-    const response = await fetch(url, {
+    const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -32,8 +33,8 @@ export class HttpService {
     return response.json() as Promise<T>;
   };
 
-  public static async post<T>(url: string, body: any): Promise<T> {
-    const response = await fetch(url, {
+  public static async post<T>(url: string, body: Record<string, unknown>): Promise<T> {
+    const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,8 +50,8 @@ export class HttpService {
     return response.json() as Promise<T>;
   }
 
-  public static async put<T>(url: string, body: any): Promise<T> {
-    const response = await fetch(url, {
+  public static async put<T>(url: string, body: Record<string, unknown>): Promise<T> {
+    const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -66,8 +67,8 @@ export class HttpService {
     return response.json() as Promise<T>;
   }
 
-  public static async delete<T>(url: string, body?: any): Promise<T> {
-    const response = await fetch(url, {
+  public static async delete<T>(url: string, body?: Record<string, unknown>): Promise<T> {
+    const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -83,8 +84,8 @@ export class HttpService {
     return response.json() as Promise<T>;
   }
 
-  public static async patch<T>(url: string, body: any): Promise<T> {
-    const response = await fetch(url, {
+  public static async patch<T>(url: string, body: Record<string, unknown>): Promise<T> {
+    const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

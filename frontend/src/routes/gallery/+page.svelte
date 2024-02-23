@@ -1,13 +1,13 @@
 <script lang="ts">
-	import Tag from '$lib/client/Tag.svelte';
-  import type { Tag as TagDef } from '$lib/server/db/vault/schema';
-	import Video from '$lib/client/Video.svelte';
+	import Tag from '$lib/Tag.svelte';
+	import Video from '$lib/Video.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
-	import { HttpService } from '$lib/client/services/HttpService';
-	import Accordeon from '$lib/client/Accordeon.svelte';
-	import TagSearchInput from '$lib/client/TagSearchInput.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+	import Accordeon from '$lib/Accordeon.svelte';
+	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import type { TagDef } from '$lib/types/TagDef';
 
   let mediaItems: MediaItem[]  = [];
   let filtersVisible: boolean = true;
@@ -18,7 +18,7 @@
 
 	onMount(async () => {
     await search();
-    tags = await HttpService.get<TagDef[]>('/api/tags');
+    tags = await HttpService.get<TagDef[]>('/tags');
 	});
 
   async function applyPositiveTagFilter(tag: TagDef) {
@@ -32,7 +32,7 @@
   }
 
   async function search() {
-    const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/api/media?' + new URLSearchParams(
+    const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + new URLSearchParams(
       { 
         negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(appliedPositiveTags.map(tag => tag.id )),
@@ -53,12 +53,12 @@
   }
 
   async function deleteItem(mediaItemId: number) {
-    await HttpService.delete(`/api/media/${mediaItemId}`);
+    await HttpService.delete(`/mediaItems/${mediaItemId}`);
     mediaItems = mediaItems.filter(item => item.id !== mediaItemId);
   }
 
   async function toggleArchivedStatus(mediaItemId: number, isArchived: boolean) {
-    await HttpService.patch(`/api/media/${mediaItemId}`, { isArchived: !isArchived });
+    await HttpService.patch(`/mediaItems/${mediaItemId}`, { isArchived: !isArchived });
     mediaItems = mediaItems.map(item => item.id === mediaItemId ? { ...item, isArchived: !isArchived } : item);
   }
 
@@ -132,10 +132,10 @@
         href={`/gallery/${mediaItem.id}`}
       >
         {#if mediaItem.type === "image"}
-          <img class="h-full" src={`/api/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
+          <img class="h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
         {/if}
         {#if mediaItem.type === "video"}
-          <Video cssClass="bg-cover w-full h-full" src={`/api/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
+          <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
         {/if}
       </GalleryItem>
     {/each}

@@ -3,7 +3,7 @@ import { masterDb } from '../../db/master/db';
 
 const getVaults = async (_: FastifyRequest, reply: FastifyReply) => {
 	const vaults = await masterDb.query.vaults.findMany();
-	reply.send({ vaults });
+	reply.send(vaults);
 };
 
 export default {

@@ -1,4 +1,4 @@
-import type { Tag } from "$lib/server/db/vault/schema";
+import type { TagDef } from "./TagDef";
 
 type BaseMediaItem = {
   id: number;
@@ -15,5 +15,4 @@ export type MediaItem = BaseMediaItem & {
   tags: number[];
 };
 
-
-export type MediaItemWithTags = BaseMediaItem & { tags: Tag[] };
+export type MediaItemWithTags = BaseMediaItem & { tags: TagDef[] };

@@ -27,6 +27,4 @@ export class VaultController {
     }
     return vault;
   }
-
-  public static vaultEndpoints: Set<string> = new Set(["/gallery", "/tags", "/playlists", "/inbox"]);
 }

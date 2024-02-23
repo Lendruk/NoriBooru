@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import Tag from "$lib/client/Tag.svelte";
-	import { HttpService } from "$lib/client/services/HttpService";
-  import type { Tag as TagDef } from "$lib/server/db/vault/schema";
+	import Tag from "$lib/Tag.svelte";
+	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItemWithTags } from "$lib/types/MediaItem";
+	import type { TagDef } from "$lib/types/TagDef";
 
   let foundTags: TagDef[] = $state([]);
   let tags: TagDef[] = $state([]);
@@ -13,7 +13,7 @@
   let previous: string | undefined = $state(undefined);
 
   $effect(() => {
-    HttpService.get<{ mediaItem: MediaItemWithTags, next?: string, previous?: string, tags: TagDef[] }>(`/api/media/${$page.params.id}`).then(res => {
+    HttpService.get<{ mediaItem: MediaItemWithTags, next?: string, previous?: string, tags: TagDef[] }>(`/mediaItems/${$page.params.id}`).then(res => {
       mediaItem = res.mediaItem;
       tags = res.tags;
       next = res.next;
@@ -30,14 +30,14 @@
   }
 
   async function addTagToMedia(tag: TagDef) {
-    await HttpService.put(`/api/media/${mediaItem?.id}/tags`, tag);
+    await HttpService.put(`/mediaItems/${mediaItem?.id}/tags`, tag);
     mediaItem!.tags = [...tags, tag];
     tagSearchText = "";
     foundTags = [];
   }
 
   async function removeTagFromMedia(tag:TagDef) {
-    await HttpService.delete(`/api/media/${mediaItem?.id}/tags`, tag);
+    await HttpService.delete(`/mediaItems/${mediaItem?.id}/tags`, tag);
     mediaItem!.tags = mediaItem!.tags.filter(t => t.id !== tag.id);
   }
 </script>
@@ -47,10 +47,10 @@
   <div class="flex flex-row flex-1">
     <div class="max-w-[30%]">
       {#if mediaItem?.type === "image"}
-        <img class="bg-cover" src={`/api/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
+        <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
       {/if}
       {#if mediaItem?.type === "video"}
-        <video class="bg-cover w-full h-full" src={`/api/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}  controls>
+        <video class="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}  controls>
           <track kind="captions" />
         </video>
       {/if}

@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-	import Video from "$lib/client/Video.svelte";
-	import TrashIcon from "$lib/client/icons/TrashIcon.svelte";
-	import type { Playlist, MediaItem, Tag } from "$lib/server/db/vault/schema";
+	import Video from "$lib/Video.svelte";
+	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import SidebarMediaItem from "./SidebarMediaItem.svelte";
-	import ChevronUp from "$lib/client/icons/ChevronUp.svelte";
-	import ChevronDown from "$lib/client/icons/ChevronDown.svelte";
-	import { HttpService } from "$lib/client/services/HttpService";
+	import ChevronUp from "$lib/icons/ChevronUp.svelte";
+	import ChevronDown from "$lib/icons/ChevronDown.svelte";
+	import { HttpService } from "$lib/services/HttpService";
+	import type { MediaItem } from "$lib/types/MediaItem";
+	import type { TagDef } from "$lib/types/TagDef";
+	import type { Playlist } from "$lib/types/Playlist";
   let playlistName = $state('');
   let timePerItem = $state(0);
   let randomizeOrder = $state(false);
@@ -15,7 +17,7 @@
 
   $effect(() => {
     if ($page.params.id && $page.params.id !== "new") {
-      HttpService.get<Playlist>(`/api/playlists/${$page.params.id}`).then(res => {
+      HttpService.get<Playlist>(`/playlists/${$page.params.id}`).then(res => {
         playlistName = res.name;
         randomizeOrder = res.randomizeOrder === 1;
         playlistItems = res.items;
@@ -25,8 +27,8 @@
   });
   
   // Sidebar props
-  let foundTags: Tag[] = $state([]);
-  let filterTags: Tag[] = $state([]);
+  let foundTags: TagDef[] = $state([]);
+  let filterTags: TagDef[] = $state([]);
   let tagSearchInputText = $state('');
   let sidebarMediaItems: MediaItem[] = $state([]);
   let selectedSidebarMediaItems: MediaItem[] = $state([]);
@@ -34,7 +36,7 @@
 
   async function onTagSearchChange() {
     if (tagSearchInputText.length > 0) {
-      const response = await HttpService.get<Tag[]>(`/api/tags?name=${tagSearchInputText}`);
+      const response = await HttpService.get<TagDef[]>(`/tags?name=${tagSearchInputText}`);
 
       foundTags = response;
       foundTags = foundTags.filter(tag => !filterTags.find(t => t.id === tag.id));
@@ -43,7 +45,7 @@
     }
   }
 
-  async function addTagToFilter(tag: Tag) {
+  async function addTagToFilter(tag: TagDef) {
     filterTags = [...filterTags, tag];
     foundTags = [];
     tagSearchInputText = '';
@@ -53,7 +55,7 @@
     }
   }
 
-  async function removeTagFromFilter(tag: Tag) {
+  async function removeTagFromFilter(tag: TagDef) {
     filterTags = filterTags.filter(t => t.id !== tag.id);
 
     if (filterTags.length > 0) {
@@ -64,7 +66,7 @@
   }
 
   async function searchMedia() {
-    const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>('/api/media?' + new URLSearchParams(
+    const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + new URLSearchParams(
       { 
         // negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(filterTags.map(tag => tag.id )),
@@ -105,7 +107,7 @@
   }
 
   async function createPlaylist() {
-    const newPlaylist = await HttpService.post<Playlist>('/api/playlists', {
+    const newPlaylist = await HttpService.post<Playlist>('/playlists', {
       name: playlistName,
       randomizeOrder,
       timePerItem,
@@ -115,7 +117,7 @@
   }
 
   async function updatePlaylist() {
-    await HttpService.put(`/api/playlists/${$page.params.id}`, {
+    await HttpService.put(`/playlists/${$page.params.id}`, {
       name: playlistName,
       randomizeOrder,
       timePerItem,
@@ -160,9 +162,9 @@
             </div>
             <div style="width: 50px;height: 50px">
             {#if item.type === "image"}
-              <img class="bg-cover" src={`/api/images/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} alt="gallery-img" />
+              <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} alt="gallery-img" />
             {:else}
-              <video class="bg-cover w-full h-full" src={`/api/videos/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} controls={false}/>
+              <video class="bg-cover w-full h-full" src={`/videos/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} controls={false}/>
             {/if}
             </div>
             <div>
@@ -197,10 +199,10 @@
             onAddClick={() => { selectedSidebarMediaItems.push(mediaItem); }}
           >
           {#if mediaItem.type === "image"}
-            <img class="bg-cover" src={`/api/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
+            <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
           {/if}
           {#if mediaItem.type === "video"}
-            <Video cssClass="bg-cover w-full h-full" src={`/api/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
+            <Video cssClass="bg-cover w-full h-full" src={`/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
           {/if}
           </SidebarMediaItem>
         {/each}

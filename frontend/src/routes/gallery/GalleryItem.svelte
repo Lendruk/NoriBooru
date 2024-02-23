@@ -1,5 +1,4 @@
 <script lang="ts">
-	import EditIcon from "$lib/client/icons/editIcon.svelte";
   import GalleryItemButton from "./GalleryItemButton.svelte";
 
   export let href = "";

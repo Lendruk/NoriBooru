@@ -1,0 +1,20 @@
+{
+  "name": "nori-booru",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "backend-dev": "cd backend && npm run dev",
+    "frontend-dev": "cd frontend && npm run dev",
+    "prepare:backend": "cd backend && npm i",
+    "prepare:frontend": "cd frontend && npm i",
+    "prepare:dev": "npm run prepare:backend && npm run prepare:frontend",
+    "dev": "concurrently npm:backend-dev npm:frontend-dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [],
+  "author": "Lendruk",
+  "license": "MIT"
+}

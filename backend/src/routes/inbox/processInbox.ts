@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import { mediaItems } from '../../db/vault/schema';
 import sharp from 'sharp';
+import { checkVault } from '../../hooks/checkVault';
 
 function fileTypeFromExtension(extension: string) {
   switch(extension) {
@@ -55,11 +56,12 @@ const processInbox = async (request: Request, reply: FastifyReply) => {
   }
 
 
-  return reply.send("Inbox processed");
+  return reply.send({ message: "Inbox processed"});
 };
 
 export default {
 	method: 'POST',
 	url: '/inbox',
 	handler: processInbox,
+  onRequest: checkVault,
 } as RouteOptions;
