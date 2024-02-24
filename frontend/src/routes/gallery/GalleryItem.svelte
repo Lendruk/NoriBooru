@@ -7,6 +7,7 @@
   export let onMoveToArchive = () => {};
   export let onMoveToInbox = () => {};
   export let isArchived = false;
+  export let style = '';
 
   let confirmingDelete = false;
   let showOptions = false;
@@ -16,7 +17,7 @@
   }
 </script>
 
-<a on:mouseenter={() => showOptions = true} on:mouseleave={() => { showOptions = false; reset()}} class={className + " relative group"} href={href}>
+<a on:mouseenter={() => showOptions = true} on:mouseleave={() => { showOptions = false; reset()}} style={style} class={className + " relative group"} href={href}>
   <div class={`absolute inset-0 bg-black opacity-0 group-hover:transition-opacity group-hover:opacity-50`}/>
   <div class={`${!showOptions ? 'hidden' : 'flex' } flex-1 w-full h-full absolute top-0`}>
     <div class="flex flex-1 flex-col">

@@ -122,22 +122,24 @@
       </select>
     </div>
   </Accordeon>
-  <div class="flex flex-wrap w-full content-start m-2">
-    {#each mediaItems as mediaItem}
-      <GalleryItem 
-        isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)} 
-        onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
-        onConfirmDelete={() => deleteItem(mediaItem.id)} 
-        className="flex w-[calc((100vw-14rem)/6)] h-1/6 justify-center items-center border-zinc-900 border-2 rounded-md m-1" 
-        href={`/gallery/${mediaItem.id}`}
-      >
-        {#if mediaItem.type === "image"}
-          <img class="h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
-        {/if}
-        {#if mediaItem.type === "video"}
-          <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
-        {/if}
-      </GalleryItem>
-    {/each}
-  </div>
+    <div class="grid w-full gap-2 justify-center p-4"
+    style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
+    >
+      {#each mediaItems as mediaItem}
+        <GalleryItem 
+          isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)} 
+          onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
+          onConfirmDelete={() => deleteItem(mediaItem.id)} 
+          className="flex justify-center h-64 items-center border-zinc-900 border-2 rounded-md" 
+          href={`/gallery/${mediaItem.id}`}
+        >
+          {#if mediaItem.type === "image"}
+            <img class="h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
+          {/if}
+          {#if mediaItem.type === "video"}
+            <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
+          {/if}
+        </GalleryItem>
+      {/each}
+    </div>
 </div>
