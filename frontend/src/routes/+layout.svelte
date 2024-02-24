@@ -43,7 +43,7 @@
   }
 
   :global(html.darkTheme) {
-    background-color: #333;
+    background-color: #121212;
     color: #fff;
   }
 
