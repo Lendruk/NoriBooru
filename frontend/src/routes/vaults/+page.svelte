@@ -4,6 +4,7 @@
 	import { HttpService } from '$lib/services/HttpService';
 	import type { Vault } from '$lib/types/Vault';
 	import Button from '$lib/Button.svelte';
+	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 
 	let vaults: Vault[] = [];
 
@@ -92,7 +93,7 @@
 
 		{:else}
 		<div class={`flex flex-col p-4 w-[80%] self-center`}>
-			<Button class="w-[100px] h-[40px] bg-lighter-bg" onClick={() => vaultCreationOpen = false }> Back </Button>
+			<button class="w-[70px] h-[40px] bg-lighter-bg hover:border-white border-b hover:transition flex items-center justify-between border-transparent" on:click={() => vaultCreationOpen = false }><ArrowLeft /> Back </button>
 			<div class="mt-4 mb-4 flex flex-col gap-2">
 				<div class="flex flex-col gap-2">
 					<label for="vaultName">Vault name</label>
