@@ -28,7 +28,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
   await fs.mkdir(`${vaultPath}/media/images/.thumb`);
   await fs.mkdir(`${vaultPath}/media/videos`);
   VaultController.registerVault(newVault[0]);
-  return reply.send(newVault);
+  return reply.send(newVault[0]);
 };
 
 export default {

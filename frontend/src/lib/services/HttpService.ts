@@ -44,7 +44,13 @@ export class HttpService {
     });
 
     if (response.status >= 400) {
-      throw new Error(`Error during request status: ${response.status}`);
+      let errorBody: { message: string } = { message: '' };
+      try {
+        errorBody = await response.json() as { message: string };
+      } catch {
+        throw new Error(`Error during request status: ${response.status}`);
+      }
+      throw new Error(errorBody.message);
     }
 
     return response.json() as Promise<T>;

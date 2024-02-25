@@ -10,8 +10,11 @@
 
 	let newVaultName = '';
 	let newVaultPath = '';
-
 	let vaultCreationOpen = false;
+
+	let vaultPathCheckTimeout: NodeJS.Timeout | undefined;
+	let pathMessage = '';
+	let isTherePathError = false;
 
 	onMount(async () => {
 		if (typeof localStorage !== 'undefined') {
@@ -26,6 +29,33 @@
 		vaults = fetchedVaults;
 	}
 
+	async function checkVaultPath() {
+
+		if (vaultPathCheckTimeout) {
+			clearTimeout(vaultPathCheckTimeout);
+			vaultPathCheckTimeout = undefined;
+		}
+
+		if (newVaultPath != "") {
+			vaultPathCheckTimeout = setTimeout(async () => {
+				try {
+					await HttpService.post<{ message: string}>('/vaults/check-path', {
+						path: newVaultPath
+					});
+					pathMessage = 'Directory is valid';
+					isTherePathError = false;
+				} catch(error) {
+					pathMessage = (error as Error).message;
+					isTherePathError = true;
+				}
+
+			}, 500);
+		} else {
+			pathMessage = '';
+			isTherePathError = false;
+		}
+	}
+
 	async function createVault() {
 		if (!newVaultName || !newVaultPath) {
 			return;
@@ -38,6 +68,8 @@
       });
       newVaultName = '';
       newVaultPath = '';
+			pathMessage = '';
+			isTherePathError = false;
 			vaultCreationOpen = false;
       vaults.push(vault);
       vaults = vaults.slice();
@@ -54,15 +86,15 @@
 </script>
 
 <div class="flex flex-row w-full items-center justify-center h-[50%] mt-28 mr-60 ml-60">
-	<div class="bg-main-bg rounded-tl-sm rounded-bl-sm w-[40%] h-full">
+	<div class="bg-main-bg rounded-tl-sm rounded-bl-sm w-[40%] h-full overflow-y-scroll overflow-x-hidden">
 		<div class="flex flex-col p-4">
 			{#if vaults.length > 0}
 				{#each vaults as vault}
 					<button
 						on:click={() => publishVaultToLocalStorage(vault)}
-						class="p-2 flex items-start justify-start flex-col hover:transition-all rounded-md hover:bg-lighter-bg"
+						class="p-2 flex items-start max-h-[10%] justify-start flex-col hover:transition-all rounded-md hover:bg-lighter-bg"
 					>
-					<div>
+					<div class="text-ellipsis overflow-x-clip max-w-full">
 						{vault.name}
 					</div>
 					<div class="text-xs text-gray-300">
@@ -101,7 +133,15 @@
 				</div>
 				<div class="flex flex-col gap-2">
 					<label for="vaultPath">Vault path</label>
-					<input class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white" bind:value={newVaultPath} name="vaultPath" type="text" placeholder="path..." />
+					<input 
+						class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white" 
+						bind:value={newVaultPath} 
+						name="vaultPath" 
+						type="text" 
+						placeholder="path..." 
+						on:input={checkVaultPath}
+					/>
+					<div class="min-h-[30px]" style={`color:${isTherePathError ? 'red' : 'lightgreen'}`}>{pathMessage}</div>
 				</div>
 			</div>
 			<Button class="w-[100px] h-[40px] self-end" onClick={createVault}>Create</Button>
