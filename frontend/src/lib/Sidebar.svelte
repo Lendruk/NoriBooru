@@ -12,6 +12,7 @@
     {
       name: "Gallery",
       path: "/gallery"
+
     },
     {
       name: "Playlists",
@@ -21,9 +22,9 @@
   
 </script>
 
-<aside class="bg-zinc-900 rounded-md">
+<aside class="bg-zinc-900 rounded-tr-md rounded-br-md">
   {#each routes as route}
-    <a class={`${$page.url.pathname === route.path && 'active'} ml-2 mr-2 p-2 rounded-md text-md hover:bg-slate-300 hover:text-zinc-800 hover:transition-all`} href={route.path}>{route.name}</a>
+    <a class={`${$page.url.pathname === route.path && 'bg-surface-color text-white'} pl-4 pr-4 pt-2 pb-2 text-md hover:bg-surface-color hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`} href={route.path}>{route.name}</a>
   {/each}
 </aside>
 
@@ -32,11 +33,6 @@
     color: #fff;
     /* padding: 1rem; */
     width: 10rem;
-  }
-
-  .active {
-    color: rgb(39 39 42);
-    background-color: rgb(203 213 225);
   }
 
   a {
