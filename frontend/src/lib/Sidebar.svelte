@@ -1,44 +1,61 @@
 <script lang="ts">
-	import { page } from "$app/stores";
-  let routes = [
-    {
-      name: "Dashboard",
-      path: "/"
-    },
-    {
-      name: "Tags",
-      path: "/tags"
-    },
-    {
-      name: "Gallery",
-      path: "/gallery"
+	import { page } from '$app/stores';
+	import ImagesIcon from './icons/ImagesIcon.svelte';
+	import PlayIcon from './icons/PlayIcon.svelte';
+	import TableColumnsIcon from './icons/TableColumnsIcon.svelte';
+	import TagIcon from './icons/TagIcon.svelte';
+  import { PUBLIC_VERSION } from '$env/static/public';
+	let routes = [
+		{
+			name: 'Dashboard',
+			path: '/',
+      icon: TableColumnsIcon,
+		},
+		{
+			name: 'Tags',
+			path: '/tags',
+			icon: TagIcon,
+		},
+		{
+			name: 'Gallery',
+			path: '/gallery',
+      icon: ImagesIcon,
+		},
+		{
+			name: 'Playlists',
+			path: '/playlists',
+      icon: PlayIcon,
+		}
+	];
 
-    },
-    {
-      name: "Playlists",
-      path: "/playlists"
-    },
-  ];
   
 </script>
 
-<aside class="bg-zinc-900 rounded-tr-md rounded-br-md">
-  {#each routes as route}
-    <a class={`${$page.url.pathname === route.path && 'bg-surface-color text-white'} pl-4 pr-4 pt-2 pb-2 text-md hover:bg-surface-color hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`} href={route.path}>{route.name}</a>
-  {/each}
+<aside class="bg-zinc-900 flex flex-col justify-between rounded-tr-md rounded-br-md w-2/12 max-w-[200px]">
+  <div>
+    {#each routes as route}
+      <a
+        class={`${
+          $page.url.pathname === route.path && 'bg-surface-color text-white'
+        } pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-surface-color hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
+        href={route.path}>{#if route.icon} <svelte:component this={route.icon} color="#FFFFFF"/> {/if}<div>{route.name}</div></a
+      >
+    {/each}
+  </div>
+  <div class="flex flex-col text-xs items-center mb-4">
+    <div>NoriBooru</div>
+    <div>v{PUBLIC_VERSION}</div>
+  </div>
 </aside>
 
 <style>
-  aside {
-    color: #fff;
-    /* padding: 1rem; */
-    width: 10rem;
-  }
+	aside {
+		color: #fff;
+	}
 
-  a {
-    display: block;
-    color: #fff;
-    text-decoration: none;
-    margin-bottom: 0.5rem;
-  }
+	a {
+		color: #fff;
+		text-decoration: none;
+		margin-bottom: 0.5rem;
+	}
 </style>
