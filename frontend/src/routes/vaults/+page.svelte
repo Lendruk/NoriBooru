@@ -86,13 +86,13 @@
 </script>
 
 <div class="flex flex-row w-full items-center justify-center h-[50%] mt-28 mr-60 ml-60">
-	<div class="bg-main-bg rounded-tl-sm rounded-bl-sm w-[40%] h-full overflow-y-scroll overflow-x-hidden">
+	<div class="bg-red-950 rounded-tl-sm rounded-bl-sm w-[40%] h-full overflow-y-scroll overflow-x-hidden">
 		<div class="flex flex-col p-4">
 			{#if vaults.length > 0}
 				{#each vaults as vault}
 					<button
 						on:click={() => publishVaultToLocalStorage(vault)}
-						class="p-2 flex items-start max-h-[10%] justify-start flex-col hover:transition-all rounded-md hover:bg-lighter-bg"
+						class="p-2 flex items-start max-h-[10%] justify-start flex-col hover:transition-all rounded-md hover:bg-zinc-900"
 					>
 					<div class="text-ellipsis overflow-x-clip max-w-full">
 						{vault.name}
@@ -107,7 +107,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="flex flex-col rounded-tr-sm rounded-br-sm bg-lighter-bg h-full w-[60%]">
+	<div class="flex flex-col rounded-tr-sm rounded-br-sm bg-zinc-900 h-full w-[60%]">
 		<h1 class="text-3xl mb-5 flex self-center mt-4">NoriBooru</h1>
 
 		{#if !vaultCreationOpen}
@@ -125,7 +125,7 @@
 
 		{:else}
 		<div class={`flex flex-col p-4 w-[80%] self-center`}>
-			<button class="w-[70px] h-[40px] bg-lighter-bg hover:border-white border-b hover:transition flex items-center justify-between border-transparent" on:click={() => vaultCreationOpen = false }><ArrowLeft /> Back </button>
+			<button class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent" on:click={() => vaultCreationOpen = false }><ArrowLeft class="fill-inherit"/> Back </button>
 			<div class="mt-4 mb-4 flex flex-col gap-2">
 				<div class="flex flex-col gap-2">
 					<label for="vaultName">Vault name</label>

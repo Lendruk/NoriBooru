@@ -63,7 +63,7 @@
 </script>
 
 <div class="flex flex-row min-h-full">
-  <a href={previous ? `/gallery/${previous}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!previous && 'cursor-not-allowed'}`}><ArrowLeft /></a>
+  <a href={previous ? `/gallery/${previous}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!previous && 'cursor-not-allowed'}`}><ArrowLeft class="fill-white" /></a>
   <div class="flex flex-col items-center gap-8 flex-1">
     <div>
       {#if mediaItem?.type === "image"}

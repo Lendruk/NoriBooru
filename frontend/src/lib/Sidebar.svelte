@@ -36,8 +36,8 @@
     {#each routes as route}
       <a
         class={`${
-          $page.url.pathname === route.path && 'bg-surface-color text-white'
-        } pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-surface-color hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
+          $page.url.pathname === route.path && 'bg-red-950 text-white'
+        } pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
         href={route.path}>{#if route.icon} <svelte:component this={route.icon} color="#FFFFFF"/> {/if}<div>{route.name}</div></a
       >
     {/each}
