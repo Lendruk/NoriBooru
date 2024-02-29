@@ -27,7 +27,7 @@ type SortMethods = "newest" | "oldest";
 
 const searchMediaItems = async (request: Request, reply: FastifyReply) => {
   const vaultInstance = request.vault;
-  const query = request.query as { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string };
+  const query = request.query as { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string };
 
   if(!vaultInstance) {
     return reply.status(400).send('No vault provided');
@@ -41,6 +41,7 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
   let hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
   const page = parseInt(query.page ?? "0");
   const rows = await db.select().from(mediaItems)
+  .where(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0))
   .orderBy(sortMethod === "newest" ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt))
   .leftJoin(tagsToMediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
   .limit(PAGE_SIZE)

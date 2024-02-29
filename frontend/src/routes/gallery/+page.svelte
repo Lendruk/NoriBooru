@@ -37,6 +37,7 @@
         negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(appliedPositiveTags.map(tag => tag.id )),
         sortMethod,
+        archived: 'true',
       }));
 
       mediaItems = res.mediaItems;
@@ -91,24 +92,26 @@
 
 <div class="flex flex-col flex-1 h-full">
   <Accordeon header="Filters">
-    <div>Positive Tags</div>
-    <div class="flex gap-4 flex-row flex-wrap">
+    <div class="mb-2">Positive Tags</div>
+    <div class="flex flex-1 flex-row flex-wrap w-full bg-zinc-800 rounded-md">
       {#each appliedPositiveTags as tag }
         <Tag onClick={() => removePositiveTagFilter(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
       {/each}
       <TagSearchInput 
         tags={tags} 
+        class="outline-none h-[40px] indent-2"
         ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
         onTagSearchSubmit={onPositiveTagSearchSubmit} 
       />
     </div>
-    <div>Negative Tags</div>
-    <div class="flex gap-4 flex-row flex-wrap">
+    <div class="mb-2">Negative Tags</div>
+    <div class="flex flex-1 flex-row flex-wrap w-full bg-zinc-800 rounded-md">
       {#each appliedNegativeTags as tag }
         <Tag onClick={() => removeNegativeTagFilter(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
       {/each}
       <TagSearchInput 
         tags={tags} 
+        class="outline-none h-[40px] indent-2"
         ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
         onTagSearchSubmit={onNegativeTagSearchSubmit} 
       />

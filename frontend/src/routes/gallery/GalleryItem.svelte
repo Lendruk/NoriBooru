@@ -1,5 +1,6 @@
 <script lang="ts">
-  import TagIcon from "$lib/icons/TagIcon.svelte";
+  import InboxIcon from "$lib/icons/InboxIcon.svelte";
+import TagIcon from "$lib/icons/TagIcon.svelte";
 import GalleryItemButton from "./GalleryItemButton.svelte";
 
   export let href = "";
@@ -29,7 +30,7 @@ import GalleryItemButton from "./GalleryItemButton.svelte";
           </GalleryItemButton>
         {:else} 
           <GalleryItemButton onClick={onMoveToArchive}>
-            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path d="M121 32C91.6 32 66 52 58.9 80.5L1.9 308.4C.6 313.5 0 318.7 0 323.9V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V323.9c0-5.2-.6-10.4-1.9-15.5l-57-227.9C446 52 420.4 32 391 32H121zm0 64H391l48 192H387.8c-12.1 0-23.2 6.8-28.6 17.7l-14.3 28.6c-5.4 10.8-16.5 17.7-28.6 17.7H195.8c-12.1 0-23.2-6.8-28.6-17.7l-14.3-28.6c-5.4-10.8-16.5-17.7-28.6-17.7H73L121 96z"/></svg>
+           <InboxIcon />
           </GalleryItemButton>
         {/if}
       </div>

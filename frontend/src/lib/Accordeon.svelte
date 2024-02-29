@@ -15,7 +15,7 @@ import ChevronUp from "./icons/ChevronUp.svelte";
     {/if}
     <span class="ml-2">{header}</span>
   </div>
-  <div class={`${open ? 'block' : 'hidden'} p-4 rounded-md pt-4 mr-4 mb-5 ml-4 bg-zinc-700`}>
+  <div class={`${open ? 'block' : 'hidden'} p-4 rounded-md pt-4 mr-4 mb-5 ml-4 bg-zinc-900`}>
     <slot />
   </div>
 </div>

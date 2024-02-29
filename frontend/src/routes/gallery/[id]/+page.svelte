@@ -51,7 +51,7 @@
 
   async function addTagToMedia(tag: TagDef) {
     await HttpService.put(`/mediaItems/${mediaItem?.id}/tags`, tag);
-    mediaItem!.tags = [...tags, tag];
+    mediaItem!.tags = [...mediaItem!.tags, tag];
     tagSearchText = "";
     foundTags = [];
   }
@@ -78,12 +78,12 @@
     <div class="flex w-full flex-col flex-1">
       <p>Tags</p>
       <input type="text" bind:value={tagSearchText} on:input={searchTags} placeholder="Search Tags" />
-          <div>Found tags</div>
-          <div class="tags">
-            {#each foundTags as tag }
-              <Tag onClick={() => addTagToMedia(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
-            {/each}
-          </div>
+      <div>Found tags</div>
+      <div class="tags">
+        {#each foundTags as tag }
+          <Tag onClick={() => addTagToMedia(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
+        {/each}
+      </div>
       <p>Current media tags</p>
       <div class="tags">
         {#if mediaItem}
@@ -97,4 +97,4 @@
   <a href={next ? `/gallery/${next}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!next && 'cursor-not-allowed'}`}><ArrowRight /></a>
 </div>
 
-<svelte:window on:keydown|preventDefault={onKeyDown} />
+<svelte:window on:keydown={onKeyDown} />
