@@ -13,7 +13,11 @@ import Modal from '$lib/Modal.svelte';
 	let tagInEditName = $state('');
 	let tagInEditId = $state(0);
 	let tagInEditTypeId = $state(0);
+
 	let showTagTypeEditModal = $state(false);
+	let tagTypeInEditId = $state(0);
+	let tagTypeInEditName = $state('');
+	let tagTypeInEditColor = $state('');
 
 	let tags: TagDef[] = $state([]);
 	let tagTypes: TagType[] = $state([]);
@@ -51,7 +55,19 @@ import Modal from '$lib/Modal.svelte';
 		tagInEditName = '';
 		tagInEditTypeId = 0;
 	}
-	1;
+	
+	async function updateTagType() {
+		const updatedTagType = await HttpService.put<TagType>(`/tagTypes/${tagTypeInEditId}`, {
+			name: tagTypeInEditName,
+			color: tagTypeInEditColor
+		});
+		showTagTypeEditModal = false;
+		tagTypes = tagTypes.map((tagType) => (tagType.id === updatedTagType.id ? updatedTagType : tagType));
+		tagTypeInEditColor = '';
+		tagTypeInEditId = 0;
+		tagTypeInEditName = '';
+	}
+
 	async function createTagType() {
 		const newTagType = await HttpService.post<TagType>('/tagTypes', {
 			name: tagTypeName,
@@ -128,8 +144,13 @@ import Modal from '$lib/Modal.svelte';
 			<h2 class="text-2xl mb-2 mt-10">Tag Types</h2>
 			<div class="h-[1px] border-t-2 border-red-950 w-[80%] flex mt-2 mb-10"></div>
 			<div class="flex flex-wrap gap-3">
-				{#each tagTypes as tag}
-					<Tag color={tag.color} text={tag.name} onDelete={() => deleteTagType(tag.id)} />
+				{#each tagTypes as tagType}
+					<Tag color={tagType.color} text={tagType.name} onEdit={() => {
+						showTagTypeEditModal = true;
+						tagTypeInEditName = tagType.name;
+						tagTypeInEditColor = tagType.color;
+						tagTypeInEditId = tagType.id;
+					}} onDelete={() => deleteTagType(tagType.id)} />
 				{/each}
 			</div>
 		</div>
@@ -137,16 +158,37 @@ import Modal from '$lib/Modal.svelte';
 </div>
 
 <Modal bind:showModal={showTagEditModal}>
-	<div slot="header">Edit Tag</div>
 	{#if tagInEditName}
-		<div>
-			<input type="text" bind:value={tagInEditName} placeholder="Tag Name" />
-			<select bind:value={tagInEditTypeId}>
-				{#each tagTypes as tagType}
-					<option value={tagType.id}>{tagType.name}</option>
-				{/each}
-			</select>
-			<button on:click={() => tagInEditName.length > 0 && updateTag()}>Save</button>
+		<div class="flex flex-1 flex-col justify-center m-4 gap-4">
+			<div class="flex flex-col gap-4">
+				<label for="tagEditName">Tag name</label>
+				<input name="tagEditName" type="text" bind:value={tagInEditName} placeholder="Tag Name" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"/>
+			</div>
+			<div class="flex flex-col gap-4">
+				<label for="tagType">Tag Type</label>
+				<select name="tagType" bind:value={tagInEditTypeId} class="h-[40px] bg-zinc-800 indent-2 rounded-md">
+					{#each tagTypes as tagType}
+						<option value={tagType.id}>{tagType.name}</option>
+					{/each}
+				</select>
+			</div>
+			<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={() => tagInEditName.length > 0 && updateTag()}>Save</Button>
+		</div>
+	{/if}
+</Modal>
+
+<Modal bind:showModal={showTagTypeEditModal}>
+	{#if tagTypeInEditName}
+		<div class="flex flex-1 flex-col justify-center m-4 gap-4">
+			<div class="flex flex-col gap-4">
+				<label for="tagEditName">Tag type name</label>
+				<input name="tagEditName" type="text" bind:value={tagTypeInEditName} placeholder="Tag type Name" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"/>
+			</div>
+			<div class="flex flex-col gap-4">
+				<label for="tagTypeEditColor">Color</label>
+				<input name="tagTypeEditColor" type="color" bind:value={tagTypeInEditColor} class="h-[40px] bg-zinc-800 indent-2" />
+			</div>
+			<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={() => tagTypeInEditName.length > 0 && updateTagType()}>Save</Button>
 		</div>
 	{/if}
 </Modal>
