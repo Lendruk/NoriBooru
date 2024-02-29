@@ -3,8 +3,7 @@ import vaultRoutes from './vaults';
 import tagTypeRoutes from './tagTypes';
 import tagRoutes from './tags';
 import playlistRoutes from './playlists';
-import inboxRoutes from './inbox';
 import mediaItemRoutes from './media';
 import imageRoutes from './images';
 
-export default [...videoRoutes, ...imageRoutes, ...vaultRoutes, ...tagTypeRoutes, ...mediaItemRoutes, ...tagRoutes, ...playlistRoutes, ...inboxRoutes];
+export default [...videoRoutes, ...imageRoutes, ...vaultRoutes, ...tagTypeRoutes, ...mediaItemRoutes, ...tagRoutes, ...playlistRoutes];

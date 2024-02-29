@@ -26,7 +26,7 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 
   const videoStream = createReadStream(videoPath);
 
-  reply.send(videoStream);
+  return reply.send(videoStream);
 };
 
 export default {

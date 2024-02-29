@@ -42,6 +42,8 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
     console.log(error);
     return reply.status(400).send({ message: error });
   }
+
+  return reply.send({ message: "Media item deleted successfully"});
 };
 
 export default {

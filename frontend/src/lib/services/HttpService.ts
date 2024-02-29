@@ -33,14 +33,19 @@ export class HttpService {
     return response.json() as Promise<T>;
   };
 
-  public static async post<T>(url: string, body: Record<string, unknown>): Promise<T> {
+  public static async post<T>(url: string, body: Record<string, unknown> | FormData): Promise<T> {
+
+    const headers: Record<string, string> = {
+      "vault": this.getVaultId() || "",
+    };
+
+    if (!(body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
     const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "vault": this.getVaultId() || "",
-      },
-      body: JSON.stringify(body),
+      headers,
+      body: body instanceof FormData ? body : JSON.stringify(body),
     });
 
     if (response.status >= 400) {

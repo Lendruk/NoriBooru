@@ -22,3 +22,6 @@ In the project root directory run:
 ```sh
 docker-compose up
 ```
+
+## Requirements
+- ffmpeg
