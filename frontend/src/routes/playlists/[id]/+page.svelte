@@ -126,15 +126,18 @@
   }
 </script>
 
-<div class="flex flex-row flex-1 h-full justify-between">
-  <div class="flex flex-1 flex-col">
-    <button class="flex self-end p-4" on:click={() => $page.params.id !== 'new' ? updatePlaylist() : createPlaylist()}>{$page.params.id !== 'new' ? 'Update' : 'Create'}</button>
+<div class="flex flex-row flex-1 justify-between bg-zinc-900 m-2 rounded-md h-full">
+  <div class="flex flex-1 flex-col p-4">
     <div>
-      <div>Name</div>
-      <input type="test" placeholder="Name.." bind:value={playlistName} />
-      <div>Time per item</div>
-      <input type="number" placeholder="Time per item.." bind:value={timePerItem} />
-      <div>
+      <div class="flex flex-col gap-4">
+        <label for="playlistName">Name</label>
+        <input name="playlistName" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md" type="test" placeholder="Name.." bind:value={playlistName} />
+      </div>
+      <div class="flex flex-col gap-4">
+        <label for="playlistTPI">Time per item</label>
+        <input name="playlistTPI" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md" type="number" placeholder="Time per item.." bind:value={timePerItem} />
+      </div>
+      <div class="flex gap-2">
         <span>Randomize order</span>
         <input type="checkbox" bind:checked={randomizeOrder} />
       </div>
@@ -177,6 +180,7 @@
         {/each}
       </div>
     </div>
+    <button class="flex self-end p-4" on:click={() => $page.params.id !== 'new' ? updatePlaylist() : createPlaylist()}>{$page.params.id !== 'new' ? 'Update' : 'Create'}</button>
   </div>
   <div class={`${mediaSearchSidebarOpen ? 'flex' : 'hidden'} w-1/2 h-full bg-slate-700`}>
     <div class="flex flex-1 flex-col">

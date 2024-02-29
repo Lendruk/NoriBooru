@@ -14,7 +14,7 @@ const deleteTagType = async (request: Request, reply: FastifyReply) => {
 
   const { db } = vault;
   await db.delete(tagTypes).where(eq(tagTypes.id, Number.parseInt(params.id ?? "")));
-	reply.send();
+	reply.send({ message: 'Tag type deleted successfully' });
 };
 
 export default {

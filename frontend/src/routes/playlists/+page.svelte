@@ -18,14 +18,17 @@
   }
 </script>
 
-<div>
-  <div>
-    <a href="/playlists/new">Create playlist</a>
+<div class="m-2 bg-zinc-900 rounded-md p-4">
+  <div class="flex justify-between mb-10">
+    <div class="text-3xl">
+      Playlists
+    </div>
+    <a class="flex items-center justify-center p-2 rounded-md hover:bg-red-900 bg-red-950" href="/playlists/new">Create playlist</a>
   </div>
 
   <div class="flex flex-col flex-1">
     {#if playlists.length > 0}
-      <div class="p-4 pl-8 bg-slate-900">
+      <div class="p-4 pl-8 bg-red-950">
         <div>Name</div>
       </div>
     {#each playlists as playlist}
@@ -35,7 +38,7 @@
         </a>
         <a href={`/playlists/${playlist.id}`}>{playlist.name} ({playlist.items} Items)</a>
         <div class="flex flex-1"></div>
-        <button on:click={() => deletePlaylist(playlist.id)}>
+        <button class="fill-white" on:click={() => deletePlaylist(playlist.id)}>
           <TrashIcon />
         </button>
       </div>
