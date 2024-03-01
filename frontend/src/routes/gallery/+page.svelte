@@ -144,5 +144,10 @@
           {/if}
         </GalleryItem>
       {/each}
+      {#if mediaItems.length === 0}
+        <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center self-center">
+          No items in inbox
+        </div>
+      {/if}
     </div>
 </div>

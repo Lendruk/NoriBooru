@@ -34,7 +34,7 @@
 </script>
 
 <div class="flex flex-col flex-1 h-full">
-  <div class="grid w-full gap-2 justify-center p-4"
+  <div class="grid w-full gap-2 justify-center p-2"
   style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
   >
     {#each mediaItems as mediaItem}
@@ -53,6 +53,11 @@
         {/if}
       </GalleryItem>
     {/each}
+    {#if mediaItems.length === 0}
+      <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center self-center">
+        No items in inbox
+      </div>
+    {/if}
   </div>
 
 </div>
