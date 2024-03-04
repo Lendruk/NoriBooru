@@ -7,8 +7,9 @@
     "backend-dev": "cd backend && npm run dev",
     "frontend-dev": "cd frontend && npm run dev",
     "prepare:backend": "cd backend && npm i",
-    "prepare:frontend": "cd frontend && npm i",
-    "prepare:dev": "npm run prepare:backend && npm run prepare:frontend",
+    "prepare:frontend": "cd frontend && npm i --force",
+    "prepare:env": "node ./scripts/createEnv",
+    "prepare:dev": "npm install && npm run prepare:backend && npm run prepare:frontend && npm run prepare:env",
     "dev": "concurrently npm:backend-dev npm:frontend-dev"
   },
   "devDependencies": {
