@@ -1,4 +1,7 @@
 <script lang="ts">
+	import type { SvelteComponent } from "svelte";
+	import Tooltip from "./Tooltip.svelte";
+
   type Col = {
     key: string;
     display: string | ConstructorOfATypedSvelteComponent;
@@ -18,7 +21,19 @@
   export let rows: Row[] = [];
   export let cols: Col[] = [];
   export let actions: Action[] = [];
+
+  let showToolTip = false;
+  let toolTipX = 0;
+  let toolTipY = 0;
+  let toolTipContent = "";
   let orderedRows: Row[] = [];
+
+  function onMouseEnterAction(e: MouseEvent & { currentTarget: EventTarget & HTMLSpanElement; }, actionName: string) {
+    toolTipContent=actionName; 
+    showToolTip=true;
+    toolTipX = e.currentTarget.offsetLeft;
+    toolTipY = e.currentTarget.offsetTop;
+  }
 
   $: orderedRows = (() => {
     let computedRows: Row[] = [];
@@ -41,7 +56,8 @@
   })();
 </script>
 
-<table class="flex flex-col h-fit flex-1">
+<table class="flex flex-col h-fit flex-1 relative">
+  <Tooltip x={toolTipX} y={toolTipY} content={toolTipContent} visible={showToolTip} />
   <thead class="flex flex-1 bg-red-950 p-2 rounded-t-md">
     <tr class="flex flex-1 justify-between">
       {#each cols as col, i}
@@ -63,7 +79,7 @@
         <td class="flex flex-1"/>
         <td class="flex flex-1 justify-end gap-4 items-center">
           {#each actions as action}
-          <span on:click={action.onClick}><svelte:component this={action.icon} /></span>
+          <span on:mouseleave={() => { showToolTip=false; }} on:mouseenter={(e) => onMouseEnterAction(e, action.name)} class="hover:fill-red-900 hover:cursor-pointer hover:transition fill-white" on:click={action.onClick}><svelte:component this={action.icon} /></span>
           {/each}
         </td>
         {/if}

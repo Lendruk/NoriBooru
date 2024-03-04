@@ -47,6 +47,6 @@
     {:else}
       <div>No playlists</div>
     {/if}
-    <SimpleTable cols={[{ key: "name", display: "Name"}, { key:"address", display:"Address"}]} rows={[{ name: "test"}, { name: "test2"}, { name: "test3"}]} actions={[ {icon: PlayIcon, name: "Play", onClick: () => {} }, {icon: TrashIcon, name: "Play", onClick: () => {} }]}/>
+    <SimpleTable cols={[{ key: "name", display: "Name"}, { key:"address", display:"Address"}]} rows={[{ name: "test"}, { name: "test2"}, { name: "test3"}]} actions={[ {icon: PlayIcon, name: "Play", onClick: () => {} }, {icon: TrashIcon, name: "Delete", onClick: () => {} }]}/>
   </div>
 </div>
