@@ -3,6 +3,7 @@
   import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
   import type {SimplePlaylist} from '$lib/types/SimplePlaylist';
+	import SimpleTable from '$lib/SimpleTable.svelte';
 
   let playlists: SimplePlaylist[] = $state([]);
 
@@ -46,5 +47,6 @@
     {:else}
       <div>No playlists</div>
     {/if}
+    <SimpleTable cols={[{ key: "name", display: "Name"}, { key:"address", display:"Address"}]} rows={[{ name: "test"}, { name: "test2"}, { name: "test3"}]} actions={[ {icon: PlayIcon, name: "Play", onClick: () => {} }, {icon: TrashIcon, name: "Play", onClick: () => {} }]}/>
   </div>
 </div>
