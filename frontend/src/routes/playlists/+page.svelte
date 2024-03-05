@@ -36,7 +36,7 @@
 		{#if playlists.length > 0}
       <SimpleTable
       cols={[
-        { key: 'name', display: 'Name' },
+        { key: 'name', header: 'Name' },
       ]}
       rows={playlists}
       actions={[

@@ -4,12 +4,12 @@
 	import Video from "$lib/Video.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import SidebarMediaItem from "./SidebarMediaItem.svelte";
-	import ChevronUp from "$lib/icons/ChevronUp.svelte";
-	import ChevronDown from "$lib/icons/ChevronDown.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItem } from "$lib/types/MediaItem";
 	import type { TagDef } from "$lib/types/TagDef";
 	import type { Playlist } from "$lib/types/Playlist";
+	import SimpleTable from "$lib/SimpleTable.svelte";
+	import TableImage from "./TableImage.svelte";
   let playlistName = $state('');
   let timePerItem = $state(0);
   let randomizeOrder = $state(false);
@@ -70,6 +70,7 @@
       { 
         // negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(filterTags.map(tag => tag.id )),
+        archived: "true",
       }));
     sidebarMediaItems = newItems.mediaItems.filter(item => !playlistItems.find(i => i.id === item.id));
   }
@@ -84,24 +85,24 @@
     filterTags = [];
   }
 
-  function removePlaylistItem(itemToRemove: MediaItem) {
-    playlistItems = playlistItems.filter(item => item.id !== itemToRemove.id);
+  function removePlaylistItem(itemId: number) {
+    playlistItems = playlistItems.filter(item => item.id !== itemId);
   }
 
-  function moveMediaItemUp(item: MediaItem) {
-    const index = playlistItems.findIndex(i => i.id === item.id);
+  function moveMediaItemUp(itemId?: string | number) {
+    const index = playlistItems.findIndex(i => i.id === itemId);
     if (index > 0) {
       const temp = playlistItems[index - 1];
-      playlistItems[index - 1] = item;
+      playlistItems[index - 1] = playlistItems[index];
       playlistItems[index] = temp;
     }
   }
 
-  function moveMediaItemDown(item: MediaItem) {
-    const index = playlistItems.findIndex(i => i.id === item.id);
+  function moveMediaItemDown(itemId?: string | number) {
+    const index = playlistItems.findIndex(i => i.id === itemId);
     if (index < playlistItems.length - 1) {
       const temp = playlistItems[index + 1];
-      playlistItems[index + 1] = item;
+      playlistItems[index + 1] = playlistItems[index];
       playlistItems[index] = temp;
     }
   }
@@ -149,35 +150,24 @@
         <button on:click={() => mediaSearchSidebarOpen = !mediaSearchSidebarOpen }>Add</button>
       </div>
       <div>
-        {#each playlistItems as item, index}
-          <div class="flex flex-row flex-1 gap-2">
-            <div class="flex flex-col">
-              {#if index !== 0}
-                <button on:click={() => moveMediaItemUp(item)}>
-                  <ChevronUp />
-                </button>
-              {/if}
-              {#if index !== playlistItems.length - 1}
-                <button on:click={() => moveMediaItemDown(item)}>
-                  <ChevronDown />
-                </button>
-              {/if}
-            </div>
-            <div style="width: 50px;height: 50px">
-            {#if item.type === "image"}
-              <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} alt="gallery-img" />
-            {:else}
-              <video class="bg-cover w-full h-full" src={`/videos/${HttpService.getVaultId()}/${item.fileName}.${item.extension}`} controls={false}/>
-            {/if}
-            </div>
-            <div>
-              {item.createdAt}
-            </div>
-            <button on:click={() => removePlaylistItem(item)}>
-              <TrashIcon />
-            </button>
-          </div>
-        {/each}
+        <SimpleTable
+          cols={[
+            { header: 'Media', customRender: TableImage },
+            { 
+              key: 'createdAt', 
+              header: 'CreatedAt', 
+              formatter: (val) => new Date(val as number).toDateString(),
+            },
+          ]}
+          rows={playlistItems}
+          actions={[
+            { icon: TrashIcon, name: 'Delete', onClick: (id) => { removePlaylistItem(id as number)} }
+          ]}
+          orderable={{
+            onMoveDown:moveMediaItemDown,
+            onMoveUp:moveMediaItemUp,
+          }}
+        />
       </div>
     </div>
     <button class="flex self-end p-4" on:click={() => $page.params.id !== 'new' ? updatePlaylist() : createPlaylist()}>{$page.params.id !== 'new' ? 'Update' : 'Create'}</button>

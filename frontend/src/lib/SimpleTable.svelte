@@ -1,12 +1,14 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
 	import Tooltip from './Tooltip.svelte';
+	import ChevronDown from './icons/ChevronDown.svelte';
+	import ChevronUp from './icons/ChevronUp.svelte';
 
-	type Col = {
+  type SimpleCol = {
 		key: string;
-		display: string | ConstructorOfATypedSvelteComponent;
-		spacing?: string;
-	};
+    formatter?: (val: unknown) => string,
+  }
+
+	type Col = { header: string } & (SimpleCol | { customRender: ConstructorOfATypedSvelteComponent });
 
 	type Row = {
 		[index: string]: unknown;
@@ -19,9 +21,15 @@
 		name: string;
 	};
 
+  type OrderableOptions = {
+    onMoveUp: (id?: string | number) => void | Promise<void>;
+    onMoveDown: (id?: string | number) => void | Promise<void>;
+  }
+
 	export let rows: Row[] = [];
 	export let cols: Col[] = [];
 	export let actions: Action[] = [];
+  export let orderable: OrderableOptions | undefined = undefined;
 
 	let showToolTip = false;
 	let toolTipX = 0;
@@ -43,8 +51,11 @@
 	<Tooltip x={toolTipX} y={toolTipY} content={toolTipContent} visible={showToolTip} />
 	<thead class="flex flex-1 bg-red-950 p-2 rounded-t-md">
 		<tr class="flex flex-1 justify-between">
+      {#if orderable}
+      <th class="flex flex-[0.2]">#</th>
+      {/if}
 			{#each cols as col, i}
-				<th class={`flex flex-1  ${i !== 0 ? 'justify-end' : ''}`}>{col.display}</th>
+				<th class={`flex flex-1 items-center  ${i !== 0 ? 'justify-end' : ''}`}>{col.header}</th>
 			{/each}
 			{#if actions.length > 0}
 				<th class="flex flex-1" />
@@ -53,10 +64,40 @@
 		</tr>
 	</thead>
 	<tbody class="flex flex-col box-border">
-		{#each rows as row}
+		{#each rows as row, i}
 			<tr class="flex flex-1 pt-5 pb-5 justify-between pl-2 pr-2 odd:bg-surface-color box-border hover:bg-zinc-700 hover:transition hover:duration-300">
-				{#each cols as col, i}
-					<td class={`flex flex-1 ${i !== 0 ? 'justify-end' : ''}`}>{row[col.key]}</td>
+        {#if orderable}
+        <td class="flex justify-center flex-col flex-[0.2]">
+          {#if i == 0}
+            <button on:click={() => orderable?.onMoveDown(row.id)}>
+              <ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+            </button>
+          {:else if i == rows.length - 1}
+            <button on:click={() => orderable?.onMoveUp(row.id)}>
+              <ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+            </button>
+          {:else}
+            <button on:click={() => orderable?.onMoveUp(row.id)}>
+              <ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+            </button>
+            <button on:click={() => orderable?.onMoveDown(row.id)}>
+              <ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+            </button>
+          {/if}
+        </td>
+        {/if}
+        {#each cols as col, j}
+					<td class={`flex flex-1 items-center ${j !== 0 ? 'justify-end' : ''}`}>
+            {#if "key" in col}
+              {#if col.formatter}
+                {col.formatter(row[col.key])}
+              {:else}
+                {row[col.key]}
+              {/if}
+            {:else}
+              <svelte:component this={col.customRender} row={row} />
+            {/if}
+          </td>
 				{/each}
 				{#if actions.length > 0}
 					<td class="flex flex-1" />

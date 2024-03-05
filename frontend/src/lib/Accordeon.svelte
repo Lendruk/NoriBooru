@@ -9,9 +9,9 @@ import ChevronUp from "./icons/ChevronUp.svelte";
 <div>
   <div class="flex flex-row items-center bg-zinc-900 pt-4 pb-5 pl-4 rounded-md m-2 hover:cursor-pointer" on:click={() => open = !open}>
     {#if open}
-      <ChevronUp />
+      <ChevronUp class="fill-white" />
     {:else}
-      <ChevronDown />
+      <ChevronDown class="fill-white" />
     {/if}
     <span class="ml-2">{header}</span>
   </div>
