@@ -21,6 +21,8 @@ const removeTagFromMediaItem = async (request: Request, reply: FastifyReply) => 
   } catch(error) {
     return reply.status(400).send({ message: error });
   }
+
+  return reply.send({ message: "Tag removed successfully" });
 };
 
 export default {

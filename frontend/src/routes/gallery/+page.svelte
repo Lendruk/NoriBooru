@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Tag from '$lib/Tag.svelte';
 	import Video from '$lib/Video.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import { onMount } from 'svelte';
@@ -8,6 +7,7 @@
 	import Accordeon from '$lib/Accordeon.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { TagDef } from '$lib/types/TagDef';
+	import Modal from '$lib/Modal.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let filtersVisible: boolean = true;
@@ -15,6 +15,9 @@
   let appliedNegativeTags: TagDef[] = [];
   let tags: TagDef[] = [];
   let sortMethod: 'newest' | 'oldest' = 'newest';
+  let showMediaTagEditModal = false;
+  let mediaItemInTagEdit: { id: number; tags: TagDef[] } | undefined;
+
 
 	onMount(async () => {
     await search();
@@ -29,6 +32,19 @@
   async function applyNegativeTagFilter(tag: TagDef) {
     appliedNegativeTags = [...appliedNegativeTags, tag];
     await search();
+  }
+
+  async function removeTagFromMediaItem(tag: TagDef, mediaItemId: number) {
+    await HttpService.delete(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+    const tagIndex = mediaItemInTagEdit!.tags.findIndex(mediaTag => mediaTag.id === tag.id);
+    mediaItemInTagEdit!.tags.splice(tagIndex, 1);
+    mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
+  }
+
+  async function addTagToMediaItem(tag: TagDef, mediaItemId: number) {
+    await HttpService.put(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+    mediaItemInTagEdit!.tags.push(tag);
+    mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
   }
 
   async function search() {
@@ -63,26 +79,22 @@
     mediaItems = mediaItems.map(item => item.id === mediaItemId ? { ...item, isArchived: !isArchived } : item);
   }
 
-  function onPositiveTagSearchSubmit(value: string) {
-    if (value) {
-      const tag = tags.find(tag => tag.name.toLowerCase().startsWith(value.toLowerCase()) && !appliedPositiveTags.concat(appliedNegativeTags).find(at => at.id === tag.id));
-      if (tag) {
-        applyPositiveTagFilter(tag);
-      } else {
-        // TODO - warn
-      }
-    }
+  async function fetchMediaItemTags(mediaItemId: number) {
+    const tags = await HttpService.get<TagDef[]>(`/mediaItems/${mediaItemId}/tags`);
+    mediaItemInTagEdit = { id: mediaItemId, tags };
   }
 
-  function onNegativeTagSearchSubmit(value: string) {
-    if (value) {
-      const tag = tags.find(tag => tag.name.toLowerCase().startsWith(value.toLowerCase()) && !appliedPositiveTags.concat(appliedNegativeTags).find(at => at.id === tag.id));
-      if (tag) {
-        applyNegativeTagFilter(tag);
-      } else {
-        // TODO - warn
-      }
-    }
+  function onPositiveTagSearchSubmit(tag: TagDef) {
+    applyPositiveTagFilter(tag);
+  }
+
+  function onNegativeTagSearchSubmit(tag: TagDef) {
+    applyNegativeTagFilter(tag);
+  }
+
+  async function onTagButtonClick(mediaItemId: number) {
+    await fetchMediaItemTags(mediaItemId);
+    showMediaTagEditModal = !showMediaTagEditModal;
   }
 </script>
 
@@ -93,30 +105,23 @@
 <div class="flex flex-col flex-1 h-full">
   <Accordeon header="Filters">
     <div class="mb-2">Positive Tags</div>
-    <div class="flex flex-1 flex-row flex-wrap w-full bg-zinc-800 rounded-md">
-      {#each appliedPositiveTags as tag }
-        <Tag onClick={() => removePositiveTagFilter(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
-      {/each}
       <TagSearchInput 
-        tags={tags} 
-        class="outline-none h-[40px] indent-2"
+        availableTags={tags} 
+        appliedTags={appliedPositiveTags}
+        class="outline-none min-h-[40px] indent-2"
         ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
         onTagSearchSubmit={onPositiveTagSearchSubmit} 
+        onAppliedTagClick={removePositiveTagFilter}
       />
-    </div>
     <div class="mb-2">Negative Tags</div>
-    <div class="flex flex-1 flex-row flex-wrap w-full bg-zinc-800 rounded-md">
-      {#each appliedNegativeTags as tag }
-        <Tag onClick={() => removeNegativeTagFilter(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
-      {/each}
       <TagSearchInput 
-        tags={tags} 
-        class="outline-none h-[40px] indent-2"
+        availableTags={tags} 
+        appliedTags={appliedNegativeTags}
+        class="outline-none min-h-[40px] indent-2"
         ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
         onTagSearchSubmit={onNegativeTagSearchSubmit} 
+        onAppliedTagClick={removePositiveTagFilter}
       />
-    </div>
-
     <div>
       Sort by: 
       <select bind:value={sortMethod} on:change={search} class="text-black" >
@@ -133,6 +138,7 @@
           isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)} 
           onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
           onConfirmDelete={() => deleteItem(mediaItem.id)} 
+          onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
           className="flex justify-center h-64 items-center border-zinc-900 border-2 rounded-md" 
           href={`/gallery/${mediaItem.id}`}
         >
@@ -146,8 +152,24 @@
       {/each}
       {#if mediaItems.length === 0}
         <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center self-center">
-          No items in inbox
+          No items in gallery
         </div>
       {/if}
     </div>
 </div>
+<Modal class="w-[40%]" bind:showModal={showMediaTagEditModal}>
+  <div class="p-4 flex flex-col w-full">
+    <div class="text-xl mb-4">
+      Modify media item tags
+    </div>
+    {#if mediaItemInTagEdit}
+      <TagSearchInput
+        appliedTags={mediaItemInTagEdit.tags}  
+        availableTags={tags}
+        ignoredTags={mediaItemInTagEdit.tags}
+        onAppliedTagClick={(tag) => removeTagFromMediaItem(tag, mediaItemInTagEdit!.id)}
+        onTagSearchSubmit={(tag) => addTagToMediaItem(tag, mediaItemInTagEdit!.id)}
+      />
+    {/if}
+  </div>
+</Modal>

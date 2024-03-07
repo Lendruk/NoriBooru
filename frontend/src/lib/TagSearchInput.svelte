@@ -2,7 +2,7 @@
 	import Tag from "./Tag.svelte";
 	import type { TagDef } from "./types/TagDef";
   
-  export let onTagSearchSubmit: (value: string) => void;
+  export let onTagSearchSubmit: (tag: TagDef) => void;
   export let onAppliedTagClick: (tag: TagDef) => void;
   export let availableTags: TagDef[] = [];
   export let appliedTags: TagDef[] = [];
@@ -15,9 +15,12 @@
 
   function onSubmit(keyCode: string, value: string) {
     if(keyCode === "Enter") {
-      onTagSearchSubmit(value);
-      tagSuggestion = "";
-      tagSearchInputText = "";
+      const tag = availableTags.find(tag => tag.name.toLowerCase().startsWith(value) && !ignoredTags.find(at => at.id === tag.id));
+      if (tag) {
+        onTagSearchSubmit(tag);
+        tagSuggestion = "";
+        tagSearchInputText = "";
+      }
     }
   }
 
@@ -38,7 +41,7 @@
       const tag = availableTags.find(tag => tag.name.toLowerCase().startsWith(e.currentTarget.value.toLowerCase()) && !ignoredTags.find(at => at.id === tag.id));
 
       if (tag) {
-        onTagSearchSubmit(tag.name);
+        onTagSearchSubmit(tag);
         tagSuggestion = "";
         tagSearchInputText = "";
       }
@@ -69,7 +72,7 @@
   }
 
 </script>
-<div class={`flex flex-1 flex-wrap bg-zinc-800 rounded-md ${cssClass}`}>
+<div class={`flex flex-wrap w-full min-h-[40px] bg-zinc-800 rounded-md ${cssClass}`}>
   <div class="flex flex-row flex-wrap gap-2">
     {#each appliedTags as tag }
       <Tag onClick={() => onAppliedTagClick(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />

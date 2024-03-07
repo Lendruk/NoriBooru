@@ -1,6 +1,8 @@
 <script lang="ts">
 	export let showModal = false; 
-
+	export { cssClass as class};
+	
+	let cssClass = "";
 	let dialog: HTMLDialogElement;
 
 	$: if (dialog && showModal) dialog.showModal();
@@ -12,7 +14,7 @@
 	bind:this={dialog}
 	on:close={() => (showModal = false)}
 	on:click|self={() => dialog.close()}
-	class="bg-surface-color text-white rounded-md min-w-[30%] min-h-[30%] flex"
+	class={`bg-surface-color text-white rounded-md min-w-[30%] min-h-[30%] flex ${cssClass}`}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="flex flex-1" on:click|stopPropagation>

@@ -8,6 +8,7 @@ import GalleryItemButton from "./GalleryItemButton.svelte";
   export let onConfirmDelete = () => {};
   export let onMoveToArchive = () => {};
   export let onMoveToInbox = () => {};
+  export let onTagButtonClick = () => {};
   export let isArchived = false;
   export let style = '';
 
@@ -35,7 +36,7 @@ import GalleryItemButton from "./GalleryItemButton.svelte";
         {/if}
       </div>
       <div class="flex gap-4 flex-1 items-end justify-end justify-items-end m-2">
-        <GalleryItemButton>
+        <GalleryItemButton onClick={onTagButtonClick}>
           <TagIcon />
         </GalleryItemButton>
   
