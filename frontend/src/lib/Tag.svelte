@@ -14,7 +14,7 @@
 
 <span on:click={onClick ?? undefined} style={cssVarStyles} class="tag"> 
   <slot>
-    <button on:click={onEdit} class={`editButton ${!onEdit && 'invisible'} mr-2`}><EditIcon class="fill-white" /></button> {text} {mediaCount > 0 ? `(${mediaCount})` : ''}
+    <button on:click={onEdit} class={`editButton ${!onEdit ? 'invisible': 'mr-2' }`}><EditIcon class="fill-white" /></button> {text} {mediaCount > 0 ? `(${mediaCount})` : ''}
     <button class={`delete ${!onDelete && 'invisible'}`} on:click={onDelete}> X </button>
   </slot>
 </span>
@@ -26,6 +26,7 @@
     color: white;
     border-radius: 2em;
     text-align: center;
+    max-height: 50px;
 
     display: flex;
     flex-direction: row;
