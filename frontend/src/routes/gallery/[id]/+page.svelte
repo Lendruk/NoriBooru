@@ -2,6 +2,7 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores";
 	import Tag from "$lib/Tag.svelte";
+	import TagSearchInput from "$lib/TagSearchInput.svelte";
 	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
 	import ArrowRight from "$lib/icons/ArrowRight.svelte";
 	import { HttpService } from "$lib/services/HttpService";
@@ -41,17 +42,9 @@
     })
   });
 
-  function searchTags() {
-    if(tagSearchText === "") {
-      foundTags = [];
-    } else {
-      foundTags = tags!.filter(tag => tag.name.toLowerCase().includes(tagSearchText.toLowerCase()) && !mediaItem?.tags.find(t => t.id === tag.id));
-    }
-  }
-
   async function addTagToMedia(tag: TagDef) {
     await HttpService.put(`/mediaItems/${mediaItem?.id}/tags`, tag);
-    mediaItem!.tags = [...mediaItem!.tags, tag];
+    mediaItem!.tags = [...mediaItem!.tags, {...tag, mediaCount: tag.mediaCount + 1}];
     tagSearchText = "";
     foundTags = [];
   }
@@ -77,21 +70,15 @@
     </div>
     <div class="flex w-full flex-col flex-1">
       <p>Tags</p>
-      <input type="text" bind:value={tagSearchText} on:input={searchTags} placeholder="Search Tags" />
-      <div>Found tags</div>
-      <div class="tags">
-        {#each foundTags as tag }
-          <Tag onClick={() => addTagToMedia(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
-        {/each}
-      </div>
-      <p>Current media tags</p>
-      <div class="tags">
-        {#if mediaItem}
-          {#each mediaItem.tags as tag}
-            <Tag onDelete={() => removeTagFromMedia(tag)} mediaCount={tag.mediaCount} color={tag?.tagType?.color} text={tag?.name} />
-          {/each}
-        {/if}
-      </div>
+      {#if mediaItem}
+        <TagSearchInput
+          appliedTags={mediaItem.tags}  
+          availableTags={tags}
+          ignoredTags={mediaItem.tags}
+          onAppliedTagClick={removeTagFromMedia}
+          onTagSearchSubmit={addTagToMedia}
+        />
+      {/if}
     </div>
   </div>
   <a href={next ? `/gallery/${next}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!next && 'cursor-not-allowed'}`}><ArrowRight /></a>

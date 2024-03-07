@@ -14,7 +14,7 @@
 	bind:this={dialog}
 	on:close={() => (showModal = false)}
 	on:click|self={() => dialog.close()}
-	class={`bg-surface-color text-white rounded-md min-w-[30%] min-h-[30%] flex ${cssClass}`}
+	class={`bg-surface-color text-white rounded-md min-w-[30%] min-h-[30%] flex ${showModal ? '' : 'hidden'} ${cssClass}`}
 >
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="flex flex-1" on:click|stopPropagation>
