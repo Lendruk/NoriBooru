@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { Tag, mediaItems, tagsToMediaItems } from '../../db/vault/schema';
+import { Tag, mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { asc, desc, eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 
@@ -19,22 +19,22 @@ export type MediaItem = BaseMediaItem & {
   tags: number[];
 };
 
-
 export type MediaItemWithTags = BaseMediaItem & { tags: Tag[] };
+
+export type MediaSearchQuery = { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string };
 
 const PAGE_SIZE = 30;
 type SortMethods = "newest" | "oldest";
 
 const searchMediaItems = async (request: Request, reply: FastifyReply) => {
   const vaultInstance = request.vault;
-  const query = request.query as { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string };
+  const query = request.query as MediaSearchQuery;
 
   if(!vaultInstance) {
     return reply.status(400).send('No vault provided');
   }
 
   const { db } = vaultInstance;
-  console.log(query);
   const positiveTags = JSON.parse(query.positiveTags ?? '[]') as number[];
   const negativeTags = JSON.parse(query.negativeTags ?? '[]') as number[];
   const sortMethod: SortMethods = query.sortMethod ?? "newest";
@@ -42,38 +42,36 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
   const page = parseInt(query.page ?? "0");
   const rows = await db.select().from(mediaItems)
   .where(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0))
-  .orderBy(sortMethod === "newest" ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt))
-  .leftJoin(tagsToMediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
-  .limit(PAGE_SIZE)
-  .offset(page * PAGE_SIZE);
-  let filteredMediaItems = Object.values(rows.reduce<Record<number, MediaItem>>((acc, row) => {
-    const mediaItem = row.media_items;
-    const tag = row.tags_to_media_items;
+  .orderBy(sortMethod === "newest" ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt));
 
-    if(!acc[mediaItem.id]) {
-      acc[mediaItem.id] = {
-        ...mediaItem,
-        isArchived: mediaItem.isArchived === 1,
-        tags: [],
-      };
+  let finalMedia: MediaItem[] = [];
+  for(const row of rows) {
+    let tagArr: number[] = [];
+    const tagPairs = await db.select().from(tagsToMediaItems).where(eq(tagsToMediaItems.mediaItemId, row.id));
+
+    for(const tagPair of tagPairs) {
+      tagArr.push(tagPair.tagId);
     }
 
-    if (tag) {
-      acc[mediaItem.id].tags.push(tag.tagId);
-    }
-
-    if ((!tag && hasFilters)) {
-      // Delete
-      delete acc[mediaItem.id];
-    }
-    return acc;
-  }, {})).sort((a, b) => sortMethod === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
-
-  if (hasFilters) {
-    filteredMediaItems = filteredMediaItems.filter(item => positiveTags.every(tag => item.tags.includes(tag)) && negativeTags.every(tag => !item.tags.includes(tag)));
+    finalMedia.push({
+      createdAt: row.createdAt,
+      extension: row.extension,
+      fileName: row.fileName,
+      fileSize: row.fileSize,
+      id: row.id,
+      isArchived: row.isArchived === 1 ? true : false,
+      type: row.type,
+      updatedAt: row.updatedAt,
+      tags: tagArr,
+    });
   }
 
-  return reply.send({ mediaItems: filteredMediaItems });
+  finalMedia = finalMedia.sort((a, b) => sortMethod === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+  if (hasFilters) {
+    finalMedia = finalMedia.filter(item => positiveTags.every(tag => item.tags.includes(tag)) && negativeTags.every(tag => !item.tags.includes(tag)));
+  }
+
+  return reply.send({ mediaItems: finalMedia.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE) });
 };
 
 export default {

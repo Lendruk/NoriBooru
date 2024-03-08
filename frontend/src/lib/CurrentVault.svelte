@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Vault } from "../server/db/master/schema";
 	import DoorOpen from "./icons/DoorOpen.svelte";
+	import type { Vault } from "./types/Vault";
 
   let currentVault: Vault | null = null;
 

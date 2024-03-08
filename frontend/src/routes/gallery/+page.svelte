@@ -1,36 +1,48 @@
 <script lang="ts">
 	import Video from '$lib/Video.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import Accordeon from '$lib/Accordeon.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { TagDef } from '$lib/types/TagDef';
 	import Modal from '$lib/Modal.svelte';
+	import { pause } from '$lib/utils/time';
 
   let mediaItems: MediaItem[]  = [];
-  let filtersVisible: boolean = true;
   let appliedPositiveTags: TagDef[] = [];
   let appliedNegativeTags: TagDef[] = [];
   let tags: TagDef[] = [];
   let sortMethod: 'newest' | 'oldest' = 'newest';
   let showMediaTagEditModal = false;
+  let currentPage = 0;
+  let hasMoreItems = true;
+  let fetchingItems = false;
   let mediaItemInTagEdit: { id: number; tags: TagDef[] } | undefined;
 
+  let oldHeight = 0;
 
+  let galleryDiv: HTMLDivElement;
 	onMount(async () => {
     await search();
     tags = await HttpService.get<TagDef[]>('/tags');
+
 	});
 
   async function applyPositiveTagFilter(tag: TagDef) {
     appliedPositiveTags = [...appliedPositiveTags, tag];
+    currentPage = 0;
+    hasMoreItems = true;
+    oldHeight = 0;
     await search();
   }
 
   async function applyNegativeTagFilter(tag: TagDef) {
     appliedNegativeTags = [...appliedNegativeTags, tag];
+    currentPage = 0;
+    hasMoreItems = true;
+    oldHeight = 0;
     await search();
   }
 
@@ -47,25 +59,41 @@
     mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
   }
 
-  async function search() {
+  async function search(appendResults: boolean = false) {
+    fetchingItems = true;
     const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + new URLSearchParams(
       { 
         negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(appliedPositiveTags.map(tag => tag.id )),
         sortMethod,
         archived: 'true',
+        page: currentPage.toString(),
       }));
 
-      mediaItems = res.mediaItems;
+      if (appendResults) {
+        if(res.mediaItems.length > 0) {
+          mediaItems = mediaItems.concat(res.mediaItems);
+        } else {
+          hasMoreItems = false;
+        }
+      } else {
+        mediaItems = res.mediaItems;
+      }
+    await pause(1000);
+    fetchingItems = false;
   }
 
   async function removePositiveTagFilter(tag: TagDef) {
     appliedPositiveTags = appliedPositiveTags.filter(t => t.id !== tag.id);
+    currentPage = 0;
+    hasMoreItems = true;
     await search();
   }
 
   async function removeNegativeTagFilter(tag: TagDef) {
     appliedNegativeTags = appliedNegativeTags.filter(t => t.id !== tag.id);
+    currentPage = 0;
+    hasMoreItems = true;
     await search();
   }
 
@@ -96,6 +124,26 @@
     await fetchMediaItemTags(mediaItemId);
     showMediaTagEditModal = !showMediaTagEditModal;
   }
+
+  async function onWindowScroll(e:  UIEvent & {
+    currentTarget: EventTarget & Window;
+  }) {
+    if (e.currentTarget.scrollY + e.currentTarget.innerHeight >= document.documentElement.scrollHeight -50) {
+      if(hasMoreItems && !fetchingItems) {
+        currentPage = currentPage + 1;
+        oldHeight = galleryDiv.clientHeight;
+        await search(true);
+      }
+    }
+  }
+
+  $: {
+      if (mediaItems.length > 0 && oldHeight !== 0) {
+        tick().then(() => {
+          window.scrollBy({ top: -(galleryDiv.clientHeight - oldHeight), behavior: 'instant'});
+        })
+      }
+    }
 </script>
 
 <div class="flex flex-row flex-1 justify-between">
@@ -120,17 +168,17 @@
         class="outline-none min-h-[40px] indent-2"
         ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
         onTagSearchSubmit={onNegativeTagSearchSubmit} 
-        onAppliedTagClick={removePositiveTagFilter}
+        onAppliedTagClick={removeNegativeTagFilter}
       />
     <div>
       Sort by: 
-      <select bind:value={sortMethod} on:change={search} class="text-black" >
+      <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
         <option value="newest">Newest</option>
         <option value="oldest">Oldest</option>
       </select>
     </div>
   </Accordeon>
-    <div class="grid w-full gap-2 justify-center p-4"
+    <div bind:this={galleryDiv} class="grid w-full gap-2 justify-center p-4"
     style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
     >
       {#each mediaItems as mediaItem}
@@ -173,3 +221,5 @@
     {/if}
   </div>
 </Modal>
+
+<svelte:window on:scroll={onWindowScroll} />
