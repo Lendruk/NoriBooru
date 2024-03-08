@@ -2,15 +2,15 @@
 	import { page } from '$app/stores';
 	import ImagesIcon from './icons/ImagesIcon.svelte';
 	import PlayIcon from './icons/PlayIcon.svelte';
-	import TableColumnsIcon from './icons/TableColumnsIcon.svelte';
 	import TagIcon from './icons/TagIcon.svelte';
   import { PUBLIC_VERSION } from '$env/static/public';
 	import InboxIcon from './icons/InboxIcon.svelte';
+	import UploadIcon from './icons/UploadIcon.svelte';
 	let routes = [
 		{
-			name: 'Dashboard',
+			name: 'Upload',
 			path: '/',
-      icon: TableColumnsIcon,
+      icon: UploadIcon,
 		},
 		{
 			name: 'Tags',
