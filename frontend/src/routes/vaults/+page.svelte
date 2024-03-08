@@ -1,27 +1,25 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { Vault } from '$lib/types/Vault';
 	import Button from '$lib/Button.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 
-	let vaults: Vault[] = [];
+	let vaults: Vault[] = $state([]);
 
-	let newVaultName = '';
-	let newVaultPath = '';
-	let vaultCreationOpen = false;
+	let newVaultName = $state('');
+	let newVaultPath = $state('');
+	let vaultCreationOpen = $state(false);
 
 	let vaultPathCheckTimeout: NodeJS.Timeout | undefined;
-	let pathMessage = '';
-	let isTherePathError = false;
+	let pathMessage = $state('');
+	let isTherePathError = $state(false);
 
-	onMount(async () => {
+	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
 			localStorage.removeItem('currentVault');
 		}
-
-		await getVaults();
+		getVaults();
 	});
 
 	async function getVaults() {
