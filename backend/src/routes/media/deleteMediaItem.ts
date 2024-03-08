@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
+import { mediaItems, playlists_mediaItems_table, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import path from 'path';
 import * as fs from 'fs/promises'; 
@@ -27,6 +27,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
         }
         await db.delete(tagsToMediaItems).where(eq(tagsToMediaItems.mediaItemId, parsedId));
         await db.delete(mediaItems).where(eq(mediaItems.id, parsedId));
+        await db.delete(playlists_mediaItems_table).where(eq(playlists_mediaItems_table.mediaItemId, parsedId));
         // Delete the file
         try {
           await Promise.all([
