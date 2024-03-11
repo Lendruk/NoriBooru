@@ -75,3 +75,7 @@
     {/if}
     </div>
   </div>
+
+  <svelte:head>
+    <title>NoriBooru - Upload</title>
+  </svelte:head>

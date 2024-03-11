@@ -85,3 +85,7 @@
 </div>
 
 <svelte:window on:keydown={onKeyDown} />
+
+<svelte:head>
+  <title>NoriBooru - Media Item</title>
+</svelte:head>

@@ -50,3 +50,7 @@
 		{/if}
 	</div>
 </div>
+
+<svelte:head>
+	<title>NoriBooru - Playlists</title>
+</svelte:head>

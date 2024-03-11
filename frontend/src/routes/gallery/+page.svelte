@@ -223,3 +223,7 @@
 </Modal>
 
 <svelte:window on:scroll={onWindowScroll} />
+
+<svelte:head>
+  <title>NoriBooru - Gallery</title>
+</svelte:head>

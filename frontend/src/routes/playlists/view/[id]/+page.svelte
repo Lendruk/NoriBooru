@@ -80,3 +80,7 @@
   {/if}
   <button on:click={handleClickRight} class={`flex justify-center items-center w-1/12 bg-slate-900 ${currentMediaIndex + 1 >= items.length && 'cursor-not-allowed'}`}>&gt;</button>
 </div>
+
+<svelte:head>
+  <title>NoriBooru - Playlist View</title>
+</svelte:head>

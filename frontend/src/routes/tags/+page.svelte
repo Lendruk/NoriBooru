@@ -192,3 +192,7 @@ import Modal from '$lib/Modal.svelte';
 		</div>
 	{/if}
 </Modal>
+
+<svelte:head>
+	<title>NoriBooru - Tags</title>
+</svelte:head>

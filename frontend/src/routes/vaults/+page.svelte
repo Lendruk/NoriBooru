@@ -147,3 +147,7 @@
 		{/if}
 	</div>
 </div>
+
+<svelte:head>
+	<title>NoriBooru</title>
+</svelte:head>

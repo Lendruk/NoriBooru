@@ -206,3 +206,7 @@
     </div>
   </div>
 </div>
+
+<svelte:head>
+  <title>NoriBooru - Playlist Edit</title>
+</svelte:head>
