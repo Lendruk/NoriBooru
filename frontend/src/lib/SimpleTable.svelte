@@ -18,6 +18,7 @@
 	type Action = {
 		icon: ConstructorOfATypedSvelteComponent;
 		onClick: (id?: string | number) => void | Promise<void>;
+		condition?: (row: Row) => boolean,
 		name: string;
 	};
 
@@ -45,6 +46,22 @@
 		toolTipX = e.currentTarget.offsetLeft;
 		toolTipY = e.currentTarget.offsetTop;
 	}
+
+	function formatActionAvailability(row: Row, action: Action) {
+		if(action.condition) {
+			if(!action.condition(row)) {
+				return `fill-zinc-400 hover:cursor-not-allowed`;
+			}
+		}
+		return "";
+	}
+
+	function handleActionClick(row: Row, action: Action) {
+		if (action.condition && !action.condition(row)) {
+			return;
+		}
+		return action.onClick(row.id);
+	}
 </script>
 
 <table class="flex flex-col relative box-border">
@@ -64,57 +81,63 @@
 		</tr>
 	</thead>
 	<tbody class="flex flex-col box-border">
-		{#each rows as row, i}
-			<tr class="flex flex-1 pt-5 pb-5 justify-between pl-2 pr-2 odd:bg-surface-color box-border hover:bg-zinc-700 hover:transition hover:duration-300">
-        {#if orderable}
-        <td class="flex justify-center flex-col flex-[0.2]">
-          {#if i == 0}
-            <button on:click={() => orderable?.onMoveDown(row.id)}>
-              <ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
-            </button>
-          {:else if i == rows.length - 1}
-            <button on:click={() => orderable?.onMoveUp(row.id)}>
-              <ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
-            </button>
-          {:else}
-            <button on:click={() => orderable?.onMoveUp(row.id)}>
-              <ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
-            </button>
-            <button on:click={() => orderable?.onMoveDown(row.id)}>
-              <ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
-            </button>
-          {/if}
-        </td>
-        {/if}
-        {#each cols as col, j}
-					<td class={`flex flex-1 items-center ${j !== 0 ? 'justify-end' : ''}`}>
-            {#if "key" in col}
-              {#if col.formatter}
-                {col.formatter(row[col.key])}
-              {:else}
-                {row[col.key]}
-              {/if}
-            {:else}
-              <svelte:component this={col.customRender} row={row} />
-            {/if}
-          </td>
-				{/each}
-				{#if actions.length > 0}
-					<td class="flex flex-1" />
-					<td class="flex flex-1 justify-end gap-4 items-center">
-						{#each actions as action}
-							<button
-								on:mouseleave={() => {
-									showToolTip = false;
-								}}
-								on:mouseenter={(e) => onMouseEnterAction(e, action.name)}
-								class="hover:fill-red-900 hover:cursor-pointer hover:transition fill-white"
-								on:click={() => action.onClick(row.id)}><svelte:component this={action.icon} /></button
-							>
-						{/each}
+		{#if rows.length > 0}
+			{#each rows as row, i}
+				<tr class="flex flex-1 pt-5 pb-5 justify-between pl-2 pr-2 odd:bg-surface-color box-border hover:bg-zinc-700 hover:transition hover:duration-300">
+					{#if orderable}
+					<td class="flex justify-center flex-col flex-[0.2]">
+						{#if i == 0}
+							<button on:click={() => orderable?.onMoveDown(row.id)}>
+								<ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+							</button>
+						{:else if i == rows.length - 1}
+							<button on:click={() => orderable?.onMoveUp(row.id)}>
+								<ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+							</button>
+						{:else}
+							<button on:click={() => orderable?.onMoveUp(row.id)}>
+								<ChevronUp class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+							</button>
+							<button on:click={() => orderable?.onMoveDown(row.id)}>
+								<ChevronDown class="fill-white hover:fill-red-900 hover:cursor-pointer hover:transition" />
+							</button>
+						{/if}
 					</td>
-				{/if}
+					{/if}
+					{#each cols as col, j}
+						<td class={`flex flex-1 items-center ${j !== 0 ? 'justify-end' : ''}`}>
+							{#if "key" in col}
+								{#if col.formatter}
+									{col.formatter(row[col.key])}
+								{:else}
+									{row[col.key]}
+								{/if}
+							{:else}
+								<svelte:component this={col.customRender} row={row} />
+							{/if}
+						</td>
+					{/each}
+					{#if actions.length > 0}
+						<td class="flex flex-1" />
+						<td class="flex flex-1 justify-end gap-4 items-center">
+							{#each actions as action}
+								<button
+									on:mouseleave={() => {
+										showToolTip = false;
+									}}
+									on:mouseenter={(e) => onMouseEnterAction(e, action.name)}
+									class={`hover:fill-red-900 hover:cursor-pointer hover:transition fill-white ${formatActionAvailability(row, action)}`}
+									on:click={() => handleActionClick(row, action)}><svelte:component this={action.icon} /></button
+								>
+							{/each}
+						</td>
+					{/if}
+				</tr>
+			{/each}
+		{:else}
+			<tr class="flex bg-surface-color pt-5 pb-5 justify-center flex-1">
+				<td class="text-xl">No Items</td>
 			</tr>
-		{/each}
+		{/if}
 	</tbody>
 </table>
