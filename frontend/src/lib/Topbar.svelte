@@ -4,7 +4,7 @@
 
 </script>
 
-<div class="bg-zinc-900 flex items-center h-12 rounded-md ml-2 mr-2 min-h-[40px]">
+<div class="bg-zinc-900 flex items-center h-[50px] rounded-md ml-2 mr-2 min-h-[40px]">
   <Breadcrumb />
   <CurrentVault />
 </div>
