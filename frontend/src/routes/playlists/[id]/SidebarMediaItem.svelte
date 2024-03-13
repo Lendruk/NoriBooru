@@ -19,7 +19,7 @@
 </script>
 
 <div class="w-1/4 relative flex items-center justify-center" style="height: fit-content;" on:mouseenter={() => showOptions = true} on:mouseleave={() => showOptions = false}>
-  <GalleryItemButton onClick={onButtonClick} cssClasses={`${(!showOptions && !isAdded) ? 'hidden' : 'flex' } absolute flex justify-center items-center self-center`}>
+  <GalleryItemButton onClick={onButtonClick} class={`${(!showOptions && !isAdded) ? 'hidden' : 'flex' } absolute flex justify-center items-center self-center`}>
     {`${isAdded ? '-' : '+'}`}
   </GalleryItemButton>
   <slot />

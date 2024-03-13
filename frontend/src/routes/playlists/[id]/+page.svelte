@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-	import Video from "$lib/Video.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
-	import SidebarMediaItem from "./SidebarMediaItem.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItem } from "$lib/types/MediaItem";
 	import type { TagDef } from "$lib/types/TagDef";
 	import type { Playlist } from "$lib/types/Playlist";
 	import SimpleTable from "$lib/SimpleTable.svelte";
 	import TableImage from "./TableImage.svelte";
+	import VerticalDrawer from "$lib/VerticalDrawer.svelte";
+	import SidebarMediaItem from "./SidebarMediaItem.svelte";
+	import Video from "$lib/Video.svelte";
+	import Button from "$lib/Button.svelte";
+	import TagSearchInput from "$lib/TagSearchInput.svelte";
+
   let playlistName = $state('');
   let timePerItem = $state(0);
   let randomizeOrder = $state(false);
@@ -127,7 +131,7 @@
   }
 </script>
 
-<div class="flex flex-row flex-1 justify-between bg-zinc-900 m-2 rounded-md h-full">
+<div class="flex flex-row flex-1 justify-between bg-zinc-900 m-2 rounded-md">
   <div class="flex flex-1 flex-col p-4">
     <div>
       <div class="flex flex-col gap-4">
@@ -172,9 +176,9 @@
     </div>
     <button class="flex self-end p-4" on:click={() => $page.params.id !== 'new' ? updatePlaylist() : createPlaylist()}>{$page.params.id !== 'new' ? 'Update' : 'Create'}</button>
   </div>
-  <div class={`${mediaSearchSidebarOpen ? 'flex' : 'hidden'} w-1/2 h-full bg-slate-700`}>
+  <VerticalDrawer isDrawerOpen={mediaSearchSidebarOpen} >
     <div class="flex flex-1 flex-col">
-      <input bind:value={tagSearchInputText} on:input={onTagSearchChange} class="w-full" type="text" placeholder="Search tags.." />
+      <input bind:value={tagSearchInputText} on:input={onTagSearchChange} class="outline-none ml-4 mr-4 mt-4 h-[40px] indent-2 bg-zinc-800 rounded-md flex-1 flex" type="text" placeholder="Search tags.." />
       <div class="flex text-sm w-full flex-wrap gap-2">
         {#each filterTags as tag}
           <div class="bg-green-400 flex flex-row gap-2 p-1">
@@ -196,15 +200,15 @@
             <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
           {/if}
           {#if mediaItem.type === "video"}
-            <Video cssClass="bg-cover w-full h-full" src={`/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
+            <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
           {/if}
           </SidebarMediaItem>
         {/each}
       </div>
 
-      <button on:click={onSubmitSidebar}>Submit</button>
-    </div>
-  </div>
+      <Button class="bg-zinc-900 h-[40px] ml-4 mr-4 mb-4" onClick={onSubmitSidebar}>Submit</Button>
+      </div>
+  </VerticalDrawer>
 </div>
 
 <svelte:head>
