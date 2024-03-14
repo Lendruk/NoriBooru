@@ -1,9 +1,8 @@
 # NoriBooru
-WIP self-hosted media database and management system.
-**NOT PRODUCTION READY**
+Self-hosted media database and management system.
+Uses the concept of vaults as a media database. A server can keep track of multiple vaults at the same time.
 
-## Why?
-I want to learn sveltekit and this seems like an interesting idea to execute.
+Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes.
 
 ## How to run
 
@@ -25,3 +24,4 @@ docker-compose up
 
 ## Requirements
 - ffmpeg
+- node >= 20.0.0
