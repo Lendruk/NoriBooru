@@ -17,7 +17,7 @@
 
 	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
-			localStorage.removeItem('currentVault');
+			HttpService.clearVault();
 		}
 		getVaults();
 	});

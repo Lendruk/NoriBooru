@@ -17,6 +17,11 @@ export class HttpService {
     }
   };
 
+  public static clearVault(): void {
+    localStorage.removeItem('currentVault');
+    this.currentVault = null;
+  }
+
   public static async get<T>(url: string): Promise<T> {
     const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "GET",
