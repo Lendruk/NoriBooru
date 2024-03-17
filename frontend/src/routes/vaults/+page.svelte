@@ -122,7 +122,7 @@
 		</div>
 
 		{:else}
-		<div class={`flex flex-col p-4 w-[80%] self-center`}>
+		<div class={`flex flex-col p-4 w-[80%] self-center overflow-scroll`}>
 			<button class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent" on:click={() => vaultCreationOpen = false }><ArrowLeft class="fill-inherit"/> Back </button>
 			<div class="mt-4 mb-4 flex flex-col gap-2">
 				<div class="flex flex-col gap-2">
