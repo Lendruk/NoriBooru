@@ -1,13 +1,13 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
 import { eq } from 'drizzle-orm';
-import { tagTypes, tags } from '../../db/vault/schema';
+import { tags } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 
 const updateTag = async (request: Request, reply: FastifyReply) => {
   const vaultInstance = request.vault;
   const params = request.params as { id: string };
-  const body = request.body as { tagTypeId: number, name: string };
+  const body = request.body as { parentId?: number, color: string, name: string };
 
   if(!vaultInstance) {
     return reply.status(400).send('No vault provided');
@@ -15,11 +15,10 @@ const updateTag = async (request: Request, reply: FastifyReply) => {
 
   const { db } = vaultInstance;
   const updated = await db.update(tags)
-  .set({ name: body.name, tagTypeId: body.tagTypeId})
+  .set({ name: body.name, parentTagId: body.parentId, color: body.color })
   .where(eq(tags.id, Number.parseInt(params.id ?? ""))).returning();
 
-  const tagType = await db.query.tagTypes.findFirst({ where: eq(tagTypes.id, body.tagTypeId ) });
-  return reply.send({ ...updated[0], tagType: tagType });
+  return reply.send({ ...updated[0] });
 };
 
 export default {

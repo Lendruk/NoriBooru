@@ -2,15 +2,15 @@
 	import Video from "$lib/Video.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItem } from "$lib/types/MediaItem";
-	import type { TagDef } from "$lib/types/TagDef";
 	import { onMount } from "svelte";
 	import GalleryItem from "../GalleryItem.svelte";
+	import type { PopulatedTag } from "$lib/types/PopulatedTag";
   let mediaItems: MediaItem[]  = [];
-  let tags: TagDef[] = [];
+  let tags: PopulatedTag[] = [];
 
   onMount(async () => {
     await search();
-    tags = await HttpService.get<TagDef[]>('/tags');
+    tags = await HttpService.get<PopulatedTag[]>('/tags');
 	});
 
   async function search() {

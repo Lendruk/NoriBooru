@@ -6,31 +6,31 @@
 	import { HttpService } from '$lib/services/HttpService';
 	import Accordeon from '$lib/Accordeon.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
-	import type { TagDef } from '$lib/types/TagDef';
 	import Modal from '$lib/Modal.svelte';
 	import { pause } from '$lib/utils/time';
+	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 
   let mediaItems: MediaItem[]  = [];
-  let appliedPositiveTags: TagDef[] = [];
-  let appliedNegativeTags: TagDef[] = [];
-  let tags: TagDef[] = [];
+  let appliedPositiveTags: PopulatedTag[] = [];
+  let appliedNegativeTags: PopulatedTag[] = [];
+  let tags: PopulatedTag[] = [];
   let sortMethod: 'newest' | 'oldest' = 'newest';
   let showMediaTagEditModal = false;
   let currentPage = 0;
   let hasMoreItems = true;
   let fetchingItems = false;
-  let mediaItemInTagEdit: { id: number; tags: TagDef[] } | undefined;
+  let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
 
   let oldHeight = 0;
 
   let galleryDiv: HTMLDivElement;
 	onMount(async () => {
     await search();
-    tags = await HttpService.get<TagDef[]>('/tags');
+    tags = await HttpService.get<PopulatedTag[]>('/tags');
 
 	});
 
-  async function applyPositiveTagFilter(tag: TagDef) {
+  async function applyPositiveTagFilter(tag: PopulatedTag) {
     appliedPositiveTags = [...appliedPositiveTags, tag];
     currentPage = 0;
     hasMoreItems = true;
@@ -38,7 +38,7 @@
     await search();
   }
 
-  async function applyNegativeTagFilter(tag: TagDef) {
+  async function applyNegativeTagFilter(tag: PopulatedTag) {
     appliedNegativeTags = [...appliedNegativeTags, tag];
     currentPage = 0;
     hasMoreItems = true;
@@ -46,14 +46,14 @@
     await search();
   }
 
-  async function removeTagFromMediaItem(tag: TagDef, mediaItemId: number) {
+  async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
     await HttpService.delete(`/mediaItems/${mediaItemId}/tags`, { ...tag });
     const tagIndex = mediaItemInTagEdit!.tags.findIndex(mediaTag => mediaTag.id === tag.id);
     mediaItemInTagEdit!.tags.splice(tagIndex, 1);
     mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
   }
 
-  async function addTagToMediaItem(tag: TagDef, mediaItemId: number) {
+  async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
     await HttpService.put(`/mediaItems/${mediaItemId}/tags`, { ...tag });
     mediaItemInTagEdit!.tags.push(tag);
     mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
@@ -83,14 +83,14 @@
     fetchingItems = false;
   }
 
-  async function removePositiveTagFilter(tag: TagDef) {
+  async function removePositiveTagFilter(tag: PopulatedTag) {
     appliedPositiveTags = appliedPositiveTags.filter(t => t.id !== tag.id);
     currentPage = 0;
     hasMoreItems = true;
     await search();
   }
 
-  async function removeNegativeTagFilter(tag: TagDef) {
+  async function removeNegativeTagFilter(tag: PopulatedTag) {
     appliedNegativeTags = appliedNegativeTags.filter(t => t.id !== tag.id);
     currentPage = 0;
     hasMoreItems = true;
@@ -108,15 +108,15 @@
   }
 
   async function fetchMediaItemTags(mediaItemId: number) {
-    const tags = await HttpService.get<TagDef[]>(`/mediaItems/${mediaItemId}/tags`);
+    const tags = await HttpService.get<PopulatedTag[]>(`/mediaItems/${mediaItemId}/tags`);
     mediaItemInTagEdit = { id: mediaItemId, tags };
   }
 
-  function onPositiveTagSearchSubmit(tag: TagDef) {
+  function onPositiveTagSearchSubmit(tag: PopulatedTag) {
     applyPositiveTagFilter(tag);
   }
 
-  function onNegativeTagSearchSubmit(tag: TagDef) {
+  function onNegativeTagSearchSubmit(tag: PopulatedTag) {
     applyNegativeTagFilter(tag);
   }
 

@@ -4,7 +4,6 @@
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItem } from "$lib/types/MediaItem";
-	import type { TagDef } from "$lib/types/TagDef";
 	import type { Playlist } from "$lib/types/Playlist";
 	import SimpleTable from "$lib/SimpleTable.svelte";
 	import TableImage from "./TableImage.svelte";
@@ -12,8 +11,8 @@
 	import SidebarMediaItem from "./SidebarMediaItem.svelte";
 	import Video from "$lib/Video.svelte";
 	import Button from "$lib/Button.svelte";
-	import TagSearchInput from "$lib/TagSearchInput.svelte";
 	import Checkbox from "$lib/Checkbox.svelte";
+	import type { PopulatedTag } from "$lib/types/PopulatedTag";
 
   let playlistName = $state('');
   let timePerItem = $state(0);
@@ -32,8 +31,8 @@
   });
   
   // Sidebar props
-  let foundTags: TagDef[] = $state([]);
-  let filterTags: TagDef[] = $state([]);
+  let foundTags: PopulatedTag[] = $state([]);
+  let filterTags: PopulatedTag[] = $state([]);
   let tagSearchInputText = $state('');
   let sidebarMediaItems: MediaItem[] = $state([]);
   let selectedSidebarMediaItems: MediaItem[] = $state([]);
@@ -41,7 +40,7 @@
 
   async function onTagSearchChange() {
     if (tagSearchInputText.length > 0) {
-      const response = await HttpService.get<TagDef[]>(`/tags?name=${tagSearchInputText}`);
+      const response = await HttpService.get<PopulatedTag[]>(`/tags?name=${tagSearchInputText}`);
 
       foundTags = response;
       foundTags = foundTags.filter(tag => !filterTags.find(t => t.id === tag.id));
@@ -50,7 +49,7 @@
     }
   }
 
-  async function addTagToFilter(tag: TagDef) {
+  async function addTagToFilter(tag: PopulatedTag) {
     filterTags = [...filterTags, tag];
     foundTags = [];
     tagSearchInputText = '';
@@ -60,7 +59,7 @@
     }
   }
 
-  async function removeTagFromFilter(tag: TagDef) {
+  async function removeTagFromFilter(tag: PopulatedTag) {
     filterTags = filterTags.filter(t => t.id !== tag.id);
 
     if (filterTags.length > 0) {

@@ -8,27 +8,14 @@ export const users = sqliteTable("users", {
 
 export type User = InferSelectModel<typeof users>;
 
-export const tagTypes = sqliteTable("tag_types", {
-  id: integer("id").primaryKey(),
-  name: text("name").notNull(),
-  color: text("color").notNull(),
-})
-export type TagType = InferSelectModel<typeof tagTypes>;
-
 export const tags = sqliteTable("tags", {
   id: integer("id").primaryKey(),
   name: text("name").notNull(),
+  color: text("color").notNull(),
   mediaCount: integer("media_count").notNull().default(0),
-  tagTypeId: integer("tag_type_id").references(() => tagTypes.id),
+  parentTagId: integer("parent_id"),
 });
-export type Tag = InferSelectModel<typeof tags> & { tagType?: TagType};
-
-export const tagsRelations = relations(tags, ({ one }) => ({
-  tagType: one(tagTypes, {
-    fields: [tags.tagTypeId],
-    references: [tagTypes.id]
-  })
-}));
+export type TagTableSchema = InferSelectModel<typeof tags>;
 
 export const mediaItems = sqliteTable("media_items", {
   id: integer("id").primaryKey(),
@@ -82,4 +69,4 @@ export const playlists_mediaItems_table = sqliteTable("playlists_media_items", {
   itemIndex: integer("item_index").notNull(),
 }, (t) => ({ pk: primaryKey({ columns: [t.playlistId, t.mediaItemId]})}));
 
-export type MediaItem = InferSelectModel<typeof mediaItems> & { tags?: Tag[] };
+export type MediaItem = InferSelectModel<typeof mediaItems> & { tags?: TagTableSchema[] };

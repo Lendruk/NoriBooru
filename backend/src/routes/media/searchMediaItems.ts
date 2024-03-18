@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { Tag, mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
+import { TagTableSchema, mediaItems, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { asc, desc, eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 
@@ -19,7 +19,7 @@ export type MediaItem = BaseMediaItem & {
   tags: number[];
 };
 
-export type MediaItemWithTags = BaseMediaItem & { tags: Tag[] };
+export type MediaItemWithTags = BaseMediaItem & { tags: TagTableSchema[] };
 
 export type MediaSearchQuery = { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string };
 

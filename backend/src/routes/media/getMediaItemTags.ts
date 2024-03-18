@@ -17,7 +17,7 @@ const getMediaItemTags = async (request: Request, reply: FastifyReply) => {
   let finalTags = [];
 
   for (const mediaTag of mediaTags) {
-    const tag = await db.query.tags.findFirst({ where: eq(tags.id, mediaTag.tagId), with: { tagType: true }  });
+    const tag = await db.query.tags.findFirst({ where: eq(tags.id, mediaTag.tagId) });
     finalTags.push(tag);
   }
 

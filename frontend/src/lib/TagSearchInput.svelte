@@ -1,12 +1,13 @@
 <script lang="ts">
 	import Tag from "./Tag.svelte";
-	import type { TagDef } from "./types/TagDef";
+	import type { PopulatedTag } from "./types/PopulatedTag";
   
-  export let onTagSearchSubmit: (tag: TagDef) => void;
-  export let onAppliedTagClick: (tag: TagDef) => void;
-  export let availableTags: TagDef[] = [];
-  export let appliedTags: TagDef[] = [];
-  export let ignoredTags: TagDef[] = [];
+  export let onTagSearchSubmit: (tag: PopulatedTag) => void;
+  export let onAppliedTagClick: (tag: PopulatedTag) => void;
+  export let availableTags: PopulatedTag[] = [];
+  export let appliedTags: PopulatedTag[] = [];
+  export let ignoredTags: PopulatedTag[] = [];
+  export let limit: number = Number.MAX_SAFE_INTEGER;
   export { cssClass as class};
 
   let cssClass = "";
@@ -79,20 +80,23 @@
 <div class={`flex flex-wrap w-full min-h-[40px] p-2 bg-zinc-800 rounded-md ${cssClass}`}>
   <div class="flex flex-row flex-wrap gap-2">
     {#each appliedTags as tag }
-      <Tag onClick={() => onAppliedTagClick(tag)} mediaCount={tag.mediaCount} color={tag.tagType?.color} text={tag.name} />
+      <Tag onClick={() => onAppliedTagClick(tag)} mediaCount={tag.mediaCount} color={tag.color} text={tag.name} />
     {/each}
   </div>
   <div class={`flex items-center flex-1`}>
-    <input 
-      bind:this={input}
-      bind:value={tagSearchInputText} 
-      on:keydown={onKeyDown}
-      on:keyup={onKeyUp}
-      on:keypress={(e) => {onSubmit(e.key, tagSearchInputText) }} 
-      on:input={(e) => onTagSearch(e.currentTarget)} 
-      class="bg-transparent ml-2 flex focus:outline-none w-full" 
-      placeholder="Search tags"
-      type="text" 
-    />
-    <span class="text-gray-400">{tagSuggestion}</span></div>
+    {#if appliedTags.length < limit} 
+      <input 
+        bind:this={input}
+        bind:value={tagSearchInputText} 
+        on:keydown={onKeyDown}
+        on:keyup={onKeyUp}
+        on:keypress={(e) => {onSubmit(e.key, tagSearchInputText) }} 
+        on:input={(e) => onTagSearch(e.currentTarget)} 
+        class="bg-transparent ml-2 flex focus:outline-none w-full" 
+        placeholder="Search tags"
+        type="text" 
+      />
+      <span class="text-gray-400">{tagSuggestion}</span>
+    {/if}
+  </div>
 </div>
