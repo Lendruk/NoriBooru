@@ -60,8 +60,9 @@
       const tag = availableTags.find(tag => tag.name.toLowerCase().startsWith(value.toLowerCase()) && !ignoredTags.find(at => at.id === tag.id));
       if (tag) {
         let remaining = "";
-        for(const char of tag.name) {
-          if(!value.includes(char.toLowerCase())) {
+        for (let i = 0; i < tag.name.length; i++) {
+          let char = tag.name[i];
+          if(i > value.length || char !== value[i]) {
             remaining += char;
           }
         }
