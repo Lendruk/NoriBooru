@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "bb3fcf69-6530-4fc2-b7be-bcd98be38776",
+  "id": "7f0e6fb1-7e8a-4aeb-9ecd-eb3cf00bc3d6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "media_items": {
@@ -188,8 +188,8 @@
       },
       "uniqueConstraints": {}
     },
-    "tag_types": {
-      "name": "tag_types",
+    "tags": {
+      "name": "tags",
       "columns": {
         "id": {
           "name": "id",
@@ -211,29 +211,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "tags": {
-      "name": "tags",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         },
         "media_count": {
           "name": "media_count",
@@ -243,8 +220,8 @@
           "autoincrement": false,
           "default": 0
         },
-        "tag_type_id": {
-          "name": "tag_type_id",
+        "parent_id": {
+          "name": "parent_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -252,21 +229,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "tags_tag_type_id_tag_types_id_fk": {
-          "name": "tags_tag_type_id_tag_types_id_fk",
-          "tableFrom": "tags",
-          "tableTo": "tag_types",
-          "columnsFrom": [
-            "tag_type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },

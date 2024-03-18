@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores";
-	import Tag from "$lib/Tag.svelte";
 	import TagSearchInput from "$lib/TagSearchInput.svelte";
 	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
 	import ArrowRight from "$lib/icons/ArrowRight.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItemWithTags } from "$lib/types/MediaItem";
-	import type { TagDef } from "$lib/types/TagDef";
+	import type { PopulatedTag } from "$lib/types/PopulatedTag";
 
-  let foundTags: TagDef[] = $state([]);
-  let tags: TagDef[] = $state([]);
+  let foundTags: PopulatedTag[] = $state([]);
+  let tags: PopulatedTag[] = $state([]);
   let tagSearchText = $state("");
   let mediaItem: MediaItemWithTags | undefined = $state(undefined);
   let next: string | undefined = $state(undefined);
@@ -34,7 +33,7 @@
 	}
 
   $effect(() => {
-    HttpService.get<{ mediaItem: MediaItemWithTags, next?: string, previous?: string, tags: TagDef[] }>(`/mediaItems/${$page.params.id}`).then(res => {
+    HttpService.get<{ mediaItem: MediaItemWithTags, next?: string, previous?: string, tags: PopulatedTag[] }>(`/mediaItems/${$page.params.id}`).then(res => {
       mediaItem = res.mediaItem;
       tags = res.tags;
       next = res.next;
@@ -42,14 +41,14 @@
     })
   });
 
-  async function addTagToMedia(tag: TagDef) {
+  async function addTagToMedia(tag: PopulatedTag) {
     await HttpService.put(`/mediaItems/${mediaItem?.id}/tags`, tag);
     mediaItem!.tags = [...mediaItem!.tags, {...tag, mediaCount: tag.mediaCount + 1}];
     tagSearchText = "";
     foundTags = [];
   }
 
-  async function removeTagFromMedia(tag:TagDef) {
+  async function removeTagFromMedia(tag:PopulatedTag) {
     await HttpService.delete(`/mediaItems/${mediaItem?.id}/tags`, tag);
     mediaItem!.tags = mediaItem!.tags.filter(t => t.id !== tag.id);
   }

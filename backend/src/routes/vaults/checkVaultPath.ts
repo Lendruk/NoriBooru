@@ -11,8 +11,6 @@ const checkVaultPath = async (request: FastifyRequest, reply: FastifyReply) => {
   if (isAbsolute) {
     try {
       const dirContent = await fs.readdir(body.path);
-      console.log(dirContent);
-
       if (dirContent.length > 0) {
         return reply.status(400).send({ message: 'Directory must be empty' });
       }

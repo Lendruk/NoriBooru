@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
 import { db } from '../../db/vault/db';
-import { Tag, mediaItems, tags as tagsTable, tagsToMediaItems } from '../../db/vault/schema';
+import { TagTableSchema, mediaItems, tags as tagsTable, tagsToMediaItems } from '../../db/vault/schema';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import * as fs from 'fs/promises';
@@ -17,9 +17,9 @@ const createImage = async (request: Request, reply: FastifyReply) => {
 
   const { vault } = vaultInstance;
 
-  const body = request.body as { image: string, tags: Tag[] };
+  const body = request.body as { image: string, tags: TagTableSchema[] };
   const imageBase64 = body.image;
-  const tags: Tag[] = body.tags;
+  const tags: TagTableSchema[] = body.tags;
 
   const id = randomUUID();
   const imageBuffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ""), 'base64');

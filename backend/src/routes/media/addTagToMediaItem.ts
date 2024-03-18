@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import {  Tag, tags, tagsToMediaItems } from '../../db/vault/schema';
+import {  TagTableSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 
@@ -11,7 +11,7 @@ const addTagToMediaItem = async (request: Request, reply: FastifyReply) => {
   }
 
   const { id } = request.params as { id: string };
-  const body = request.body as Tag;
+  const body = request.body as TagTableSchema;
   
   try {
     const { db } = vault;

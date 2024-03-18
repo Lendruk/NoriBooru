@@ -1,4 +1,4 @@
-import type { TagDef } from "./TagDef";
+import type { PopulatedTag } from "./PopulatedTag";
 
 type BaseMediaItem = {
   id: number;
@@ -15,4 +15,4 @@ export type MediaItem = BaseMediaItem & {
   tags: number[];
 };
 
-export type MediaItemWithTags = BaseMediaItem & { tags: TagDef[] };
+export type MediaItemWithTags = BaseMediaItem & { tags: PopulatedTag[] };

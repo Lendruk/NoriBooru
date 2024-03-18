@@ -27,18 +27,12 @@ CREATE TABLE `playlists_media_items` (
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `tag_types` (
-	`id` integer PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`color` text NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE `tags` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
+	`color` text NOT NULL,
 	`media_count` integer DEFAULT 0 NOT NULL,
-	`tag_type_id` integer,
-	FOREIGN KEY (`tag_type_id`) REFERENCES `tag_types`(`id`) ON UPDATE no action ON DELETE no action
+	`parent_id` integer
 );
 --> statement-breakpoint
 CREATE TABLE `tags_to_media_items` (
