@@ -5,8 +5,12 @@
 	import { onMount } from "svelte";
 	import GalleryItem from "../GalleryItem.svelte";
 	import type { PopulatedTag } from "$lib/types/PopulatedTag";
+	import TagSearchInput from "$lib/TagSearchInput.svelte";
+	import Modal from "$lib/Modal.svelte";
   let mediaItems: MediaItem[]  = [];
   let tags: PopulatedTag[] = [];
+  let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
+  let showMediaTagEditModal = false;
 
   onMount(async () => {
     await search();
@@ -31,6 +35,29 @@
     await HttpService.patch(`/mediaItems/${mediaItemId}`, { isArchived: !isArchived });
     mediaItems = mediaItems.map(item => item.id === mediaItemId ? { ...item, isArchived: !isArchived } : item);
   }
+
+  async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
+    await HttpService.delete(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+    const tagIndex = mediaItemInTagEdit!.tags.findIndex(mediaTag => mediaTag.id === tag.id);
+    mediaItemInTagEdit!.tags.splice(tagIndex, 1);
+    mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
+  }
+
+  async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
+    await HttpService.put(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+    mediaItemInTagEdit!.tags.push(tag);
+    mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
+  }
+
+  async function fetchMediaItemTags(mediaItemId: number) {
+    const tags = await HttpService.get<PopulatedTag[]>(`/mediaItems/${mediaItemId}/tags`);
+    mediaItemInTagEdit = { id: mediaItemId, tags };
+  }
+
+  async function onTagButtonClick(mediaItemId: number) {
+    await fetchMediaItemTags(mediaItemId);
+    showMediaTagEditModal = !showMediaTagEditModal;
+  }
 </script>
 
 <div class="flex flex-col flex-1 h-full">
@@ -42,6 +69,7 @@
         isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)} 
         onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
         onConfirmDelete={() => deleteItem(mediaItem.id)} 
+        onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
         className="flex justify-center h-64 items-center border-zinc-900 border-2 rounded-md" 
         href={`/gallery/${mediaItem.id}`}
       >
@@ -59,8 +87,23 @@
       </div>
     {/if}
   </div>
-
 </div>
+<Modal class="w-[40%]" bind:showModal={showMediaTagEditModal}>
+  <div class="p-4 flex flex-col w-full">
+    <div class="text-xl mb-4">
+      Modify media item tags
+    </div>
+    {#if mediaItemInTagEdit}
+      <TagSearchInput
+        appliedTags={mediaItemInTagEdit.tags}  
+        availableTags={tags}
+        ignoredTags={mediaItemInTagEdit.tags}
+        onAppliedTagClick={(tag) => removeTagFromMediaItem(tag, mediaItemInTagEdit!.id)}
+        onTagSearchSubmit={(tag) => addTagToMediaItem(tag, mediaItemInTagEdit!.id)}
+      />
+    {/if}
+  </div>
+</Modal>
 
 <svelte:head>
   <title>NoriBooru - Inbox</title>
