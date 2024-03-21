@@ -12,7 +12,9 @@
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
+  let positiveQueryType: "AND" | "OR" = "AND";
   let appliedNegativeTags: PopulatedTag[] = [];
+  let negativeQueryType: "AND" | "OR" = "AND";
   let tags: PopulatedTag[] = [];
   let sortMethod: 'newest' | 'oldest' = 'newest';
   let showMediaTagEditModal = false;
@@ -66,6 +68,8 @@
       { 
         negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)), 
         positiveTags: JSON.stringify(appliedPositiveTags.map(tag => tag.id )),
+        positiveQueryType,
+        negativeQueryType,
         sortMethod,
         archived: 'true',
         page: currentPage.toString(),
@@ -126,6 +130,12 @@
     showMediaTagEditModal = !showMediaTagEditModal;
   }
 
+  function onKeyPress(event: KeyboardEvent) {
+    if(event.key === "f" || event.key === "F") {
+      isFilterSelectionVisible = !isFilterSelectionVisible;
+    }
+  }
+
   async function onWindowScroll(e:  UIEvent & {
     currentTarget: EventTarget & Window;
   }) {
@@ -157,16 +167,32 @@
 <div class="flex flex-1 h-full">
     {#if isFilterSelectionVisible}
       <div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
-        <div class="mb-2">Positive Tags</div>
-          <TagSearchInput 
-            availableTags={tags} 
-            appliedTags={appliedPositiveTags}
-            class="outline-none min-h-[40px] indent-2"
-            ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
-            onTagSearchSubmit={onPositiveTagSearchSubmit} 
-            onAppliedTagClick={removePositiveTagFilter}
-          />
-        <div class="mb-2">Negative Tags</div>
+        <div class="text-3xl mb-4">Filters</div>
+        <div class="flex flex-col mb-2">
+          <div class="mb-2 flex justify-between">
+            <div >Positive Tags</div>
+            <div class="flex flex-1 max-w-[150px]">
+              <button class={`${positiveQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {positiveQueryType = "AND"; search() }}>AND</button>
+              <button class={`${positiveQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {positiveQueryType = "OR"; search() }}>OR</button>
+            </div>
+          </div>
+            <TagSearchInput 
+              availableTags={tags} 
+              appliedTags={appliedPositiveTags}
+              class="outline-none min-h-[40px] indent-2"
+              ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
+              onTagSearchSubmit={onPositiveTagSearchSubmit} 
+              onAppliedTagClick={removePositiveTagFilter}
+            />
+        </div>
+        <div class="flex flex-col">
+          <div class="mb-2 flex justify-between">
+            <div >Negative Tags</div>
+            <div class="flex flex-1 max-w-[150px]">
+              <button class={`${negativeQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {negativeQueryType = "AND"; search() }}>AND</button>
+              <button class={`${negativeQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {negativeQueryType = "OR"; search() }}>OR</button>
+            </div>
+          </div>
           <TagSearchInput 
             availableTags={tags} 
             appliedTags={appliedNegativeTags}
@@ -175,6 +201,7 @@
             onTagSearchSubmit={onNegativeTagSearchSubmit} 
             onAppliedTagClick={removeNegativeTagFilter}
           />
+        </div>
         <div>
           Sort by: 
           <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
@@ -228,7 +255,7 @@
   </div>
 </Modal>
 
-<svelte:window on:scroll={onWindowScroll} />
+<svelte:window on:scroll={onWindowScroll} on:keypress={onKeyPress} />
 
 <svelte:head>
   <title>NoriBooru - Gallery</title>
