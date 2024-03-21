@@ -4,11 +4,11 @@
 	import { onMount, tick } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import Accordeon from '$lib/Accordeon.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import Modal from '$lib/Modal.svelte';
 	import { pause } from '$lib/utils/time';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import FilterIcon from '$lib/icons/FilterIcon.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -19,6 +19,7 @@
   let currentPage = 0;
   let hasMoreItems = true;
   let fetchingItems = false;
+  let isFilterSelectionVisible = false;
   let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
 
   let oldHeight = 0;
@@ -146,39 +147,44 @@
     }
 </script>
 
-<div class="flex flex-row flex-1 justify-between">
-  <div />
+<div class="flex flex-1 justify-end mr-2">
+  <div class="flex w-fit p-2 mt-2 mb-2 justify-center bg-zinc-900 rounded-lg">
+    <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
+      <FilterIcon />
+    </button>
+  </div>
 </div>
-
-<div class="flex flex-col flex-1 h-full">
-  <Accordeon header="Filters">
-    <div class="mb-2">Positive Tags</div>
-      <TagSearchInput 
-        availableTags={tags} 
-        appliedTags={appliedPositiveTags}
-        class="outline-none min-h-[40px] indent-2"
-        ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
-        onTagSearchSubmit={onPositiveTagSearchSubmit} 
-        onAppliedTagClick={removePositiveTagFilter}
-      />
-    <div class="mb-2">Negative Tags</div>
-      <TagSearchInput 
-        availableTags={tags} 
-        appliedTags={appliedNegativeTags}
-        class="outline-none min-h-[40px] indent-2"
-        ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
-        onTagSearchSubmit={onNegativeTagSearchSubmit} 
-        onAppliedTagClick={removeNegativeTagFilter}
-      />
-    <div>
-      Sort by: 
-      <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-      </select>
-    </div>
-  </Accordeon>
-    <div bind:this={galleryDiv} class="grid w-full gap-2 justify-center p-4"
+<div class="flex flex-1 h-full">
+    {#if isFilterSelectionVisible}
+      <div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
+        <div class="mb-2">Positive Tags</div>
+          <TagSearchInput 
+            availableTags={tags} 
+            appliedTags={appliedPositiveTags}
+            class="outline-none min-h-[40px] indent-2"
+            ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
+            onTagSearchSubmit={onPositiveTagSearchSubmit} 
+            onAppliedTagClick={removePositiveTagFilter}
+          />
+        <div class="mb-2">Negative Tags</div>
+          <TagSearchInput 
+            availableTags={tags} 
+            appliedTags={appliedNegativeTags}
+            class="outline-none min-h-[40px] indent-2"
+            ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
+            onTagSearchSubmit={onNegativeTagSearchSubmit} 
+            onAppliedTagClick={removeNegativeTagFilter}
+          />
+        <div>
+          Sort by: 
+          <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+      </div>
+    {/if}
+    <div bind:this={galleryDiv} class="grid w-full gap-2 justify-center p-2"
     style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
     >
       {#each mediaItems as mediaItem}
@@ -187,7 +193,7 @@
           onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
           onConfirmDelete={() => deleteItem(mediaItem.id)} 
           onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
-          className="flex justify-center h-64 items-center border-zinc-900 border-2 rounded-md" 
+          className="flex justify-center h-64 items-center border-zinc-900 bg-zinc-900 border-2 rounded-md" 
           href={`/gallery/${mediaItem.id}`}
         >
           {#if mediaItem.type === "image"}
