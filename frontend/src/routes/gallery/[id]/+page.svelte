@@ -80,7 +80,7 @@
       {/if}
     </div>
   </div>
-  <a href={next ? `/gallery/${next}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!next && 'cursor-not-allowed'}`}><ArrowRight /></a>
+  <a href={next ? `/gallery/${next}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition fill-white ${!next && 'cursor-not-allowed'}`}><ArrowRight /></a>
 </div>
 
 <svelte:window on:keydown={onKeyDown} />

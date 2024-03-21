@@ -80,8 +80,10 @@
 </script>
 <div class={`flex flex-wrap w-full min-h-[40px] p-2 bg-zinc-800 rounded-md ${cssClass}`}>
   <div class="flex flex-row flex-wrap gap-2">
-    {#each appliedTags as tag }
-      <Tag onClick={() => onAppliedTagClick(tag)} mediaCount={tag.mediaCount} color={tag.color} text={tag.name} />
+    {#each appliedTags as tag}
+      {#if tag} 
+        <Tag onClick={() => onAppliedTagClick(tag)} tag={tag} />
+      {/if}
     {/each}
   </div>
   <div class={`flex items-center flex-1`}>

@@ -1,20 +1,33 @@
 <script lang="ts">
 	import type { MouseEventHandler } from "svelte/elements";
 	import EditIcon from "./icons/editIcon.svelte";
+	import type { PopulatedTag } from "./types/PopulatedTag";
+	import ArrowRight from "./icons/ArrowRight.svelte";
 
-  export let text = '';
-  export let mediaCount = 0;
-  export let color = '#007bff';
+  export let tag: PopulatedTag;
   export let onDelete: MouseEventHandler<HTMLButtonElement> | undefined = undefined;
   export let onEdit: MouseEventHandler<HTMLButtonElement>  | undefined  = undefined;
   export let onClick: MouseEventHandler<HTMLSpanElement>  | undefined  = undefined;
 
-  $: cssVarStyles = `--color: ${color}; cursor: ${onClick ? 'pointer' : 'default'}`;
+  let showParent = false;
+
+  $: cssVarStyles = `--color: ${tag.color}; cursor: ${onClick ? 'pointer' : 'default'}`;
 </script>
 
-<span on:click={onClick ?? undefined} style={cssVarStyles} class="tag"> 
+<span aria-pressed="false" on:click={onClick ?? undefined} style={cssVarStyles} class="tag"> 
   <slot>
-    <button on:click={onEdit} class={`editButton ${!onEdit ? 'invisible': 'mr-2' }`}><EditIcon class="fill-white" /></button> {text} {mediaCount > 0 ? `(${mediaCount})` : ''}
+    <button on:click={onEdit} class={`editButton ${!onEdit ? 'invisible': 'mr-2' }`}><EditIcon class="fill-white" /></button>
+    <span class="flex items-center gap-1">
+      {#if tag.parent}
+        {#if showParent}
+          {tag.parent.name}
+        {/if}
+      <button on:click={() => showParent = !showParent} class="hover:fill-red-900 hover:transition fill-white">
+        <ArrowRight />
+      </button>
+      {/if}
+      {tag.name} {tag.mediaCount > 0 ? `(${tag.mediaCount})` : ''}
+    </span>
     <button class={`delete ${!onDelete && 'invisible'}`} on:click={onDelete}> X </button>
   </slot>
 </span>

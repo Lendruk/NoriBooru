@@ -95,7 +95,6 @@ import Modal from '$lib/Modal.svelte';
 		<div class="flex flex-wrap gap-3">
 			{#each tags as tag}
 				<Tag
-					mediaCount={tag.mediaCount}
 					onEdit={() => {
 						showTagEditModal = true;
 						tagInEditName = tag.name;
@@ -103,8 +102,7 @@ import Modal from '$lib/Modal.svelte';
 						tagInEditColor = tag.color;
 						tagInEditAppliedParent = [tag.parent as PopulatedTag]
 					}}
-					color={tag?.color}
-					text={tag.name}
+					tag={tag}
 					onDelete={() => deleteTag(tag.id)}
 				/>
 			{/each}
