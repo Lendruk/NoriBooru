@@ -42,8 +42,8 @@
 		},
 		{
 			name: 'Inbox',
-			path: '/gallery/inbox',
-			navHref: '/gallery/inbox',
+			path: /\/gallery\?inbox=true/g,
+			navHref: '/gallery?inbox=true',
       icon: InboxIcon,
 		},
 		{
@@ -59,7 +59,7 @@
 		if ($page.url.pathname === '/') {
 			return route.path === '/';
 		} 
-		const pathName = $page.url.pathname.slice();
+		const pathName = $page.url.pathname.slice() + $page.url.search;
 
 		if (typeof route.path === 'string') {
 			return route.path === pathName;

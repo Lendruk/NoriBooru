@@ -9,11 +9,12 @@
 	import { pause } from '$lib/utils/time';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import FilterIcon from '$lib/icons/FilterIcon.svelte';
-	import GalleryItemButton from './GalleryItemButton.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import InboxIcon from '$lib/icons/InboxIcon.svelte';
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 	import XIcon from '$lib/icons/XIcon.svelte';
+	import { page } from '$app/stores';
+	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -35,12 +36,25 @@
 
   let selectedItems: Map<number, MediaItem> = new Map();
   let isSelectionModeActive = false;
+  let isInbox = false;
 
   $: isSelectionModeActive = selectedItems.size > 0;
+  $: isInbox = $page.url.searchParams.has("inbox");
+
 	onMount(async () => {
+    isInbox = $page.url.searchParams.has("inbox");
+    page.subscribe(async (val) => {
+      if (val.url.searchParams.has("inbox")) {
+        isInbox = true;
+      } else {
+        isInbox = false;
+      }
+
+      selectedItems = new Map();
+      await search();
+    });
     await search();
     tags = await HttpService.get<PopulatedTag[]>('/tags');
-
 	});
 
   async function applyPositiveTagFilter(tag: PopulatedTag) {
@@ -81,7 +95,7 @@
         positiveQueryType,
         negativeQueryType,
         sortMethod,
-        archived: 'true',
+        archived: isInbox ? 'false' : 'true',
         page: currentPage.toString(),
       }));
 
@@ -136,7 +150,7 @@
     for(const id of selectedItems.keys()) {
       itemIds.push(id);
     }
-    await toggleArchivedStatus(itemIds, false);
+    await toggleArchivedStatus(itemIds, isInbox ? true : false);
     selectedItems = new Map();
     await search();
   }
@@ -209,7 +223,11 @@
               <TrashIcon />
             </button>
             <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-              <InboxIcon />
+              {#if isInbox}
+                <ArchiveIcon />
+              {:else}
+                <InboxIcon />
+              {/if}
             </button>
           </div>
         </div>
