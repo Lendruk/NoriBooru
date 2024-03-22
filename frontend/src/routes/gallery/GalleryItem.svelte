@@ -1,7 +1,10 @@
 <script lang="ts">
+  import ArchiveIcon from "$lib/icons/ArchiveIcon.svelte";
+  import CheckIcon from "$lib/icons/CheckIcon.svelte";
   import InboxIcon from "$lib/icons/InboxIcon.svelte";
-import TagIcon from "$lib/icons/TagIcon.svelte";
-import GalleryItemButton from "./GalleryItemButton.svelte";
+  import TagIcon from "$lib/icons/TagIcon.svelte";
+	import TrashIcon from "$lib/icons/TrashIcon.svelte";
+  import GalleryItemButton from "./GalleryItemButton.svelte";
 
   export let href = "";
   export let className = "";
@@ -12,28 +15,49 @@ import GalleryItemButton from "./GalleryItemButton.svelte";
   export let isArchived = false;
   export let style = '';
 
+  export let isSelected = false;
+  export let onSelectClick = () => {};
+  export let isSelectionModeActive = false;
+
   let confirmingDelete = false;
   let showOptions = false;
 
   const reset = () => {
     confirmingDelete = false;
   }
+
+  function onItemClick(e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement; }) {
+    if (isSelectionModeActive) {
+      onSelectClick();
+      e.preventDefault();
+    }
+  }
 </script>
 
-<a on:mouseenter={() => showOptions = true} on:mouseleave={() => { showOptions = false; reset()}} style={style} class={className + " relative group"} href={href}>
-  <div class={`absolute inset-0 bg-black opacity-0 group-hover:transition-opacity group-hover:opacity-50 rounded-lg`}/>
-  <div class={`${!showOptions ? 'hidden' : 'flex' } flex-1 w-full h-full absolute top-0`}>
+<a on:mouseenter={() => showOptions = true} on:mouseleave={() => { showOptions = false; reset()}} style={style} class={`flex justify-center h-64 items-center ${ isSelected ? 'border-red-900 bg-red-900' : 'border-zinc-900 bg-zinc-900'} border-2 rounded-md relative group ${className}`} href={isSelectionModeActive ? '' : href}>
+  <div class={`absolute inset-0 bg-black opacity-0 group-hover:transition-opacity group-hover:opacity-50 rounded-lg`} />
+  <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
+  <div class={`${!showOptions ? 'hidden' : 'flex' } flex-1 w-full h-full absolute top-0`} on:click={onItemClick}>
     <div class="flex flex-1 flex-col">
-      <div class="m-2 flex flex-1 justify-end">
-        {#if isArchived}
-          <GalleryItemButton onClick={onMoveToInbox}>
-            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path d="M32 32H480c17.7 0 32 14.3 32 32V96c0 17.7-14.3 32-32 32H32C14.3 128 0 113.7 0 96V64C0 46.3 14.3 32 32 32zm0 128H480V416c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V160zm128 80c0 8.8 7.2 16 16 16H336c8.8 0 16-7.2 16-16s-7.2-16-16-16H176c-8.8 0-16 7.2-16 16z"/></svg>
-          </GalleryItemButton>
-        {:else} 
-          <GalleryItemButton onClick={onMoveToArchive}>
-           <InboxIcon />
-          </GalleryItemButton>
-        {/if}
+      <div class="m-2 flex flex-1">
+        <div class="flex flex-1">
+          <button class={`w-[12px] h-[12px] border-2 border-red-900 rounded-full items-center justify-center flex fill-white ${isSelected ? 'bg-red-900' : ''}`} on:click={ e => { e.preventDefault(); e.stopPropagation(); onSelectClick()}}>
+            {#if isSelected}
+              <CheckIcon width={10} height={10}/>
+            {/if}
+          </button>
+        </div>
+        <div class="flex flex-1 justify-end">
+          {#if isArchived}
+            <GalleryItemButton onClick={onMoveToInbox}>
+              <ArchiveIcon />
+            </GalleryItemButton>
+          {:else} 
+            <GalleryItemButton onClick={onMoveToArchive}>
+              <InboxIcon />
+            </GalleryItemButton>
+          {/if}
+        </div>
       </div>
       <div class="flex gap-4 flex-1 items-end justify-end justify-items-end m-2">
         <GalleryItemButton onClick={onTagButtonClick}>
@@ -42,7 +66,7 @@ import GalleryItemButton from "./GalleryItemButton.svelte";
   
         {#if confirmingDelete}
           <GalleryItemButton onClick={onConfirmDelete}>
-            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>
+            <TrashIcon />
           </GalleryItemButton>
         {/if}
         {#if !confirmingDelete}

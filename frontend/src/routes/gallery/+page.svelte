@@ -9,6 +9,11 @@
 	import { pause } from '$lib/utils/time';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import FilterIcon from '$lib/icons/FilterIcon.svelte';
+	import GalleryItemButton from './GalleryItemButton.svelte';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import InboxIcon from '$lib/icons/InboxIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
+	import XIcon from '$lib/icons/XIcon.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -27,6 +32,11 @@
   let oldHeight = 0;
 
   let galleryDiv: HTMLDivElement;
+
+  let selectedItems: Map<number, MediaItem> = new Map();
+  let isSelectionModeActive = false;
+
+  $: isSelectionModeActive = selectedItems.size > 0;
 	onMount(async () => {
     await search();
     tags = await HttpService.get<PopulatedTag[]>('/tags');
@@ -102,14 +112,33 @@
     await search();
   }
 
-  async function deleteItem(mediaItemId: number) {
-    await HttpService.delete(`/mediaItems/${mediaItemId}`);
-    mediaItems = mediaItems.filter(item => item.id !== mediaItemId);
+  async function deleteItems(mediaItemIds: number[]) {
+    await HttpService.delete(`/mediaItems/${JSON.stringify(mediaItemIds)}`);
+    mediaItems = mediaItems.filter(item => !mediaItemIds.includes(item.id));
   }
 
-  async function toggleArchivedStatus(mediaItemId: number, isArchived: boolean) {
-    await HttpService.patch(`/mediaItems/${mediaItemId}`, { isArchived: !isArchived });
-    mediaItems = mediaItems.map(item => item.id === mediaItemId ? { ...item, isArchived: !isArchived } : item);
+  async function deleteSelectedItems() {
+    let itemIds: number[] = [];
+    for(const id of selectedItems.keys()) {
+      itemIds.push(id);
+    }
+    await deleteItems(itemIds);
+    selectedItems = new Map();
+  }
+
+  async function toggleArchivedStatus(mediaItemIds: number[], isArchived: boolean) {
+    await HttpService.patch(`/mediaItems/${JSON.stringify(mediaItemIds)}`, { isArchived });
+    mediaItems = mediaItems.map(item => mediaItemIds.includes(item.id) ? { ...item, isArchived } : item);
+  }
+
+  async function toggleSelectedItems() {
+    let itemIds: number[] = [];
+    for(const id of selectedItems.keys()) {
+      itemIds.push(id);
+    }
+    await toggleArchivedStatus(itemIds, false);
+    selectedItems = new Map();
+    await search();
   }
 
   async function fetchMediaItemTags(mediaItemId: number) {
@@ -128,6 +157,15 @@
   async function onTagButtonClick(mediaItemId: number) {
     await fetchMediaItemTags(mediaItemId);
     showMediaTagEditModal = !showMediaTagEditModal;
+  }
+
+  function onMediaItemSelect(mediaItem: MediaItem) {
+    if (selectedItems.has(mediaItem.id)) {
+      selectedItems.delete(mediaItem.id);
+    } else {
+      selectedItems.set(mediaItem.id, mediaItem);
+    }
+    selectedItems = selectedItems;
   }
 
   function onKeyPress(event: KeyboardEvent) {
@@ -157,8 +195,27 @@
     }
 </script>
 
-<div class="flex flex-1 justify-end mr-2">
-  <div class="flex w-fit p-2 mt-2 mb-2 justify-center bg-zinc-900 rounded-lg">
+<div class="flex flex-1 mr-2 justify-between min-h-[60px]">
+  {#if isSelectionModeActive}
+    <div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
+        <div class="flex gap-8">
+          <div class="flex gap-4">
+            <span class="flex items-center gap-4"><CheckIcon /> Selecting {selectedItems.size} Items</span>
+            <button class="flex items-center gap-4 hover:text-red-950 hover:fill-red-950 hover:transition" on:click={() => selectedItems = new Map()}><XIcon />Deselect all</button>
+          </div>
+
+          <div class ="flex gap-2 items-center">
+            <button on:click={() => deleteSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+              <TrashIcon />
+            </button>
+            <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+              <InboxIcon />
+            </button>
+          </div>
+        </div>
+      </div>
+  {/if}
+  <div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
     <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
       <FilterIcon />
     </button>
@@ -216,11 +273,13 @@
     >
       {#each mediaItems as mediaItem}
         <GalleryItem 
-          isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)} 
-          onMoveToInbox={() => toggleArchivedStatus(mediaItem.id, mediaItem.isArchived)}  
-          onConfirmDelete={() => deleteItem(mediaItem.id)} 
+          isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)} 
+          onMoveToInbox={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}  
+          onConfirmDelete={() => deleteItems([mediaItem.id])} 
           onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
-          className="flex justify-center h-64 items-center border-zinc-900 bg-zinc-900 border-2 rounded-md" 
+          onSelectClick={() => onMediaItemSelect(mediaItem)}
+          isSelected={selectedItems.has(mediaItem.id)}
+          isSelectionModeActive={isSelectionModeActive}
           href={`/gallery/${mediaItem.id}`}
         >
           {#if mediaItem.type === "image"}

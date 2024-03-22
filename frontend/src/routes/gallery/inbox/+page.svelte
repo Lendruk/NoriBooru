@@ -27,12 +27,12 @@
   }
   
   async function deleteItem(mediaItemId: number) {
-    await HttpService.delete(`/mediaItems/${mediaItemId}`);
+    await HttpService.delete(`/mediaItems/${JSON.stringify([mediaItemId])}`);
     mediaItems = mediaItems.filter(item => item.id !== mediaItemId);
   }
 
   async function toggleArchivedStatus(mediaItemId: number, isArchived: boolean) {
-    await HttpService.patch(`/mediaItems/${mediaItemId}`, { isArchived: !isArchived });
+    await HttpService.patch(`/mediaItems/${JSON.stringify([mediaItemId])}`, { isArchived: !isArchived });
     mediaItems = mediaItems.map(item => item.id === mediaItemId ? { ...item, isArchived: !isArchived } : item);
   }
 

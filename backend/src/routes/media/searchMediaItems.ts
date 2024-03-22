@@ -38,9 +38,9 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 
 	const { db } = vaultInstance;
 	const positiveTags = JSON.parse(query.positiveTags ?? '[]') as number[];
-	const positiveQueryType = query.positiveQueryType;
+	const positiveQueryType = query.positiveQueryType ?? 'AND';
 	const negativeTags = JSON.parse(query.negativeTags ?? '[]') as number[];
-	const negativeQueryType = query.negativeQueryType;
+	const negativeQueryType = query.negativeQueryType ?? 'AND';
 	const sortMethod: SortMethods = query.sortMethod ?? 'newest';
 	const hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
 	const page = parseInt(query.page ?? '0');
