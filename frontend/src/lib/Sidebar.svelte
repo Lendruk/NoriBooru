@@ -86,19 +86,21 @@
 			</a>
     {/each}
   </div>
-	{#if isSidebarOpen}
-		<div class="flex flex-col text-xs items-center mb-4">
-			<div>NoriBooru</div>
-			<div>v{PUBLIC_VERSION}</div>
-		</div>
-	{/if}
-	<button on:click={() => isSidebarOpen = !isSidebarOpen} class={`${isSidebarOpen ? 'absolute right-0 bottom-0 rounded-tl-lg' : 'w-full flex items-center justify-center'}  bg-red-950 p-2 fill-white hover:bg-red-900 hover:transition`}>
+	<div class="sticky bottom-0">
 		{#if isSidebarOpen}
-			<ArrowLeft />
-		{:else}
-			<ArrowRight />
+			<div class="flex flex-col text-xs items-center mb-4">
+				<div>NoriBooru</div>
+				<div>v{PUBLIC_VERSION}</div>
+			</div>
 		{/if}
-	</button>
+		<button on:click={() => isSidebarOpen = !isSidebarOpen} class={`${isSidebarOpen ? 'absolute right-0 bottom-0 rounded-tl-lg' : 'w-full flex items-center justify-center'}  bg-red-950 p-2 fill-white hover:bg-red-900 hover:transition`}>
+			{#if isSidebarOpen}
+				<ArrowLeft />
+			{:else}
+				<ArrowRight />
+			{/if}
+		</button>
+	</div>
 </aside>
 
 <style>
