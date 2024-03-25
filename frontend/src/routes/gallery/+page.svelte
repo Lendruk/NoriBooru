@@ -209,36 +209,42 @@
     }
 </script>
 
-<div class="flex flex-1 mr-2 justify-between min-h-[60px]">
-  {#if isSelectionModeActive}
-    <div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
-        <div class="flex gap-8">
-          <div class="flex gap-4">
-            <span class="flex items-center gap-4"><CheckIcon /> Selecting {selectedItems.size} Items</span>
-            <button class="flex items-center gap-4 hover:text-red-950 hover:fill-red-950 hover:transition" on:click={() => selectedItems = new Map()}><XIcon />Deselect all</button>
-          </div>
+{#if mediaItems.length > 0}
+  <div class="flex flex-1 mr-2 justify-between min-h-[60px]">
+    {#if isSelectionModeActive}
+      <div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
+          <div class="flex gap-8">
+            <div class="flex gap-4">
+              <span class="flex items-center gap-4"><CheckIcon /> Selecting {selectedItems.size} Items</span>
+              <button class="flex items-center gap-4 hover:text-red-950 hover:fill-red-950 hover:transition" on:click={() => selectedItems = new Map()}><XIcon />Deselect all</button>
+            </div>
 
-          <div class ="flex gap-2 items-center">
-            <button on:click={() => deleteSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-              <TrashIcon />
-            </button>
-            <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-              {#if isInbox}
-                <ArchiveIcon />
-              {:else}
-                <InboxIcon />
-              {/if}
-            </button>
+            <div class ="flex gap-2 items-center">
+              <button on:click={() => deleteSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                <TrashIcon />
+              </button>
+              <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                {#if isInbox}
+                  <ArchiveIcon />
+                {:else}
+                  <InboxIcon />
+                {/if}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-  {/if}
-  <div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
-    <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
-      <FilterIcon />
-    </button>
+    {/if}
+    <div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
+      <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
+        <FilterIcon />
+      </button>
+
+      {#if isInbox}
+        <a href={mediaItems.length > 0 ? '/gallery/review' : ''} class={`bg-red-900 rounded-lg ml-2 p-2 ${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}>Start review</a>
+      {/if}
+    </div>
   </div>
-</div>
+{/if}
 <div class="flex flex-1 h-full">
     {#if isFilterSelectionVisible}
       <div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
@@ -309,8 +315,8 @@
         </GalleryItem>
       {/each}
       {#if mediaItems.length === 0}
-        <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center self-center">
-          No items in gallery
+        <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center h-full items-center self-center">
+          No items in {isInbox ? 'inbox' : 'gallery'}
         </div>
       {/if}
     </div>

@@ -69,7 +69,7 @@
         case "Escape": 
           goto(`/playlists`);
           break;
-        case "        ":
+        case " ":
           handlePause();
           break;
 		 }
