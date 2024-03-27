@@ -13,13 +13,19 @@
 	import Button from "$lib/Button.svelte";
 	import Checkbox from "$lib/Checkbox.svelte";
 	import type { PopulatedTag } from "$lib/types/PopulatedTag";
+	import TagSearchInput from "$lib/TagSearchInput.svelte";
 
   let playlistName = $state('');
   let timePerItem = $state(0);
   let randomizeOrder = $state(false);
+  let availableTags = $state<PopulatedTag[]>([]);
   let playlistItems: MediaItem[] = $state([]);
 
   $effect(() => {
+    HttpService.get<PopulatedTag[]>(`/tags`).then(tags => {
+      availableTags = tags;
+    });
+
     if ($page.params.id && $page.params.id !== "new") {
       HttpService.get<Playlist>(`/playlists/${$page.params.id}`).then(res => {
         playlistName = res.name;
@@ -175,18 +181,25 @@
   </div>
   <VerticalDrawer isDrawerOpen={mediaSearchSidebarOpen} >
     <div class="flex flex-1 flex-col">
-      <input bind:value={tagSearchInputText} on:input={onTagSearchChange} class="outline-none ml-4 mr-4 mt-4 h-[40px] indent-2 bg-zinc-800 rounded-md flex-1 flex" type="text" placeholder="Search tags.." />
-      <div class="flex text-sm w-full flex-wrap gap-2">
-        {#each filterTags as tag}
-          <div class="bg-green-400 flex flex-row gap-2 p-1">
-            <div>{tag.name}</div>
-            <button on:click={() => removeTagFromFilter(tag)}>X</button>
-          </div>
-        {/each}
-        {#each foundTags as tag}
-          <div on:click={() => addTagToFilter(tag)}>{tag.name}</div>
-        {/each}
-      </div>
+      <TagSearchInput 
+        availableTags={availableTags} 
+        appliedTags={filterTags}
+        class="outline-none min-h-[40px] indent-2 m-2 w-auto"
+        onTagSearchSubmit={async (tag) => {
+          filterTags.push(tag);
+
+          if (filterTags.length > 0) {
+            await searchMedia();
+          }
+        }} 
+        onAppliedTagClick={(tag) => {
+          const index = filterTags.findIndex(t => t.id === tag.id);
+
+          if(index !== -1) {
+            filterTags.splice(index, 1);
+          }
+        }}
+      />
       <div class="flex flex-wrap h-full overflow-scroll">
         {#each sidebarMediaItems as mediaItem}
           <SidebarMediaItem 

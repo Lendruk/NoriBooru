@@ -41,7 +41,6 @@
   }) {
     if (e.key == "Tab") {
       e.preventDefault();
-      console.log("tab pressed");
       const tag = availableTags.find(tag => tag.name.toLowerCase().startsWith(e.currentTarget.value.toLowerCase()) && !ignoredTags.find(at => at.id === tag.id));
 
       if (tag) {

@@ -128,7 +128,7 @@
     }
   }}><DoorOpen width={32} height={32} /></button>
 </div>
-<div class="flex flex-row flex-1 h-full absolute top-0 left-0 w-full z-[20]">
+<div class="flex flex-row flex-1 h-full absolute top-0 left-0 w-full z-[40]">
   <button on:click={handleClickLeft} class={`flex fill-white justify-center items-center w-1/12 bg-red-950 hover:bg-red-900 hover:transition ${currentMediaIndex - 1 < 0 && 'cursor-not-allowed'}`}>
     <ArrowLeft />
   </button>

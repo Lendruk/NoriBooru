@@ -9,7 +9,7 @@
 
 </script>
 
-<div class={`${isDrawerOpen ? 'flex' : 'hidden'} absolute right-0 top-0 w-full h-full flex`}>
+<div class={`${isDrawerOpen ? 'flex' : 'hidden'} absolute right-0 top-0 w-full h-full flex z-[40]`}>
   <div on:click={() => isDrawerOpen = false} class="flex flex-1 bg-zinc-900 bg-opacity-90 backdrop-blur-sm">
 
   </div>

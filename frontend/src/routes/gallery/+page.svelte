@@ -17,6 +17,7 @@
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import TagIcon from '$lib/icons/TagIcon.svelte';
 	import MassTagEditModal from '../components/MassTagEditModal.svelte';
+	import Link from '$lib/Link.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -247,7 +248,7 @@
         </button>
   
         {#if isInbox}
-          <a href={mediaItems.length > 0 ? '/gallery/review' : ''} class={`bg-red-900 rounded-lg ml-2 p-2 ${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}>Start review</a>
+          <Link href={mediaItems.length > 0 ? '/gallery/review' : ''} class={`${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'} ml-2`}>Start review</Link>
         {/if}
       </div>
     </div>
