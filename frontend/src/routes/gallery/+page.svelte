@@ -15,6 +15,8 @@
 	import XIcon from '$lib/icons/XIcon.svelte';
 	import { page } from '$app/stores';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
+	import TagIcon from '$lib/icons/TagIcon.svelte';
+	import MassTagEditModal from '../components/MassTagEditModal.svelte';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -24,6 +26,7 @@
   let tags: PopulatedTag[] = [];
   let sortMethod: 'newest' | 'oldest' = 'newest';
   let showMediaTagEditModal = false;
+  let showMassTagEditModal = false;
   let currentPage = 0;
   let hasMoreItems = true;
   let fetchingItems = false;
@@ -81,7 +84,7 @@
   }
 
   async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
-    await HttpService.put(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+    await HttpService.put(`/mediaItems/${JSON.stringify([mediaItemId])}/tags`, { ...tag });
     mediaItemInTagEdit!.tags.push(tag);
     mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
   }
@@ -230,6 +233,9 @@
                   <InboxIcon />
                 {/if}
               </button>
+              <button on:click={() => showMassTagEditModal = true } class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                <TagIcon />
+              </button>
             </div>
           </div>
         </div>
@@ -337,6 +343,11 @@
     {/if}
   </div>
 </Modal>
+<MassTagEditModal 
+  showModal={showMassTagEditModal} 
+  itemsInEdit={selectedItems}
+  availableTags={tags} 
+/>
 
 <svelte:window on:scroll={onWindowScroll} on:keypress={onKeyPress} />
 

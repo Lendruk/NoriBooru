@@ -3,32 +3,58 @@ import { Request } from '../../types/Request';
 import {  TagTableSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
+import { VaultDb } from '../../db/VaultController';
+
+const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagTableSchema): Promise<boolean> => {
+	try {
+		await db.insert(tagsToMediaItems).values({ tagId: tag.id, mediaItemId: mediaId });
+		return true;
+	} catch {
+		return false;
+	}
+};
 
 const addTagToMediaItem = async (request: Request, reply: FastifyReply) => {
-  const vault = request.vault;
-  if(!vault) {
-    return reply.status(400).send('No vault provided');
-  }
+	const vault = request.vault;
+	if(!vault) {
+		return reply.status(400).send('No vault provided');
+	}
 
-  const { id } = request.params as { id: string };
-  const body = request.body as TagTableSchema;
+	const { ids } = request.params as { ids: string };
+	const parsedIdArray: string[] = JSON.parse(ids);
+	const body = request.body as TagTableSchema | { tags: TagTableSchema[] };
   
-  try {
-    const { db } = vault;
-    if (id) {
-      await db.insert(tagsToMediaItems).values({ tagId: body.id, mediaItemId: Number.parseInt(id) });
-      await db.update(tags).set({ mediaCount: body.mediaCount + 1 }).where(eq(tags.id, body.id));
-    }
-  } catch(error) {
-    return reply.status(400).send({ message: error });
-  }
+	try {
+		const { db } = vault;
+		if (parsedIdArray && Array.isArray(parsedIdArray)) {
+			let tagsToInsert: TagTableSchema[] = [];
+			if ('tags' in body) {
+				tagsToInsert = body.tags;
+			} else { 
+				tagsToInsert = [body];
+			}
 
-  return reply.send({ message: 'Tag added successfully' });
+			for(const tag of tagsToInsert) {
+				let curMediaCount = tag.mediaCount;
+				for (const id of parsedIdArray) {
+					const numericId = Number.parseInt(id);
+					if (await insertTagIntoMedia(db, numericId, tag)) {
+						curMediaCount++;
+						await db.update(tags).set({ mediaCount: curMediaCount }).where(eq(tags.id, tag.id));
+					}
+				}
+			}
+		}
+	} catch(error) {
+		return reply.status(400).send({ message: error });
+	}
+
+	return reply.send({ message: 'Tag added successfully' });
 };
 
 export default {
 	method: 'PUT',
-	url: '/mediaItems/:id/tags',
+	url: '/mediaItems/:ids/tags',
 	handler: addTagToMediaItem,
-  onRequest: checkVault,
+	onRequest: checkVault,
 } as RouteOptions;

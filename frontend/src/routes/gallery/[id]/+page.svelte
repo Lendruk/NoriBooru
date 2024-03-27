@@ -42,7 +42,7 @@
   });
 
   async function addTagToMedia(tag: PopulatedTag) {
-    await HttpService.put(`/mediaItems/${mediaItem?.id}/tags`, tag);
+    await HttpService.put(`/mediaItems/${JSON.stringify([mediaItem?.id])}/tags`, tag);
     mediaItem!.tags = [...mediaItem!.tags, {...tag, mediaCount: tag.mediaCount + 1}];
     tagSearchText = "";
     foundTags = [];
