@@ -116,10 +116,10 @@
   }
 </script>
 
-<div class="absolute right-10 top-5 z-10">
+<div class="absolute right-10 top-5 z-[21]">
   {currentMediaIndex + 1} / {mediaIds.length}
 </div>
-<div class="absolute right-10 bottom-5 z-10 bg-zinc-900 p-3 rounded-md">
+<div class="absolute right-10 bottom-5 z-[21] bg-zinc-900 p-3 rounded-md">
   <button on:click={() => {
     if (actionMap.size > 0) {
       showModal = true;
@@ -128,7 +128,7 @@
     }
   }}><DoorOpen width={32} height={32} /></button>
 </div>
-<div class="flex flex-row flex-1 h-full absolute top-0 left-0 w-full">
+<div class="flex flex-row flex-1 h-full absolute top-0 left-0 w-full z-[20]">
   <button on:click={handleClickLeft} class={`flex fill-white justify-center items-center w-1/12 bg-red-950 hover:bg-red-900 hover:transition ${currentMediaIndex - 1 < 0 && 'cursor-not-allowed'}`}>
     <ArrowLeft />
   </button>

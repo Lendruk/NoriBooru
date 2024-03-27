@@ -59,7 +59,7 @@
   <div class="flex flex-col items-center gap-8 flex-1">
     <div>
       {#if mediaItem?.type === "image"}
-        <img class="bg-cover" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
+        <img class="max-h-[80vh]" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} alt="gallery-img" />
       {/if}
       {#if mediaItem?.type === "video"}
         <video class="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}  controls>
