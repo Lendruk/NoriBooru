@@ -212,120 +212,122 @@
     }
 </script>
 
-{#if mediaItems.length > 0}
-  <div class="flex flex-1 mr-2 justify-between min-h-[60px]">
-    {#if isSelectionModeActive}
-      <div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
-          <div class="flex gap-8">
-            <div class="flex gap-4">
-              <span class="flex items-center gap-4"><CheckIcon /> Selecting {selectedItems.size} Items</span>
-              <button class="flex items-center gap-4 hover:text-red-950 hover:fill-red-950 hover:transition" on:click={() => selectedItems = new Map()}><XIcon />Deselect all</button>
-            </div>
-
-            <div class ="flex gap-2 items-center">
-              <button on:click={() => deleteSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-                <TrashIcon />
-              </button>
-              <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-                {#if isInbox}
-                  <ArchiveIcon />
-                {:else}
-                  <InboxIcon />
-                {/if}
-              </button>
-              <button on:click={() => showMassTagEditModal = true } class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
-                <TagIcon />
-              </button>
+<div class="relative">
+  {#if mediaItems.length > 0}
+    <div class="flex flex-1 mr-2 justify-between min-h-[60px] sticky top-10 z-[10]">
+      {#if isSelectionModeActive}
+        <div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
+            <div class="flex gap-8">
+              <div class="flex gap-4">
+                <span class="flex items-center gap-4"><CheckIcon /> Selecting {selectedItems.size} Items</span>
+                <button class="flex items-center gap-4 hover:text-red-950 hover:fill-red-950 hover:transition" on:click={() => selectedItems = new Map()}><XIcon />Deselect all</button>
+              </div>
+  
+              <div class ="flex gap-2 items-center">
+                <button on:click={() => deleteSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                  <TrashIcon />
+                </button>
+                <button on:click={() => toggleSelectedItems()} class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                  {#if isInbox}
+                    <ArchiveIcon />
+                  {:else}
+                    <InboxIcon />
+                  {/if}
+                </button>
+                <button on:click={() => showMassTagEditModal = true } class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition">
+                  <TagIcon />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-    {/if}
-    <div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
-      <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
-        <FilterIcon />
-      </button>
-
-      {#if isInbox}
-        <a href={mediaItems.length > 0 ? '/gallery/review' : ''} class={`bg-red-900 rounded-lg ml-2 p-2 ${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}>Start review</a>
       {/if}
+      <div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
+        <button class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`} on:click={() => isFilterSelectionVisible = !isFilterSelectionVisible}>
+          <FilterIcon />
+        </button>
+  
+        {#if isInbox}
+          <a href={mediaItems.length > 0 ? '/gallery/review' : ''} class={`bg-red-900 rounded-lg ml-2 p-2 ${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}>Start review</a>
+        {/if}
+      </div>
     </div>
-  </div>
-{/if}
-<div class="flex flex-1 h-full">
-    {#if isFilterSelectionVisible}
-      <div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
-        <div class="text-3xl mb-4">Filters</div>
-        <div class="flex flex-col mb-2">
-          <div class="mb-2 flex justify-between">
-            <div >Positive Tags</div>
-            <div class="flex flex-1 max-w-[150px]">
-              <button class={`${positiveQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {positiveQueryType = "AND"; search() }}>AND</button>
-              <button class={`${positiveQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {positiveQueryType = "OR"; search() }}>OR</button>
+  {/if}
+  <div class="flex flex-1 h-full relative">
+      {#if isFilterSelectionVisible}
+        <div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
+          <div class="text-3xl mb-4 sticky">Filters</div>
+          <div class="flex flex-col mb-2">
+            <div class="mb-2 flex justify-between">
+              <div >Positive Tags</div>
+              <div class="flex flex-1 max-w-[150px]">
+                <button class={`${positiveQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {positiveQueryType = "AND"; search() }}>AND</button>
+                <button class={`${positiveQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {positiveQueryType = "OR"; search() }}>OR</button>
+              </div>
             </div>
+              <TagSearchInput 
+                availableTags={tags} 
+                appliedTags={appliedPositiveTags}
+                class="outline-none min-h-[40px] indent-2"
+                ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
+                onTagSearchSubmit={onPositiveTagSearchSubmit} 
+                onAppliedTagClick={removePositiveTagFilter}
+              />
           </div>
+          <div class="flex flex-col">
+            <div class="mb-2 flex justify-between">
+              <div >Negative Tags</div>
+              <div class="flex flex-1 max-w-[150px]">
+                <button class={`${negativeQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {negativeQueryType = "AND"; search() }}>AND</button>
+                <button class={`${negativeQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {negativeQueryType = "OR"; search() }}>OR</button>
+              </div>
+            </div>
             <TagSearchInput 
               availableTags={tags} 
-              appliedTags={appliedPositiveTags}
+              appliedTags={appliedNegativeTags}
               class="outline-none min-h-[40px] indent-2"
               ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
-              onTagSearchSubmit={onPositiveTagSearchSubmit} 
-              onAppliedTagClick={removePositiveTagFilter}
+              onTagSearchSubmit={onNegativeTagSearchSubmit} 
+              onAppliedTagClick={removeNegativeTagFilter}
             />
-        </div>
-        <div class="flex flex-col">
-          <div class="mb-2 flex justify-between">
-            <div >Negative Tags</div>
-            <div class="flex flex-1 max-w-[150px]">
-              <button class={`${negativeQueryType === "AND" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' } w-1/2 rounded-tl-md rounded-bl-md`} on:click={() => {negativeQueryType = "AND"; search() }}>AND</button>
-              <button class={`${negativeQueryType === "OR" ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition' }  w-1/2 rounded-tr-md rounded-br-md`} on:click={() => {negativeQueryType = "OR"; search() }}>OR</button>
-            </div>
           </div>
-          <TagSearchInput 
-            availableTags={tags} 
-            appliedTags={appliedNegativeTags}
-            class="outline-none min-h-[40px] indent-2"
-            ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)} 
-            onTagSearchSubmit={onNegativeTagSearchSubmit} 
-            onAppliedTagClick={removeNegativeTagFilter}
-          />
-        </div>
-        <div>
-          Sort by: 
-          <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-          </select>
-        </div>
-      </div>
-    {/if}
-    <div bind:this={galleryDiv} class="grid w-full gap-2 justify-center p-2"
-    style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
-    >
-      {#each mediaItems as mediaItem}
-        <GalleryItem 
-          isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)} 
-          onMoveToInbox={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}  
-          onConfirmDelete={() => deleteItems([mediaItem.id])} 
-          onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
-          onSelectClick={() => onMediaItemSelect(mediaItem)}
-          isSelected={selectedItems.has(mediaItem.id)}
-          isSelectionModeActive={isSelectionModeActive}
-          href={`/gallery/${mediaItem.id}`}
-        >
-          {#if mediaItem.type === "image"}
-            <img class="h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
-          {/if}
-          {#if mediaItem.type === "video"}
-            <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
-          {/if}
-        </GalleryItem>
-      {/each}
-      {#if mediaItems.length === 0}
-        <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center h-full items-center self-center">
-          No items in {isInbox ? 'inbox' : 'gallery'}
+          <div>
+            Sort by: 
+            <select bind:value={sortMethod} on:change={() => search()} class="text-black" >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
         </div>
       {/if}
-    </div>
+      <div bind:this={galleryDiv} class="grid w-full gap-2 justify-center p-2"
+      style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
+      >
+        {#each mediaItems as mediaItem}
+          <GalleryItem 
+            isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)} 
+            onMoveToInbox={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}  
+            onConfirmDelete={() => deleteItems([mediaItem.id])} 
+            onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
+            onSelectClick={() => onMediaItemSelect(mediaItem)}
+            isSelected={selectedItems.has(mediaItem.id)}
+            isSelectionModeActive={isSelectionModeActive}
+            href={`/gallery/${mediaItem.id}`}
+          >
+            {#if mediaItem.type === "image"}
+              <img class="h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`} alt="gallery-img" />
+            {/if}
+            {#if mediaItem.type === "video"}
+              <Video cssClass="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`} />
+            {/if}
+          </GalleryItem>
+        {/each}
+        {#if mediaItems.length === 0}
+          <div class="text-4xl bg-zinc-900 p-4 rounded-md flex justify-center h-full items-center self-center">
+            No items in {isInbox ? 'inbox' : 'gallery'}
+          </div>
+        {/if}
+      </div>
+  </div>
 </div>
 <Modal class="w-[40%]" bind:showModal={showMediaTagEditModal}>
   <div class="p-4 flex flex-col w-full">
