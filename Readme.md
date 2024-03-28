@@ -2,9 +2,13 @@
 Self-hosted media database and management system.
 Uses the concept of vaults as a media database. A server can keep track of multiple vaults at the same time.
 
-Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes.
+Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes. For now there is no optimized production build.
 
-## How to run
+## Getting Started
+
+### Requirements
+- ffmpeg
+- node >= 20.0.0
 
 ### Locally
 In the project root directory run:
@@ -22,6 +26,6 @@ In the project root directory run:
 docker-compose up
 ```
 
-## Requirements
-- ffmpeg
-- node >= 20.0.0
+## Firefox extension
+There is also a Firefox [extension](https://github.com/Lendruk/NoriBooru-media-uploader) that allows you to directly upload images to your NoriBooru instance.
+This extension adds a new right-click option to every image which will send it directly to your inbox on the vault selected in the extension.
