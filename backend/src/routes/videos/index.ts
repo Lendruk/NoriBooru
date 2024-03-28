@@ -1,3 +1,3 @@
-import getVideo from "./getVideo";
+import getVideo from './getVideo';
 
 export default [getVideo];

@@ -16,26 +16,26 @@ export type SimplePlaylist = {
 
 
 const getPlaylists = async (request: Request, reply: FastifyReply) => {
-  const vault = request.vault;
+	const vault = request.vault;
 
-  if(!vault) {
-    return reply.status(400).send('No vault provided');
-  }
-  const { db } = vault;
+	if(!vault) {
+		return reply.status(400).send('No vault provided');
+	}
+	const { db } = vault;
 
-  const playlists = await db.query.playlists.findMany() as SimplePlaylist[];
+	const playlists = await db.query.playlists.findMany() as SimplePlaylist[];
 
-  for(const playlist of playlists) {
-    const amtOfMedia = await db.select({ count: sql<number>`cast(count(${playlists_mediaItems_table.playlistId}) as int)` }).from(playlists_mediaItems_table)
-    .where(eq(playlists_mediaItems_table.playlistId, playlist.id));
-    playlist.items = amtOfMedia[0].count;
-  }
-  return reply.send(playlists);
+	for(const playlist of playlists) {
+		const amtOfMedia = await db.select({ count: sql<number>`cast(count(${playlists_mediaItems_table.playlistId}) as int)` }).from(playlists_mediaItems_table)
+			.where(eq(playlists_mediaItems_table.playlistId, playlist.id));
+		playlist.items = amtOfMedia[0].count;
+	}
+	return reply.send(playlists);
 };
 
 export default {
 	method: 'GET',
 	url: '/playlists',
 	handler: getPlaylists,
-  onRequest: checkVault,
+	onRequest: checkVault,
 } as RouteOptions;
