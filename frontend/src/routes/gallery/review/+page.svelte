@@ -135,7 +135,7 @@
   {#if currentMediaItem}
     <div class="flex flex-1 flex-col justify-center items-center bg-zinc-800 backdrop-blur-lg bg-opacity-5">
       {#if currentMediaItem.type === "image"}
-        <img class="max-w-full max-h-full" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`} alt="gallery-img" />
+        <img class="max-w-full max-h-[85vh]" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`} alt="gallery-img" />
       {/if}
       {#if currentMediaItem.type === "video"}
         <video class="bg-cover w-full h-full" src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}  controls>
