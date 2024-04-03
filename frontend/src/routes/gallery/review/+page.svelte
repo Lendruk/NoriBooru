@@ -70,12 +70,22 @@
   }
 
   function markItemForArchival(mediaItemId: number) {
-    actionMap.set(mediaItemId, 'Archive');
+    const curAction = actionMap.get(mediaItemId);
+    if(curAction === 'Archive') {
+      actionMap.delete(mediaItemId);
+    } else {
+      actionMap.set(mediaItemId, 'Archive');
+    }
     actionMap = new Map(actionMap);
   }
 
   function markItemForDeletion(mediaItemId: number) {
-    actionMap.set(mediaItemId, 'Delete');
+    const curAction = actionMap.get(mediaItemId);
+    if(curAction === 'Delete') {
+      actionMap.delete(mediaItemId);
+    } else {
+      actionMap.set(mediaItemId, 'Delete');
+    }
     actionMap = new Map(actionMap);
   }
 
@@ -162,7 +172,7 @@
 <div class="absolute right-10 top-5 z-[50]">
   {currentMediaIndex + 1} / {mediaIds.length}
 </div>
-<div class="absolute right-10 bottom-5 z-[50] bg-zinc-900 p-3 rounded-md">
+<div class="absolute right-10 bottom-5 z-[50] bg-zinc-900 p-3 rounded-md hover:bg-red-800 hover:transition">
   <button on:click={() => {
     if (actionMap.size > 0) {
       showConfirmationModal = true;
@@ -187,13 +197,13 @@
       {/if}
 
       <div class="fill-white flex gap-4 mt-10">
-        <button on:click={() => markItemForArchival(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Archive' ? 'bg-red-950' : 'bg-red-900'} rounded-full p-4`}>
+        <button on:click={() => markItemForArchival(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Archive' ? 'bg-red-950' : 'bg-red-900'} hover:bg-red-800 hover:transition rounded-full p-4`}>
           <ArchiveIcon width={32} height={32} />
         </button>
-        <button on:click={() => markItemForDeletion(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Delete' ? 'bg-red-950' : 'bg-red-900'} rounded-full p-4`}>
+        <button on:click={() => markItemForDeletion(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Delete' ? 'bg-red-950' : 'bg-red-900'} hover:bg-red-800 hover:transition rounded-full p-4`}>
           <TrashIcon width={32} height={32} />
         </button>
-        <button on:click={() => showTagModal = true} class="bg-red-900 rounded-full p-4">
+        <button on:click={() => showTagModal = true} class="bg-red-900 rounded-full p-4 hover:bg-red-800 hover:transition">
           <TagIcon width={32} height={32} />
         </button>
       </div>
