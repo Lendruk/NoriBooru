@@ -6,17 +6,23 @@
 	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
 	import ArrowRight from "$lib/icons/ArrowRight.svelte";
 	import DoorOpen from "$lib/icons/DoorOpen.svelte";
+	import TagIcon from "$lib/icons/TagIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import { HttpService } from "$lib/services/HttpService";
 	import type { MediaItemWithTags } from "$lib/types/MediaItem";
+	import type { PopulatedTag } from "$lib/types/PopulatedTag";
+	import TagEditModal from "../../components/TagEditModal.svelte";
   type ReviewAction = "Archive" | "Delete";
 
   let currentMediaIndex = $state(0);
   let mediaIds = $state<number[]>([]);
+  let tags = $state<PopulatedTag[]>([]);
   let fetchedMediaItems = $state<Map<number, MediaItemWithTags>>(new Map());
   let currentMediaItem = $state<MediaItemWithTags | undefined>(undefined);
   let actionMap = $state<Map<number, ReviewAction | undefined>>(new Map());
-  let showModal = $state(false);
+  let tagsToApply = $state<Map<number, PopulatedTag[]>>(new Map());
+  let showConfirmationModal = $state(false);
+  let showTagModal = $state(false);
 
   const inboxUrl = '/gallery?inbox=true';
   $effect(() => {
@@ -25,6 +31,10 @@
       const firstItem = await fetchMediaItem(mediaIds[0]);
       currentMediaItem = firstItem;
       fetchedMediaItems.set(firstItem.id, firstItem);
+    });
+
+    HttpService.get<PopulatedTag[]>('/tags').then((fetchedTags) => {
+      tags = fetchedTags;
     });
   });
 
@@ -110,19 +120,52 @@
       promises.push(HttpService.delete(`/mediaItems/${JSON.stringify(itemsToDelete)}`));
     }
 
+    if(tagsToApply.size > 0) {
+      for(const pair of tagsToApply) {
+        const id = pair[0];
+        const tags = pair[1];
+        promises.push(HttpService.put(`/mediaItems/${JSON.stringify([id])}/tags`, { tags }));
+      }
+    }
+
     await Promise.all(promises);
 
     goto(inboxUrl);
   }
+  
+  function addTagToMediaItem(tag: PopulatedTag) {
+    if(currentMediaItem) {
+      if (tagsToApply.has(currentMediaItem.id)) {
+        const curTags = tagsToApply.get(currentMediaItem.id)!;
+        curTags.push(tag);
+        tagsToApply.set(currentMediaItem.id, curTags);
+      } else {
+        tagsToApply.set(currentMediaItem.id, [tag]);
+      }
+      tagsToApply = new Map(tagsToApply);
+    }
+  }
+
+  function removeTagFromMediaItem(tag: PopulatedTag) {
+    if(currentMediaItem) {
+      const tags = tagsToApply.get(currentMediaItem.id);
+      if (tags) {
+        const index = tags.findIndex(t => t.id === tag.id);
+        tags.splice(index, 1);
+        tagsToApply.set(currentMediaItem.id, tags);
+        tagsToApply = new Map(tagsToApply);
+      }
+    }
+  }
 </script>
 
-<div class="absolute right-10 top-5 z-[21]">
+<div class="absolute right-10 top-5 z-[50]">
   {currentMediaIndex + 1} / {mediaIds.length}
 </div>
-<div class="absolute right-10 bottom-5 z-[21] bg-zinc-900 p-3 rounded-md">
+<div class="absolute right-10 bottom-5 z-[50] bg-zinc-900 p-3 rounded-md">
   <button on:click={() => {
     if (actionMap.size > 0) {
-      showModal = true;
+      showConfirmationModal = true;
     } else {
       goto(inboxUrl);
     }
@@ -150,6 +193,9 @@
         <button on:click={() => markItemForDeletion(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Delete' ? 'bg-red-950' : 'bg-red-900'} rounded-full p-4`}>
           <TrashIcon width={32} height={32} />
         </button>
+        <button on:click={() => showTagModal = true} class="bg-red-900 rounded-full p-4">
+          <TagIcon width={32} height={32} />
+        </button>
       </div>
     </div>
   {/if}
@@ -158,7 +204,7 @@
   </button>
 </div>
 
-<Modal bind:showModal={showModal}>
+<Modal bind:showModal={showConfirmationModal}>
 		<div class="flex flex-1 flex-col m-4 gap-4">
       <div>Finish Review</div>
       <div>
@@ -167,5 +213,16 @@
 			<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={onReviewFinishConfirmation}>Confirm</Button>
 		</div>
 </Modal>
+
+{#if currentMediaItem}
+  <TagEditModal
+    bind:showModal={showTagModal}
+    availableTags={tags}
+    appliedTags={currentMediaItem?.tags.concat(tagsToApply.get(currentMediaItem.id) ?? [])}
+    ignoredTags={currentMediaItem?.tags.concat(tagsToApply.get(currentMediaItem.id) ?? [])}
+    onAppliedTagClick={removeTagFromMediaItem}
+    onTagSearchSubmit={addTagToMediaItem}
+  />
+{/if}
 
 <svelte:window on:keydown={onKeyDown} />

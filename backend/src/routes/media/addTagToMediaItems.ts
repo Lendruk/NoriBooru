@@ -14,7 +14,7 @@ const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagTableSc
 	}
 };
 
-const addTagToMediaItem = async (request: Request, reply: FastifyReply) => {
+const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 	if(!vault) {
 		return reply.status(400).send('No vault provided');
@@ -55,6 +55,6 @@ const addTagToMediaItem = async (request: Request, reply: FastifyReply) => {
 export default {
 	method: 'PUT',
 	url: '/mediaItems/:ids/tags',
-	handler: addTagToMediaItem,
+	handler: addTagToMediaItems,
 	onRequest: checkVault,
 } as RouteOptions;
