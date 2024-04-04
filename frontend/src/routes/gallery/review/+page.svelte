@@ -2,10 +2,12 @@
 	import { goto } from "$app/navigation";
 	import Button from "$lib/Button.svelte";
 	import Modal from "$lib/Modal.svelte";
+	import Tooltip from "$lib/Tooltip.svelte";
 	import ArchiveIcon from "$lib/icons/ArchiveIcon.svelte";
 	import ArrowLeft from "$lib/icons/ArrowLeft.svelte";
 	import ArrowRight from "$lib/icons/ArrowRight.svelte";
 	import DoorOpen from "$lib/icons/DoorOpen.svelte";
+	import InfoIcon from "$lib/icons/InfoIcon.svelte";
 	import TagIcon from "$lib/icons/TagIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import { HttpService } from "$lib/services/HttpService";
@@ -186,7 +188,7 @@
     <ArrowLeft />
   </button>
   {#if currentMediaItem}
-    <div class="flex flex-1 flex-col justify-center items-center bg-zinc-800 backdrop-blur-lg bg-opacity-5">
+    <div class="flex flex-1 flex-col justify-center items-center bg-zinc-800 backdrop-blur-lg bg-opacity-5 relative">
       {#if currentMediaItem.type === "image"}
         <img class="max-w-full max-h-[85vh]" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`} alt="gallery-img" />
       {/if}
@@ -195,6 +197,23 @@
           <track kind="captions" />
         </video>
       {/if}
+
+      <Tooltip>
+        <div slot="target" class="absolute top-4 right-4">
+          <InfoIcon />
+        </div>
+        <div class="flex flex-1 flex-col w-[300px]" slot="toolTipContent">
+          <div>
+            D - mark for current item for deletion
+          </div>
+          <div>
+            Spacebar - mark current item for archival
+          </div>
+          <div>
+            Escape - exit review mode
+          </div>
+        </div>
+      </Tooltip>
 
       <div class="fill-white flex gap-4 mt-10">
         <button on:click={() => markItemForArchival(currentMediaItem!.id)} class={`${actionMap.get(currentMediaItem!.id) === 'Archive' ? 'bg-red-950' : 'bg-red-900'} hover:bg-red-800 hover:transition rounded-full p-4`}>

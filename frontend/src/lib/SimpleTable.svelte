@@ -43,7 +43,7 @@
 	) {
 		toolTipContent = actionName;
 		showToolTip = true;
-		toolTipX = e.currentTarget.offsetLeft;
+		toolTipX = e.currentTarget.offsetLeft - 100;
 		toolTipY = e.currentTarget.offsetTop;
 	}
 
@@ -65,7 +65,7 @@
 </script>
 
 <table class="flex flex-col relative box-border">
-	<Tooltip x={toolTipX} y={toolTipY} content={toolTipContent} visible={showToolTip} />
+	<Tooltip x={toolTipX} y={toolTipY} content={toolTipContent} visible={showToolTip} automaticMode={false} />
 	<thead class="flex flex-1 bg-red-950 p-2 rounded-t-md">
 		<tr class="flex flex-1 justify-between">
       {#if orderable}
