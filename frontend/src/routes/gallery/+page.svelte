@@ -187,8 +187,10 @@
   }
 
   function onKeyPress(event: KeyboardEvent) {
-    if(event.key === "f" || event.key === "F") {
-      isFilterSelectionVisible = !isFilterSelectionVisible;
+    if (!showMassTagEditModal && !showMediaTagEditModal) {
+      if(event.key === "f" || event.key === "F") {
+        isFilterSelectionVisible = !isFilterSelectionVisible;
+      }
     }
   }
 
