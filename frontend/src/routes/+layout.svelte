@@ -5,6 +5,7 @@
   import '../app.css';
   import { page } from "$app/stores";
 	import { goto } from '$app/navigation';
+	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
   
   onMount(() => {
     document.documentElement.className = "darkTheme";
@@ -30,6 +31,7 @@
     <slot></slot>
   {/if}
 </div>
+<ToastContainer />
 
 <style lang="postcss">
   .slot {

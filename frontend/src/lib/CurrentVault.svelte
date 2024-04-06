@@ -9,9 +9,13 @@
     let storageVault = localStorage?.getItem("currentVault");
     currentVault = storageVault ? JSON.parse(storageVault) : null;
   }
+
+  function onSelectedVaultClick() {
+    isVaultSelectionOpen = !isVaultSelectionOpen;
+  }
 </script>
 
-<button on:click={() => isVaultSelectionOpen = !isVaultSelectionOpen} class="mr-4 hover:bg-red-900 hover:transition relative p-2 flex flex-col items-center bg-red-950 rounded-lg shadow-md">
+<button on:click={onSelectedVaultClick} class="mr-4 hover:bg-red-900 hover:transition relative p-2 flex flex-col items-center bg-red-950 rounded-lg shadow-md">
   <div>
     Vault: {currentVault?.name}
   </div>
