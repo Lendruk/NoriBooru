@@ -24,7 +24,7 @@
 </script>
 
 <div class="bg-red-950 min-w-[150px] rounded-lg flex flex-col fill-white">
-  <div class="flex flex-1 justify-between items-center p-4">
+  <div class="flex flex-1 justify-between items-center p-4 gap-4">
     <div>
       {content}
     </div>

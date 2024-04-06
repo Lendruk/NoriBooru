@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
+	import { createToast } from "$lib/components/toast/ToastContainer.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import UploadIcon from "$lib/icons/UploadIcon.svelte";
   import { HttpService } from "$lib/services/HttpService";
@@ -19,6 +20,7 @@
 
       const result = await HttpService.post("/mediaItems", formData);
       previewFiles = [];
+      createToast("Media uploaded successfully!");
     }
   }
 
