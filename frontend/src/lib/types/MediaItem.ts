@@ -9,6 +9,7 @@ type BaseMediaItem = {
   createdAt: number;
   updatedAt: number | null;
   isArchived: boolean;
+  exif: string;
 }
 
 export type MediaItem = BaseMediaItem & {

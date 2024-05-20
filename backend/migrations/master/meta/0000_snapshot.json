@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "6dc31dc7-c729-4aac-ac02-ee9b4f47753b",
+  "id": "723791c1-67ff-4c1f-8fda-36d9293f0086",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "vaults": {
@@ -14,12 +14,27 @@
           "notNull": true,
           "autoincrement": false
         },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "path": {
           "name": "path",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1716239615803
         }
       },
       "indexes": {},

@@ -8,7 +8,9 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { mediaItems } from '../../db/vault/schema';
 import sharp from 'sharp';
+import ExifReader from 'exifreader';
 import ffmpeg from 'fluent-ffmpeg';
+import { Exif } from '../../types/Exif';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { pipeline } = require('node:stream');
 const pump = util.promisify(pipeline);
@@ -43,8 +45,16 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			}
 			console.log('after');
 
-			const stats = await fs.stat(finalPath);
-			await db.insert(mediaItems).values({ fileName: id, extension: finalExtension, type: fileType, createdAt: Date.now(), fileSize: stats.size / (1024*1024) }).returning();
+			const [stats, buffer] = await Promise.all([
+				fs.stat(finalPath),
+				fs.readFile(finalPath)
+			]);
+			
+			// Exif
+			const exif = await ExifReader.load(buffer) as Exif;
+			
+
+			await db.insert(mediaItems).values({ fileName: id, extension: finalExtension, exif: JSON.stringify(exif), type: fileType, createdAt: Date.now(), fileSize: stats.size / (1024*1024) }).returning();
 
 			// Create thumbnail in case of images
 			if (fileType === 'image') {

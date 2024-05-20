@@ -33,6 +33,7 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 			createdAt: mediaItems.createdAt,
 			updatedAt: mediaItems.updatedAt,
 			isArchived: mediaItems.isArchived,
+			exif: mediaItems.exif,
 			index: playlists_mediaItems_table.itemIndex,
 		}
 	})
@@ -65,7 +66,8 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
       	id: item.id!, 
       	isArchived: item.isArchived ?? 0, 
       	type: item.type!, 
-      	updatedAt: item.updatedAt
+      	updatedAt: item.updatedAt,
+      	exif: item.exif
       };
 		}
 

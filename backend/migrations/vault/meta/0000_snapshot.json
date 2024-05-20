@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "7f0e6fb1-7e8a-4aeb-9ecd-eb3cf00bc3d6",
+  "id": "c4cdbe99-4f43-4a0e-a617-d95f588e155a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "media_items": {
@@ -63,6 +63,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "exif": {
+          "name": "exif",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},

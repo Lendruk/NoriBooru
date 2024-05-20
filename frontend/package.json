@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"exifreader": "^4.23.1",
 		"puppeteer": "^21.5.2"
 	}
 }

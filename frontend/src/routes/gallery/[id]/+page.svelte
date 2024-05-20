@@ -15,6 +15,8 @@
   let next: string | undefined = $state(undefined);
   let previous: string | undefined = $state(undefined);
 
+  let parsedExif: object | null = $state(null);
+
   function onKeyDown(e: KeyboardEvent) {
 		 switch(e.keyCode) {
        // Left
@@ -38,6 +40,7 @@
       tags = res.tags;
       next = res.next;
       previous = res.previous;
+      parsedExif = JSON.parse(mediaItem.exif);
     })
   });
 
@@ -78,6 +81,10 @@
           onTagSearchSubmit={addTagToMedia}
         />
       {/if}
+    </div>
+    <div>
+      <!-- TODO prettify the exif output -->
+      {JSON.stringify(parsedExif)}
     </div>
   </div>
   <a href={next ? `/gallery/${next}` : '#'} class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition fill-white ${!next && 'cursor-not-allowed'}`}><ArrowRight /></a>

@@ -6,7 +6,8 @@ CREATE TABLE `media_items` (
 	`file_size` integer NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
-	`is_archived` integer DEFAULT 0 NOT NULL
+	`is_archived` integer DEFAULT 0 NOT NULL,
+	`exif` text
 );
 --> statement-breakpoint
 CREATE TABLE `playlists` (

@@ -26,6 +26,7 @@ export const mediaItems = sqliteTable('media_items', {
 	createdAt: integer('created_at').notNull(),
 	updatedAt: integer('updated_at'),
 	isArchived: integer('is_archived').notNull().default(0),
+	exif: text('exif'),
 });
 
 export const tags_mediaItems_relation = relations(mediaItems, ({ many }) => ({
