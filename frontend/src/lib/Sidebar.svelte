@@ -8,6 +8,7 @@
 	import UploadIcon from './icons/UploadIcon.svelte';
 	import ArrowRight from './icons/ArrowRight.svelte';
 	import ArrowLeft from './icons/ArrowLeft.svelte';
+	import PaletteIcon from './icons/PaletteIcon.svelte';
 
 	let isSidebarOpen = true;
 
@@ -45,6 +46,12 @@
 			path: /\/gallery\?inbox=true/g,
 			navHref: '/gallery?inbox=true',
       icon: InboxIcon,
+		},
+		{
+			name: 'Stable Diffusion',
+			path: '/stablediffusion',
+			navHref: '/stablediffusion',
+			icon: PaletteIcon,
 		},
 		{
 			name: 'Playlists',
