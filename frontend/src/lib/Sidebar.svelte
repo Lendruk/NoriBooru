@@ -9,6 +9,8 @@
 	import ArrowRight from './icons/ArrowRight.svelte';
 	import ArrowLeft from './icons/ArrowLeft.svelte';
 	import PaletteIcon from './icons/PaletteIcon.svelte';
+	import PenIcon from './icons/PenIcon.svelte';
+	import FolderClosedIcon from './icons/FolderClosedIcon.svelte';
 
 	let isSidebarOpen = true;
 
@@ -50,9 +52,23 @@
 		},
 		{
 			name: 'Stable Diffusion',
-			path: '/stablediffusion',
-			navHref: '/stablediffusion',
+			navHref: '',
+			path: '',
 			icon: PaletteIcon,
+			subRoutes: [
+				{
+					icon: FolderClosedIcon,
+					name: 'Resources',
+					path: '/stablediffusion/resource-manager',
+					navHref: '/stablediffusion/resource-manager',
+				},
+				{
+					icon: PenIcon,
+					name: 'Generator',
+					path: '/stablediffusion/generator',
+					navHref: '/stablediffusion/generator',
+				}
+			]
 		},
 		{
 			name: 'Playlists',
@@ -92,7 +108,7 @@
 									{route.name}
 								</div>
 							{#each route.subRoutes as subRoute}
-								<div class="flex flex-1 flex-col">
+								<div class="flex flex-1 flex-col text-sm">
 									<a href={subRoute.navHref} 	class={`${
 										isCurrentPathSelected(subRoute) && 'bg-red-950 text-white'
 									} pl-8 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}> 
