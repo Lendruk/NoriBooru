@@ -19,6 +19,7 @@
 		icon: ConstructorOfATypedSvelteComponent;
 		subNavPaths?: (string | RegExp)[];
 		ignoreSubNavPaths?: (string | RegExp)[];
+		subRoutes?: Route[];
 	}
 
 	let routes: Route[] = [
@@ -79,18 +80,68 @@
 <aside class={`bg-zinc-900 flex flex-col justify-between rounded-tr-md rounded-br-md max-w-[200px] relative ${isSidebarOpen ? 'w-2/12' : 'w-[50px]'}`}>
   <div>
     {#each routes as route}
-      <a
-        class={`${
-          isCurrentPathSelected(route) && 'bg-red-950 text-white'
-        } pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
-        href={route.navHref}>
-				{#if route.icon} 
-					<svelte:component this={route.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
-				{/if}
-				{#if isSidebarOpen}
-					<div>{route.name}</div>
-				{/if}
-			</a>
+			{#if route.subRoutes}
+				<div>
+					{#if isSidebarOpen}
+						<div class="text-md flex items-center gap-4">
+							<div class="flex flex-col flex-1">
+								<div class="flex gap-4 pl-4 pr-4 pt-2 pb-2"> 
+									{#if route.icon} 
+										<svelte:component this={route.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
+									{/if}
+									{route.name}
+								</div>
+							{#each route.subRoutes as subRoute}
+								<div class="flex flex-1 flex-col">
+									<a href={subRoute.navHref} 	class={`${
+										isCurrentPathSelected(subRoute) && 'bg-red-950 text-white'
+									} pl-8 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}> 
+										{#if subRoute.icon} 
+											<svelte:component this={subRoute.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
+										{/if}
+										{subRoute.name}
+									</a>
+								</div>
+							{/each}
+							</div>
+						</div>
+					{:else}
+					<div class="pl-4 pr-4 pt-2 pb-2 text-md flex flex-col items-center gap-4">
+						{#each route.subRoutes as subRoute}
+							<a href={subRoute.navHref} class={`${
+								isCurrentPathSelected(subRoute) && 'bg-red-950 text-white'
+							} pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
+							> 
+								{#if subRoute.icon} 
+									<svelte:component this={subRoute.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
+								{/if}
+							</a>
+						{/each}
+					</div>
+					{/if}
+				</div>
+			{:else}
+				<a
+					class={`${
+						isCurrentPathSelected(route) && 'bg-red-950 text-white'
+					} pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
+					href={route.navHref}>
+					{#if isSidebarOpen}
+						<div class="flex flex-col">
+							<div class="flex gap-4"> 
+								{#if route.icon} 
+									<svelte:component this={route.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
+								{/if}
+								{route.name}
+							</div>
+						</div>
+					{:else}
+						{#if route.icon} 
+							<svelte:component this={route.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
+						{/if}
+					{/if}
+				</a>
+			{/if}
     {/each}
   </div>
 	<div class="sticky bottom-0">
