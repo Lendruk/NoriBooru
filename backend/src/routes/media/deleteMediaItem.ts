@@ -7,14 +7,14 @@ import * as fs from 'fs/promises';
 import { checkVault } from '../../hooks/checkVault';
 
 const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
-	if(!vaultInstance) {
+	const vault = request.vault;
+	if(!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
 	const { ids } = request.params as { ids: string };
 	const parsedIdArray: string[] = JSON.parse(ids);
-	const { vault, db } = vaultInstance;
+	const { db } = vault;
 	try {
 		for (const rawId of parsedIdArray) {
 			const parsedId = Number.parseInt(rawId ?? '');

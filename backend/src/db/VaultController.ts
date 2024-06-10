@@ -6,10 +6,7 @@ import * as vaultSchema from './vault/schema';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export type VaultInstance = {
-  vault: Vault;
-  db: VaultDb;
-}
+export type VaultInstance = Vault & { db: VaultDb }; 
 
 export class VaultController {
 	public static vaults: Map<string, VaultInstance> = new Map();
@@ -19,7 +16,7 @@ export class VaultController {
 		const newDb = new Database(`${vault.path}/vault.sqlite`);
 		const db = drizzle(newDb, { schema: vaultSchema });
 		await migrate(db, { migrationsFolder: 'migrations/vault' });
-		this.vaults.set(vault.id, { vault, db });
+		this.vaults.set(vault.id, { ...vault, db });
 	}
 
 	public static getVault(vaultId: string) {

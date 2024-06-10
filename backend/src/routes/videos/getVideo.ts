@@ -12,7 +12,7 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	}
 
 	const fileName = params.fileName;
-	const { vault } = VaultController.getVault(vaultId);
+	const vault = VaultController.getVault(vaultId);
 	const videoPath = path.join(vault.path, 'media', 'videos', fileName!);
 	const videoStream = createReadStream(videoPath);
 
