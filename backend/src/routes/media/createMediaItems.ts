@@ -16,13 +16,13 @@ const { pipeline } = require('node:stream');
 const pump = util.promisify(pipeline);
 
 const createMediaItems = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
+	const vault = request.vault;
 
-	if(!vaultInstance) {
+	if(!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const { db, vault } = vaultInstance;
   
+	const { db } = vault;
 	const parts = request.parts();
 	for await (const part of parts) {
 		if (part.type === 'file') {
