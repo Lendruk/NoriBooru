@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Sidebar from '$lib/Sidebar.svelte';
 	import Topbar from '$lib/Topbar.svelte';
 	import { onMount } from 'svelte';
@@ -6,6 +6,8 @@
   import { page } from "$app/stores";
 	import { goto } from '$app/navigation';
 	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
+	import { vaultStore } from '../store';
+  import type { Vault } from '$lib/types/Vault';
   
   onMount(() => {
     document.documentElement.className = "darkTheme";
@@ -14,6 +16,8 @@
 
     if(!curVault) {
       goto("/vaults");
+    } else {
+      vaultStore.set(JSON.parse(curVault) as Vault)
     }
   });
 </script>

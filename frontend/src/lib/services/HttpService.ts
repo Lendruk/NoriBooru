@@ -1,25 +1,19 @@
-import type { Vault } from "$lib/types/Vault";
+import { get } from "svelte/store";
+import { vaultStore } from "../../store";
 
 export class HttpService {
-  private static currentVault: Vault | null = null;
   public static BASE_URL = `http://localhost:8080`;
 
   public static getVaultId(): string | undefined {
-    if (this.currentVault) {
-      return this.currentVault.id;
-    } else {
-      const storageVault = localStorage.getItem("currentVault");
-
-      if (storageVault) {
-        this.currentVault = JSON.parse(storageVault);
-        return this.currentVault?.id;
-      }
+    const curVault = get(vaultStore);
+    if (curVault) {
+      return curVault.id;
     }
   };
 
   public static clearVault(): void {
     localStorage.removeItem('currentVault');
-    this.currentVault = null;
+    vaultStore.set(undefined);
   }
 
   public static async get<T>(url: string): Promise<T> {

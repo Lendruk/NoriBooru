@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
 import { HttpService } from "$lib/services/HttpService";
+	import { vaultStore } from "../../../store";
 
 
 
@@ -30,4 +31,10 @@ import { HttpService } from "$lib/services/HttpService";
   <Button onClick={() => HttpService.post(`/sd/stop`, {})}>
     Stop
   </Button>
+
+  {#if $vaultStore?.hasInstalledSD}
+    Has installed sd
+  {:else}
+    NO sd install
+  {/if}
 </div>
