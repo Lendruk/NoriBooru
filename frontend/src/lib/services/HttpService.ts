@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { vaultStore } from "../../store";
+import type { Vault } from "$lib/types/Vault";
 
 export class HttpService {
   public static BASE_URL = `http://localhost:8080`;
@@ -8,6 +9,13 @@ export class HttpService {
     const curVault = get(vaultStore);
     if (curVault) {
       return curVault.id;
+    } else {
+      const storedVault = localStorage.getItem("currentVault");
+
+      if (storedVault) {
+        vaultStore.set(JSON.parse(storedVault) as Vault);
+        return get(vaultStore)?.id;
+      }
     }
   };
 

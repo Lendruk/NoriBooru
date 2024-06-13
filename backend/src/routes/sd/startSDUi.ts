@@ -10,6 +10,8 @@ const startSDUi= async (request: Request, reply: FastifyReply) => {
 	}
 
 	await sdUiService.startSDUi(vault);
+
+	reply.send();
 };
 
 export default {
