@@ -1,25 +1,32 @@
 import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import { VaultInstance } from '../db/VaultController';
 import { promisify } from 'util';
+import kill from 'tree-kill';
 
 const execAsync = promisify(exec);
 
+type ProcessEntry = {
+	process: ChildProcessWithoutNullStreams;
+	isActive: boolean;
+}
+
 class SDUiService {
-
-	private processMap:  Map<string, ChildProcessWithoutNullStreams> = new Map();
-
+	private processMap:  Map<string, ProcessEntry> = new Map();
+	private inactiveProcessTimers: Map<string, NodeJS.Timeout> = new Map();
+	
 	/**
-   * Current SD ui link
-   * Using the Automatic1111 web ui
-   */
+	 * Current SD ui link
+	 * Using the Automatic1111 web ui
+	*/
 	private static readonly SD_UI_LINK = 'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
-
+	
+	private static readonly PROCESS_INACTIVE_TTL = 10 * 1000; // 10 Minutes
 	public constructor() {
 		process.on('SIGINT', () => {
 			console.log(`Shutdown received killing ${this.processMap.size} child processes`);
-			for(const childProcess of this.processMap.values()) {
+			for(const processEntry of this.processMap.values()) {
 				setTimeout(() => {
-					childProcess.kill();
+					processEntry.process.kill();
 				}, 1000);
 			}
 			process.exit(0);
@@ -37,6 +44,35 @@ class SDUiService {
 		console.log(stdout);
 	}
 
+	public markProcessAsActive(vault: VaultInstance): void {
+		const processEntry = this.processMap.get(vault.id);
+
+		if(processEntry) {
+			if(!processEntry.isActive) {
+				const timer = this.inactiveProcessTimers.get(vault.id);
+				
+				if (timer) {
+					clearTimeout(timer);
+				}
+			}
+			processEntry.isActive = true;
+		}
+	}
+
+	public markProcessAsInactive(vault: VaultInstance): void {
+		const processEntry = this.processMap.get(vault.id);
+
+		if(processEntry && processEntry.isActive) {
+			processEntry.isActive = false;
+
+			const timer = setTimeout(() => {
+				this.stopSDUi(vault);
+			}, SDUiService.PROCESS_INACTIVE_TTL);
+
+			this.inactiveProcessTimers.set(vault.id, timer);
+		}
+	}
+
 	public startSDUi(vault: VaultInstance): void {
 		if(!this.processMap.has(vault.id)) {
 			const newProcess = spawn('bash',[`${vault.path}/stable-diffusion-webui/webui.sh`]);
@@ -48,16 +84,21 @@ class SDUiService {
 			newProcess.stderr.on('data', (data) => {
 				console.log(data.toString());
 			});
-			this.processMap.set(vault.id, newProcess);
+			this.processMap.set(vault.id, { process: newProcess, isActive: true });
+		} else {
+			this.markProcessAsActive(vault);
 		}
 	}
 
 	public stopSDUi(vault: VaultInstance): void {
-		const childProcess = this.processMap.get(vault.id);
+		console.log(`Stopping SD ui for vault ${vault.name}`);
+		const processEntry = this.processMap.get(vault.id);
 
-		if(childProcess) {
-			childProcess.kill();
-			this.processMap.delete(vault.id);
+		if(processEntry) {
+			if(processEntry.process.pid) {
+				kill(processEntry.process.pid);
+				this.processMap.delete(vault.id);
+			}
 		}
 	}
 }			

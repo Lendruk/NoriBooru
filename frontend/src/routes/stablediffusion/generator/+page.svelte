@@ -1,13 +1,21 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
-import { HttpService } from "$lib/services/HttpService";
+  import { HttpService } from "$lib/services/HttpService";
+	import { onMount } from "svelte";
 	import { vaultStore } from "../../../store";
+	import { beforeNavigate } from "$app/navigation";
 
-
-
-  async function installSD() {
-    await HttpService.post(`/sd/install`, {});
+  async function setup() {
+    await HttpService.post(`/sd/start`, {});
   }
+  beforeNavigate(async () => {
+    console.log("inactive");
+    await HttpService.post(`/sd/inactive`, {});
+  });
+
+  onMount(() => {
+    void setup();
+  });
 </script>
 
 <div class="m-2 bg-zinc-900 rounded-md p-4 flex flex-col">
@@ -21,10 +29,6 @@ import { HttpService } from "$lib/services/HttpService";
       <textarea />
     </div>
   </div>
-  <Button onClick={() => installSD() }>
-    Install
-  </Button>
-
   <Button onClick={() => HttpService.post(`/sd/start`, {})}>
     Start
   </Button>
