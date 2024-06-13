@@ -43,7 +43,6 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			} else {
 				await pump(part.file, createWriteStream(finalPath));
 			}
-			console.log('after');
 
 			const [stats, buffer] = await Promise.all([
 				fs.stat(finalPath),
@@ -52,8 +51,6 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			
 			// Exif
 			const exif = await ExifReader.load(buffer) as Exif;
-			
-
 			await db.insert(mediaItems).values({ fileName: id, extension: finalExtension, exif: JSON.stringify(exif), type: fileType, createdAt: Date.now(), fileSize: stats.size / (1024*1024) }).returning();
 
 			// Create thumbnail in case of images

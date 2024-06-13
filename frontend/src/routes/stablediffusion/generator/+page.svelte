@@ -37,6 +37,10 @@
     prompt.withPositivePrompt(positivePrompt)
     const result = await HttpService.post<SDPromptResponse>(`/sd/prompt`, prompt.build());
     generatedImage = result.images[0];
+
+    for(const image of result.images) {
+      await HttpService.post(`/images`, { image });
+    }
   }
 
   beforeNavigate(async () => {

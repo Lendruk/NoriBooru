@@ -6,6 +6,9 @@ import path from 'path';
 import * as fs from 'fs/promises';
 import { eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
+import ExifReader from 'exifreader';
+import { Exif } from '../../types/Exif';
+import sharp from 'sharp';
 
 const createImage = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -21,11 +24,21 @@ const createImage = async (request: Request, reply: FastifyReply) => {
 
 	const id = randomUUID();
 	const imageBuffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-	await fs.writeFile(path.join(vault.path, 'media', 'images', `${id}.png`), imageBuffer);
+	const imagePath = path.join(vault.path, 'media', 'images', `${id}.png`);
+	await fs.writeFile(imagePath, imageBuffer);
+	await sharp(imagePath).jpeg({ quality: 80 }).toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
+
 	// TODO - Use fs.stat instead
 	const fileSize = imageBuffer.byteLength;
-	console.log(id);
-	const mediaItem = await db.insert(mediaItems).values({  fileName: id, extension: 'png', type: 'image', fileSize, createdAt: Date.now() }).returning();
+	const exif = await ExifReader.load(imageBuffer) as Exif;
+	const mediaItem = await db.insert(mediaItems).values({ 
+		fileName: id, 
+		extension: 'png',
+		type: 'image', 
+		fileSize, 
+		createdAt: Date.now(), 
+		exif: JSON.stringify(exif) 
+	}).returning();
 
 	if(tags && tags.length > 0) {
 		await db.insert(tagsToMediaItems).values(tags.map(tag => ({ tagId: tag.id, mediaItemId: mediaItem[0].id }))).returning();
