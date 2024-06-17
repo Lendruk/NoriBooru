@@ -25,7 +25,7 @@
 
   let generatedImage: { fileName: string, id: number } | undefined = undefined;
 
-  let selectedTab:  'GENERAL' | 'HIGHRES' | 'OTHER2' = 'GENERAL';
+  let selectedTab:  'GENERAL' | 'HIGHRES' | 'LORAS' = 'GENERAL';
   let isGeneratingImage = false;
 
   // General settings
@@ -50,7 +50,8 @@
     .withNegativePrompt(negativePrompt)
     .withSampler(selectedSampler)
     .withSteps(steps)
-    .withSize(width, height);
+    .withSize(width, height)
+    .withCheckpoint(currentCheckpoint);
 
     isGeneratingImage = true;
     try {
@@ -113,8 +114,8 @@
         <button on:click={() => selectedTab = "HIGHRES"}  class={`tab-option ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950' : ''}`}>
           High Res
         </button>
-        <button on:click={() => selectedTab = "OTHER2"}  class={`tab-option ${selectedTab === 'OTHER2' ? 'active-tab-option bg-red-950' : ''}`}>
-          Other2
+        <button on:click={() => selectedTab = "LORAS"}  class={`tab-option ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950' : ''}`}>
+          Loras
         </button>
       </div>
       <div class="flex flex-1">
@@ -129,8 +130,8 @@
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
           High res fix
         </div>
-        <div class={selectedTab === 'OTHER2' ? 'visible' : 'hidden'}>
-          Other2
+        <div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
+          Loras
         </div>
       </div>
       <div class="flex flex-1 items-center justify-center bg-surface-color">

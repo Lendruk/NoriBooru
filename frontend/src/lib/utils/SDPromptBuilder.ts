@@ -34,7 +34,8 @@ export class SDPromptBuilder {
       s_noise: 0,
       override_settings: {
         CLIP_stop_at_last_layers: 2,
-        sd_vae: "sdxl_vae.safetensors"
+        sd_vae: "sdxl_vae.safetensors",
+        sd_model_checkpoint: "v1-5-pruned-emaonly",
       },
       override_settings_restore_afterwards: true,
       refiner_checkpoint: null,
@@ -64,6 +65,11 @@ export class SDPromptBuilder {
       alwayson_scripts: {},
       infotext: "",
     }
+  }
+
+  public withCheckpoint(checkpoint: string): this {
+    this.promptRequest.override_settings[`sd_model_checkpoint`] = checkpoint;
+    return this;
   }
 
   public withPositivePrompt(prompt: string): this {

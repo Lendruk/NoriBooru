@@ -11,7 +11,7 @@ const markSDAsInactive= async (request: Request, reply: FastifyReply) => {
 
 	await sdUiService.markProcessAsInactive(vault);
 
-	reply.send();
+	reply.status(200).send({ message: 'Instance marked as inactive' });
 };
 
 export default {

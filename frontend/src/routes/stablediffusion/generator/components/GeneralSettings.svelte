@@ -23,7 +23,7 @@
 
   <div class="flex flex-col flex-1">
     <div>Sampling method</div>
-    <Select bind:value={selectedSampler}>
+    <Select class="h-[40px]" bind:value={selectedSampler}>
       {#each samplers as sampler}
         <option value={sampler.name}>{sampler.name}</option>
       {/each}
