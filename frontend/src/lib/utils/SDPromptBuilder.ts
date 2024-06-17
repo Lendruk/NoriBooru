@@ -71,6 +71,22 @@ export class SDPromptBuilder {
     return this;
   }
 
+  public withSteps(steps: number): this {
+    this.promptRequest.steps = steps;
+    return this;
+  }
+
+  public withSampler(sampler: string): this {
+    this.promptRequest.sampler_name = sampler;
+    return this;
+  }
+
+  public withSize(width: number, height: number): this {
+    this.promptRequest.width = width;
+    this.promptRequest.height = height;
+    return this;
+  }
+  
   public withSeed(seed: number): this {
     this.promptRequest.seed = seed;
     return this;

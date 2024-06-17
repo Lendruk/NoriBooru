@@ -4,7 +4,8 @@ import routes from './routes';
 import multipart from '@fastify/multipart';
 
 const app = Fastify({
-	logger: true
+	logger: true,
+	bodyLimit: 100000000, // ~100mb
 });
 
 app.register(cors);
