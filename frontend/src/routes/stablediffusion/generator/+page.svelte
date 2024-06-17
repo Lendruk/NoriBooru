@@ -13,6 +13,7 @@
 	import Select from "$lib/components/Select.svelte";
   import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import GalleryItem from "../../gallery/GalleryItem.svelte";
+	import PreviewImage from "./components/PreviewImage.svelte";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
@@ -62,12 +63,6 @@
     } finally {
       isGeneratingImage = false;
     }
-  }
-
-  // TODO: this function is duplicated in the gallery page, abstract into common location
-  async function deleteItems(mediaItemIds: number[]) {
-    await HttpService.delete(`/mediaItems/${JSON.stringify(mediaItemIds)}`);
-    generatedImage = undefined;
   }
 
 
@@ -139,11 +134,7 @@
           <img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
         {:else}
           {#if generatedImage}
-            <GalleryItem
-              onConfirmDelete={() => deleteItems([generatedImage!.id])}
-            >
-              <img class="h-full bg-contain" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${generatedImage.fileName}.png`} alt="gallery-img" />
-            </GalleryItem>
+            <PreviewImage imageName={generatedImage.fileName} imageId={generatedImage.id} onDeletion={() => generatedImage = undefined }/>
           {/if}
         {/if}
       </div>
