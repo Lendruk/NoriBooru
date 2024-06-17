@@ -71,6 +71,11 @@ export class SDPromptBuilder {
     return this;
   }
 
+  public withNegativePrompt(prompt: string): this {
+    this.promptRequest.negative_prompt = prompt;
+    return this;
+  }
+
   public withSteps(steps: number): this {
     this.promptRequest.steps = steps;
     return this;
@@ -86,7 +91,7 @@ export class SDPromptBuilder {
     this.promptRequest.height = height;
     return this;
   }
-  
+
   public withSeed(seed: number): this {
     this.promptRequest.seed = seed;
     return this;

@@ -7,18 +7,19 @@
   import GalleryItemButton from "./GalleryItemButton.svelte";
 
   export let href = "";
-  export let className = "";
   export let onConfirmDelete = () => {};
   export let onMoveToArchive = () => {};
   export let onMoveToInbox = () => {};
   export let onTagButtonClick = () => {};
   export let isArchived = false;
   export let style = '';
-
+  
   export let isSelected = false;
   export let onSelectClick = () => {};
   export let isSelectionModeActive = false;
+  export { className as class };
 
+  let className = "";
   let confirmingDelete = false;
   let showOptions = false;
 

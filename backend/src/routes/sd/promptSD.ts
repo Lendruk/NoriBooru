@@ -1,6 +1,14 @@
+
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
+import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
+import { mediaService } from '../../services/MediaService';
+
+type PromptResponse = {
+	fileName: string;
+	id: number;
+}
 
 const promptSD = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -17,10 +25,14 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 			'Content-Type': 'application/json',
 		},
 	});
-	const body = await result.json();
-	console.log(body);
+	const body = await result.json() as SDPromptResponse;
+	const items: PromptResponse[] = [];
+	for(const image of body.images) {
+		const { fileName, id } = await mediaService.createImageFromBase64(image, vault);
+		items.push({ fileName, id });
+	}
 
-	reply.send(body);
+	reply.send({ items });
 };
 
 export default {
