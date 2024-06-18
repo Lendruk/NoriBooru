@@ -34,6 +34,7 @@
   let height = 512;
   let selectedSampler = '';
   let steps = 20;
+  let seed = -1;
 
   async function setup() {
     samplers = await HttpService.get(`/sd/samplers`);
@@ -52,6 +53,7 @@
     .withSampler(selectedSampler)
     .withSteps(steps)
     .withSize(width, height)
+    .withSeed(seed)
     .withCheckpoint(currentCheckpoint);
 
     isGeneratingImage = true;
@@ -120,6 +122,7 @@
           bind:selectedSampler={selectedSampler}
           bind:width={width} 
           bind:height={height} 
+          bind:seed={seed}
           class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
         />
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>

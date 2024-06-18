@@ -31,7 +31,7 @@
 </script>
 
 {#if isFullscreen}
-  <div class="flex items-center justify-center absolute h-full w-full top-0 left-0 z-50 backdrop-blur-sm">
+  <div on:click={() => isFullscreen = false} class="flex items-center justify-center absolute h-full w-full top-0 left-0 z-50 backdrop-blur-sm">
     <img class="bg-contain" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${imageName}.png`} />
   </div>
 {/if}
