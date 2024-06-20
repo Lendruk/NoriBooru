@@ -40,7 +40,7 @@ export class HttpService {
     return response.json() as Promise<T>;
   };
 
-  public static async post<T>(url: string, body: Record<string, unknown> | FormData): Promise<T> {
+  public static async post<T>(url: string, body?: Record<string, unknown> | FormData): Promise<T> {
 
     const headers: Record<string, string> = {
       "vault": this.getVaultId() || "",
@@ -52,7 +52,7 @@ export class HttpService {
     const response = await fetch(`${HttpService.BASE_URL}${url}`, {
       method: "POST",
       headers,
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
     });
 
     if (response.status >= 400) {

@@ -87,9 +87,13 @@
     }
   }
 
+  async function interrupt() {
+    await HttpService.post('/sd/interrupt');
+  }
+
 
   beforeNavigate(async () => {
-    await HttpService.post(`/sd/inactive`, {});
+    await HttpService.post(`/sd/inactive`);
   });
 
   onMount(() => {
@@ -108,9 +112,15 @@
           <option value={checkpoint.model_name}>{checkpoint.model_name}</option>
         {/each}
       </Select>
-      <Button onClick={() => generate()} class="h-[40px]">
-        Generate
-      </Button>
+      {#if isGeneratingImage}
+        <Button onClick={() => interrupt()} class="h-[40px]">
+          Interrupt
+        </Button>
+      {:else}
+        <Button onClick={() => generate()} class="h-[40px]">
+          Generate
+        </Button>
+      {/if}
     </div>
   </div>
   <div class="flex flex-col flex-1">
