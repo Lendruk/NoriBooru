@@ -1,5 +1,12 @@
 import type { SDPromptRequest } from "$lib/types/SD/SDPromptRequest";
 
+type HighResOptions = {
+  upscaler: string;
+  steps: number;
+  denoisingStrength: number;
+  upscaleBy: number;
+}
+
 export class SDPromptBuilder {
   private promptRequest: SDPromptRequest;
   
@@ -100,6 +107,15 @@ export class SDPromptBuilder {
 
   public withSeed(seed: number): this {
     this.promptRequest.seed = seed;
+    return this;
+  }
+
+  public withHighResOptions(options: HighResOptions ): this {
+    this.promptRequest.hr_upscaler = options.upscaler;
+    this.promptRequest.hr_scale = options.upscaleBy;
+    this.promptRequest.hr_second_pass_steps = options.steps;
+    
+    this.promptRequest.enable_hr = true;
     return this;
   }
 

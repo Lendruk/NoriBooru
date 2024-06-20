@@ -12,12 +12,14 @@
 	import GeneralSettings from "./components/GeneralSettings.svelte";
 	import Select from "$lib/components/Select.svelte";
   import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import GalleryItem from "../../gallery/GalleryItem.svelte";
 	import PreviewImage from "./components/PreviewImage.svelte";
+	import HighResSettings from "./components/HighResSettings.svelte";
+	import type { SDUpscaler } from "$lib/types/SD/SDUpscaler";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
   let schedulers: SDScheduler[] = [];
+  let upscalers: SDUpscaler[] = [];
 
   let currentCheckpoint: string;
 
@@ -36,13 +38,22 @@
   let steps = 20;
   let seed = -1;
 
+  // High res
+  let isHighResEnabled = false;
+  let upscaleBy = 2;
+  let highResUpscaler = "";
+  let highResSteps = 0;
+  let highResDenoisingStrength = 0.7;
+
   async function setup() {
     samplers = await HttpService.get(`/sd/samplers`);
     checkpoints = await HttpService.get(`/sd/checkpoints`);
     schedulers = await HttpService.get(`/sd/schedulers`);
+    upscalers = await HttpService.get(`/sd/highres/upscalers`);
 
     currentCheckpoint = checkpoints[0].model_name;
     selectedSampler = samplers[0].name;
+    highResUpscaler = upscalers[0].name;
     // await HttpService.post(`/sd/start`, {});
   }
 
@@ -55,6 +66,15 @@
     .withSize(width, height)
     .withSeed(seed)
     .withCheckpoint(currentCheckpoint);
+
+    if (isHighResEnabled) {
+      prompt.withHighResOptions({
+        denoisingStrength: highResDenoisingStrength,
+        steps: highResSteps,
+        upscaleBy,
+        upscaler: highResUpscaler
+      })
+    }
 
     isGeneratingImage = true;
     try {
@@ -108,8 +128,8 @@
         <button on:click={() => selectedTab = "GENERAL"} class={`tab-option ${selectedTab === 'GENERAL' ? 'active-tab-option bg-red-950' : ''}`}>
           General
         </button>
-        <button on:click={() => selectedTab = "HIGHRES"}  class={`tab-option ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950' : ''}`}>
-          High Res
+        <button on:click={() => selectedTab = "HIGHRES"}  class={`tab-option flex gap-2 ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950' : ''}`}>
+          <input on:click={(e) => e.stopPropagation() } bind:checked={isHighResEnabled} type="checkbox" /> <span>High Res</span>
         </button>
         <button on:click={() => selectedTab = "LORAS"}  class={`tab-option ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950' : ''}`}>
           Loras
@@ -126,7 +146,13 @@
           class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
         />
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
-          High res fix
+          <HighResSettings 
+            bind:upscaler={highResUpscaler}
+            bind:steps={highResSteps}
+            bind:denoisingStrength={highResDenoisingStrength}
+            bind:upscaleBy={upscaleBy}
+            bind:upscalers={upscalers}
+          />
         </div>
         <div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
           Loras

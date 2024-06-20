@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
-import Select from "$lib/components/Select.svelte";
+  import Select from "$lib/components/Select.svelte";
 	import type { SDSampler } from "$lib/types/SD/SDSampler";
 
   export { cssClass as class };
