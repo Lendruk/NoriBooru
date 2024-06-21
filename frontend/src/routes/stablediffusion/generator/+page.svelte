@@ -18,6 +18,8 @@
 	import SaveIcon from "$lib/icons/SaveIcon.svelte";
 	import Tooltip from "$lib/Tooltip.svelte";
   import SearchIcon from "$lib/icons/SearchIcon.svelte";
+  import ChevronDown from "$lib/icons/ChevronDown.svelte";
+  import ChevronUp from "$lib/icons/ChevronUp.svelte";
 	import PromptSearch from "./components/PromptSearch.svelte";
 	import PromptSaveModal from "./components/PromptSaveModal.svelte";
 	import type { SavedPrompt } from "$lib/types/SavedPrompt";
@@ -35,6 +37,7 @@
   let isGeneratingImage = false;
   let isSearchingPrompts = false;
   let isSavingPrompt = false;
+  let areSaveOptionsExpanded = false;
   
   // General settings
   let promptId: string = '';
@@ -192,27 +195,50 @@
       </Tooltip>
     </div>
     <div class="flex gap-2">
-      <Tooltip>
-        <Button onClick={() => {
-          if (promptId) {
-            updatePrompt();
-          } else {
-            isSavingPrompt = true
-          }
-        }} slot="target" class="flex gap-2">
-          <div>
-            {#if promptId}
-              Update
-            {:else}
-              Save
-            {/if}
-          </div>
-          <SaveIcon />
+      <div class="flex relative">
+        <Tooltip>
+          <Button onClick={() => {
+            if (promptId) {
+              updatePrompt();
+            } else {
+              isSavingPrompt = true
+            }
+          }} slot="target" class="flex gap-2 rounded-tr-none rounded-br-none">
+            <div>
+              {#if promptId}
+                Update
+              {:else}
+                Save
+              {/if}
+            </div>
+            <SaveIcon />
+          </Button>
+          <div slot="toolTipContent">
+            Save current prompt & Settings
+          </div>  
+        </Tooltip>
+        <Button 
+          onClick={() => {
+            if (promptId) {
+              areSaveOptionsExpanded = !areSaveOptionsExpanded
+            }
+          }}
+          class={`${!promptId && 'cursor-not-allowed fill-zinc-900'} rounded-tl-none rounded-bl-none border-l-2 border-zinc-800`}
+        >
+          {#if areSaveOptionsExpanded}
+            <ChevronUp />
+          {:else}
+            <ChevronDown />
+          {/if}
         </Button>
-        <div slot="toolTipContent">
-          Save current prompt & Settings
-        </div>  
-      </Tooltip>
+        {#if areSaveOptionsExpanded}
+          <div class="absolute top-[40px] w-full">
+            <Button onClick={() => {savePrompt(`${promptName} - Clone`); areSaveOptionsExpanded = false; }} class="h-[40px] w-full">
+              Save as new
+            </Button>
+          </div>
+        {/if}
+      </div>
       <Select bind:value={checkpoint}>
         {#each checkpoints as checkpoint}
           <option value={checkpoint.model_name}>{checkpoint.model_name}</option>
