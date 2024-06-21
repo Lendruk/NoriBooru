@@ -13,6 +13,7 @@
   export let samplers: SDSampler[];
   export let selectedSampler: string;
   export let samplingSteps: number;
+  export let cfgScale: number;
 
   let sizePresets: [number, number][] = [
     [512, 512],
@@ -77,6 +78,12 @@
           </div>
         </div>
       </div>
+    </div>
+    <div>
+      <div>
+        Cfg Scale
+      </div>
+      <input bind:value={cfgScale} type="number" />
     </div>
   </div>
 </div>

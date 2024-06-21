@@ -110,6 +110,11 @@ export class SDPromptBuilder {
     return this;
   }
 
+  public withCfgScale(cfgScale: number): this {
+    this.promptRequest.cfg_scale = cfgScale;
+    return this;
+  }
+
   public withHighResOptions(options: HighResOptions ): this {
     this.promptRequest.hr_upscaler = options.upscaler;
     this.promptRequest.hr_scale = options.upscaleBy;

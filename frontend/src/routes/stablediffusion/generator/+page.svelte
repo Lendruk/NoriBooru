@@ -37,6 +37,7 @@
   let selectedSampler = '';
   let steps = 20;
   let seed = -1;
+  let cfgScale = 7;
 
   // High res
   let isHighResEnabled = false;
@@ -65,7 +66,8 @@
     .withSteps(steps)
     .withSize(width, height)
     .withSeed(seed)
-    .withCheckpoint(currentCheckpoint);
+    .withCheckpoint(currentCheckpoint)
+    .withCfgScale(cfgScale);
 
     if (isHighResEnabled) {
       prompt.withHighResOptions({
@@ -153,6 +155,7 @@
           bind:width={width} 
           bind:height={height} 
           bind:seed={seed}
+          bind:cfgScale={cfgScale}
           class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
         />
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
