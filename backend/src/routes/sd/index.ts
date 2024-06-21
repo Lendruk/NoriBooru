@@ -8,5 +8,18 @@ import markSDAsInactive from './markSDAsInactive';
 import promptSD from './promptSD';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
+import promptCruds from './prompts';
 
-export default [installSDUi, startSDUi, stopSDUi, markSDAsInactive, getCheckpoints, getSamplers, getSchedulers, promptSD, getHighResUpscalers, interruptGeneration];
+export default [
+	installSDUi, 
+	startSDUi, 
+	stopSDUi, 
+	markSDAsInactive, 
+	getCheckpoints, 
+	getSamplers, 
+	getSchedulers, 
+	promptSD, 
+	getHighResUpscalers, 
+	interruptGeneration,
+	...promptCruds
+];

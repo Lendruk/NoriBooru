@@ -11,8 +11,6 @@
 
 	function onMouseEnter() {
 		visible = true;
-		console.log(toolTipDiv.offsetWidth);
-		console.log(toolTipDiv.offsetHeight);
 		x = contentDiv.offsetLeft - toolTipDiv.clientWidth;
 		y = contentDiv.offsetTop + 15;
 	}

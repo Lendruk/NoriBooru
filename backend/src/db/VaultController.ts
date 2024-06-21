@@ -18,7 +18,7 @@ export class VaultController {
 		await migrate(db, { migrationsFolder: 'migrations/vault' });
 		this.vaults.set(vault.id, { ...vault, db });
 	}
-
+  
 	public static getVault(vaultId: string) {
 		const vault = this.vaults.get(vaultId);
 		if (!vault) {

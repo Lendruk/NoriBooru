@@ -15,26 +15,36 @@
 	import PreviewImage from "./components/PreviewImage.svelte";
 	import HighResSettings from "./components/HighResSettings.svelte";
 	import type { SDUpscaler } from "$lib/types/SD/SDUpscaler";
+	import SaveIcon from "$lib/icons/SaveIcon.svelte";
+	import Tooltip from "$lib/Tooltip.svelte";
+  import SearchIcon from "$lib/icons/SearchIcon.svelte";
+	import PromptSearch from "./components/PromptSearch.svelte";
+	import PromptSaveModal from "./components/PromptSaveModal.svelte";
+	import type { SavedPrompt } from "$lib/types/SavedPrompt";
+	import { createToast } from "$lib/components/toast/ToastContainer.svelte";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
   let schedulers: SDScheduler[] = [];
   let upscalers: SDUpscaler[] = [];
 
-  let currentCheckpoint: string;
-
-  let positivePrompt: string = '';
-  let negativePrompt: string = '';
-
+  
   let generatedImage: { fileName: string, id: number } | undefined = undefined;
-
+  
   let selectedTab:  'GENERAL' | 'HIGHRES' | 'LORAS' = 'GENERAL';
   let isGeneratingImage = false;
-
+  let isSearchingPrompts = false;
+  let isSavingPrompt = false;
+  
   // General settings
+  let promptId: string = '';
+  let promptName: string = '';
+  let positivePrompt: string = '';
+  let negativePrompt: string = '';
+  let checkpoint: string;
   let width = 512;
   let height = 512;
-  let selectedSampler = '';
+  let sampler = '';
   let steps = 20;
   let seed = -1;
   let cfgScale = 7;
@@ -52,8 +62,8 @@
     schedulers = await HttpService.get(`/sd/schedulers`);
     upscalers = await HttpService.get(`/sd/highres/upscalers`);
 
-    currentCheckpoint = checkpoints[0].model_name;
-    selectedSampler = samplers[0].name;
+    checkpoint = checkpoints[0].model_name;
+    sampler = samplers[0].name;
     highResUpscaler = upscalers[0].name;
     // await HttpService.post(`/sd/start`, {});
   }
@@ -62,11 +72,11 @@
     const prompt = new SDPromptBuilder();
     prompt.withPositivePrompt(positivePrompt)
     .withNegativePrompt(negativePrompt)
-    .withSampler(selectedSampler)
+    .withSampler(sampler)
     .withSteps(steps)
     .withSize(width, height)
     .withSeed(seed)
-    .withCheckpoint(currentCheckpoint)
+    .withCheckpoint(checkpoint)
     .withCfgScale(cfgScale);
 
     if (isHighResEnabled) {
@@ -93,6 +103,69 @@
     await HttpService.post('/sd/interrupt');
   }
 
+  async function savePrompt(name: string) {
+    const newPrompt = await HttpService.post<SavedPrompt>('/sd/prompts', {
+      name,
+      cfgScale,
+      checkpoint,
+      positivePrompt,
+      negativePrompt,
+      width,
+      height,
+      sampler,
+      steps,
+      highRes: isHighResEnabled ? { 
+        denoisingStrength: highResDenoisingStrength,
+        steps: highResSteps,
+        upscaleBy,
+        upscaler: highResUpscaler
+      } : undefined,
+    });
+    promptId = newPrompt.id!;
+    createToast('Prompt saved successfully!');
+  }
+
+  async function updatePrompt() {
+    await HttpService.put(`/sd/prompts/${promptId}`, {
+      name: promptName,
+      cfgScale,
+      checkpoint,
+      positivePrompt,
+      negativePrompt,
+      width,
+      height,
+      sampler,
+      steps,
+      highRes: isHighResEnabled ? { 
+        denoisingStrength: highResDenoisingStrength,
+        steps: highResSteps,
+        upscaleBy,
+        upscaler: highResUpscaler
+      } : undefined,
+    });
+    createToast('Prompt updated successfully!');
+  }
+
+  function loadPrompt(prompt: SavedPrompt) {
+    width = prompt.width;
+    height = prompt.height;
+    cfgScale = prompt.cfgScale;
+    sampler = prompt.sampler;
+    checkpoint = prompt.checkpoint;
+    promptName = prompt.name;
+    positivePrompt = prompt.positivePrompt;
+    negativePrompt = prompt.negativePrompt;
+    steps = prompt.steps;
+    isHighResEnabled = !!prompt.highRes;
+    promptId = prompt.id ?? '';
+
+    if (prompt.highRes) {
+      highResDenoisingStrength = prompt.highRes.denoisingStrength;
+      highResSteps = prompt.highRes.steps;
+      upscaleBy = prompt.highRes.upscaleBy;
+      highResUpscaler = prompt.highRes.upscaler;
+    }
+  }
 
   beforeNavigate(async () => {
     await HttpService.post(`/sd/inactive`);
@@ -105,11 +178,42 @@
 
 <div class="m-2 bg-zinc-900 rounded-md p-4 flex flex-1 flex-col">
   <div class="flex justify-between">
-    <div>
-      Prompt Mode
+    <div class="flex gap-2 items-center">
+      <div>
+        Prompt
+      </div>
+      <Tooltip>
+        <Button onClick={() => isSearchingPrompts = true } slot="target" class="h-full">
+          <SearchIcon />
+        </Button>
+        <div slot="toolTipContent">
+          Search saved prompts
+        </div>
+      </Tooltip>
     </div>
-    <div class="flex">
-      <Select bind:value={currentCheckpoint}>
+    <div class="flex gap-2">
+      <Tooltip>
+        <Button onClick={() => {
+          if (promptId) {
+            updatePrompt();
+          } else {
+            isSavingPrompt = true
+          }
+        }} slot="target" class="flex gap-2">
+          <div>
+            {#if promptId}
+              Update
+            {:else}
+              Save
+            {/if}
+          </div>
+          <SaveIcon />
+        </Button>
+        <div slot="toolTipContent">
+          Save current prompt & Settings
+        </div>  
+      </Tooltip>
+      <Select bind:value={checkpoint}>
         {#each checkpoints as checkpoint}
           <option value={checkpoint.model_name}>{checkpoint.model_name}</option>
         {/each}
@@ -151,7 +255,7 @@
         <GeneralSettings 
           bind:samplingSteps={steps}
           bind:samplers={samplers}
-          bind:selectedSampler={selectedSampler}
+          bind:selectedSampler={sampler}
           bind:width={width} 
           bind:height={height} 
           bind:seed={seed}
@@ -182,13 +286,19 @@
       </div>
     </div>
   </div>
-
   {#if $vaultStore?.hasInstalledSD}
-    Has installed sd
+  Has installed sd
   {:else}
-    NO sd install
+  NO sd install
   {/if}
 </div>
+{#if isSearchingPrompts}
+  <PromptSearch bind:isOpen={isSearchingPrompts} onSelectPrompt={loadPrompt} />
+{/if}
+{#if isSavingPrompt}
+  <PromptSaveModal onSubmit={savePrompt} bind:isOpen={isSavingPrompt} />
+{/if}
+
 <style>
   .tab-option {
     height: 40px;

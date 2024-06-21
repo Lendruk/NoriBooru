@@ -71,3 +71,23 @@ export const playlists_mediaItems_table = sqliteTable('playlists_media_items', {
 }, (t) => ({ pk: primaryKey({ columns: [t.playlistId, t.mediaItemId]})}));
 
 export type MediaItem = InferSelectModel<typeof mediaItems> & { tags?: TagTableSchema[] };
+
+export const sdPrompts = sqliteTable('sd_prompts', {
+	id: text('id').primaryKey(),
+	name: text('name'),
+	previewImage: text('preview_image'),
+	positivePrompt: text('positive_prompt').notNull(),
+	negativePrompt: text('negative_prompt').notNull(),
+	sampler: text('sampler').notNull(),
+	steps: integer('steps').notNull(),
+	width: integer('width').notNull(),
+	height: integer('height').notNull(),
+	checkpoint: text('checkpoint').notNull(),
+	cfgScale: integer('cfg_scale').notNull(),
+	isHighResEnabled: integer('is_high_res_enabled').notNull(),
+	highResUpscaler: text('high_res_upscaler'),
+	highResSteps: integer('high_res_steps'),
+	highResDenoisingStrength: integer('high_res_denoising_strength'),
+	highResUpscaleBy: integer('high_res_upscale_by'),
+	createdAt: integer('created_at').notNull()
+});
