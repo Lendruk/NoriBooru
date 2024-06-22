@@ -50,20 +50,20 @@
 </script>
 
 <div class="absolute flex items-center justify-center h-full w-full top-0 left-0 z-50 backdrop-blur-sm">
-  <div class="bg-zinc-900 min-h-[80%] min-w-[80%]">
-    <div>
+  <div class="bg-zinc-900 min-h-[80%] min-w-[80%] p-2">
+    <div class="text-4xl">
       Search saved prompts
     </div>
     <div class="flex">
-      <div>
+      <div class="flex-[0.2]">
         {#each prompts as prompt}
           <div class="flex">
-            <Button class="rounded-none" onClick={() => currentOpenPrompt = prompt }>{prompt.name ?? 'unnamed'}</Button>
-            <Button class="rounded-none" onClick={() => deleteSavedPrompt(prompt.id!)}><TrashIcon /></Button>
+            <Button class="rounded-none h-[40px]" onClick={() => currentOpenPrompt = prompt }>{prompt.name ?? 'unnamed'}</Button>
+            <Button class="rounded-none h-[40px]" onClick={() => deleteSavedPrompt(prompt.id!)}><TrashIcon /></Button>
           </div>
         {/each}
       </div>
-      <div>
+      <div class="flex flex-1 flex-col">
         {#if currentOpenPrompt}
           <div>
             <div>
@@ -71,7 +71,13 @@
                 Positive Prompt
               </div>
               <div>
-                {currentOpenPrompt.positivePrompt}
+                {currentOpenPrompt.positivePrompt || 'No positive prompt'}
+              </div>
+              <div>
+                Negative Prompt
+              </div>
+              <div>
+                {currentOpenPrompt.negativePrompt || 'No negative prompt'}
               </div>
             </div>
             <Button onClick={() => { onSelectPrompt(currentOpenPrompt!); isOpen = false; }}>Select</Button>
