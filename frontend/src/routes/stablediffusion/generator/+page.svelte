@@ -170,6 +170,31 @@
     }
   }
 
+  function clearPrompt() {
+    promptId = '';
+    promptName = '';
+    positivePrompt = '';
+    negativePrompt = '';
+    checkpoint;
+    width = 512;
+    height = 512;
+    sampler = '';
+    steps = 20;
+    seed = -1;
+    cfgScale =   7;
+    isHighResEnabled = false;
+    upscaleBy = 2;
+    highResUpscaler = "";
+    highResSteps = 0;
+    highResDenoisingStrength = 0.7;
+  }
+
+  function onDeletePrompt(prompt: SavedPrompt) {
+    if (prompt.id === promptId) {
+      clearPrompt();
+    }
+  }
+
   beforeNavigate(async () => {
     await HttpService.post(`/sd/inactive`);
   });
@@ -233,7 +258,7 @@
         </Button>
         {#if areSaveOptionsExpanded}
           <div class="absolute top-[40px] w-full">
-            <Button onClick={() => {savePrompt(`${promptName} - Clone`); areSaveOptionsExpanded = false; }} class="h-[40px] w-full">
+            <Button onClick={() => {isSavingPrompt = true; areSaveOptionsExpanded = false; }} class="h-[40px] w-full">
               Save as new
             </Button>
           </div>
@@ -319,10 +344,10 @@
   {/if}
 </div>
 {#if isSearchingPrompts}
-  <PromptSearch bind:isOpen={isSearchingPrompts} onSelectPrompt={loadPrompt} />
+  <PromptSearch bind:isOpen={isSearchingPrompts} onSelectPrompt={loadPrompt} onDeletePrompt={onDeletePrompt} />
 {/if}
 {#if isSavingPrompt}
-  <PromptSaveModal onSubmit={savePrompt} bind:isOpen={isSavingPrompt} />
+  <PromptSaveModal onSubmit={savePrompt} bind:isOpen={isSavingPrompt} bind:promptName={promptName} />
 {/if}
 
 <style>

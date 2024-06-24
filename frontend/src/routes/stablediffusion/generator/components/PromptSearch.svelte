@@ -8,6 +8,7 @@
 
   export let isOpen: boolean;
   export let onSelectPrompt: (prompt: SavedPrompt) => void | Promise<void>;
+  export let onDeletePrompt: (prompt: SavedPrompt) => void | Promise<void>;
 
   let prompts: SavedPrompt[] = [];
   let currentOpenPrompt: SavedPrompt | undefined;
@@ -38,10 +39,11 @@
     if (id === currentOpenPrompt?.id) {
       currentOpenPrompt = undefined;
     }
-
+    
     const index = prompts.findIndex(prompt => prompt.id === id);
     if (index !== -1 ) {
-      prompts.splice(index, 1);
+      const prompt = prompts.splice(index, 1);
+      onDeletePrompt(prompt[0]);
       prompts = prompts;
     }
     createToast('Prompt deleted successfully!');
