@@ -8,6 +8,7 @@ import { mediaService } from '../../services/MediaService';
 type PromptResponse = {
 	fileName: string;
 	id: number;
+	exif: string;
 }
 
 const promptSD = async (request: Request, reply: FastifyReply) => {
@@ -28,8 +29,8 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const body = await result.json() as SDPromptResponse;
 	const items: PromptResponse[] = [];
 	for(const image of body.images) {
-		const { fileName, id } = await mediaService.createImageFromBase64(image, vault);
-		items.push({ fileName, id });
+		const { fileName, id, exif } = await mediaService.createImageFromBase64(image, vault);
+		items.push({ fileName, id, exif });
 	}
 
 	reply.send({ items });

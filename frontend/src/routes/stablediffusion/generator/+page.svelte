@@ -24,11 +24,14 @@
 	import PromptSaveModal from "./components/PromptSaveModal.svelte";
 	import type { SavedPrompt } from "$lib/types/SavedPrompt";
 	import { createToast } from "$lib/components/toast/ToastContainer.svelte";
+	import LoraSelector from "./components/LoraSelector.svelte";
+	import type { SDLora } from "$lib/types/SD/SDLora";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
   let schedulers: SDScheduler[] = [];
   let upscalers: SDUpscaler[] = [];
+  let loras: SDLora[] = [];
 
   
   let generatedImage: { fileName: string, id: number } | undefined = undefined;
@@ -59,11 +62,22 @@
   let highResSteps = 0;
   let highResDenoisingStrength = 0.7;
 
+  let lastGenExif: Record<string, any> | undefined;
+
   async function setup() {
-    samplers = await HttpService.get(`/sd/samplers`);
-    checkpoints = await HttpService.get(`/sd/checkpoints`);
-    schedulers = await HttpService.get(`/sd/schedulers`);
-    upscalers = await HttpService.get(`/sd/highres/upscalers`);
+    const [fetchedSamplers, fetchedCheckpoints, fetchedSchedulers, fetchedUpscalers, fetchedLoras] = await Promise.all([
+      HttpService.get<SDSampler[]>(`/sd/samplers`),
+      HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
+      HttpService.get<SDScheduler[]>(`/sd/schedulers`),
+      HttpService.get<SDUpscaler[]>(`/sd/highres/upscalers`),
+      HttpService.get<SDLora[]>(`/sd/loras`)
+    ]);
+
+    samplers = fetchedSamplers;
+    checkpoints = fetchedCheckpoints;
+    schedulers = fetchedSchedulers;
+    upscalers = fetchedUpscalers;
+    loras = fetchedLoras;
 
     checkpoint = checkpoints[0].model_name;
     sampler = samplers[0].name;
@@ -93,8 +107,9 @@
 
     isGeneratingImage = true;
     try {
-      const result = await HttpService.post<{ items: { fileName: string, id: number }[] }>(`/sd/prompt`, prompt.build());
+      const result = await HttpService.post<{ items: { fileName: string, id: number, exif: string }[] }>(`/sd/prompt`, prompt.build());
       generatedImage = result.items[0];
+      lastGenExif = JSON.parse(result.items[0].exif);
     } catch {
       // TODO
     } finally {
@@ -195,6 +210,21 @@
     }
   }
 
+  function setSeedFromLastGen() {
+    if(!lastGenExif) return;
+    const value = lastGenExif.parameters.value;
+    // Bad performance
+    for(const entry of value.split(',')) {
+      if (entry.includes('Seed:')) {
+        seed = Number.parseInt(entry.split(' ')[2]);
+      }
+    }
+  }
+
+  function onLoraClick(lora: SDLora) {
+    positivePrompt += `, <lora:${lora.name}:1>`
+  }
+
   beforeNavigate(async () => {
     await HttpService.post(`/sd/inactive`);
   });
@@ -231,9 +261,9 @@
           }} slot="target" class="flex gap-2 rounded-tr-none rounded-br-none">
             <div>
               {#if promptId}
-                Update
+                Update Prompt
               {:else}
-                Save
+                Save Prompt
               {/if}
             </div>
             <SaveIcon />
@@ -323,7 +353,10 @@
           />
         </div>
         <div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
-          Loras
+          <LoraSelector
+            bind:loras={loras}
+            onLoraClick={onLoraClick}
+          />
         </div>
       </div>
       <div class="flex flex-1 items-center justify-center bg-surface-color">
@@ -331,7 +364,12 @@
           <img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
         {:else}
           {#if generatedImage}
-            <PreviewImage imageName={generatedImage.fileName} imageId={generatedImage.id} onDeletion={() => generatedImage = undefined }/>
+            <PreviewImage 
+              imageName={generatedImage.fileName} 
+              imageId={generatedImage.id} 
+              onDeletion={() => generatedImage = undefined }
+              onSetSeed={setSeedFromLastGen}
+            />
           {/if}
         {/if}
       </div>
@@ -353,3 +391,7 @@
     padding-left: 4px;
   }
 </style>
+
+<svelte:head>
+	<title>NoriBooru - SD Generator</title>
+</svelte:head>

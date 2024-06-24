@@ -1,11 +1,14 @@
 <script lang="ts">
+	import Tooltip from "$lib/Tooltip.svelte";
 	import ArchiveIcon from "$lib/icons/ArchiveIcon.svelte";
+	import SeedIcon from "$lib/icons/SeedIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
   import { HttpService } from "$lib/services/HttpService";
 	import GalleryItemButton from "../../../gallery/GalleryItemButton.svelte";
   export let imageName: string;
   export let imageId: number;
   export let onDeletion: () => void;
+  export let onSetSeed: () => void;
 
   let isFullscreen = false;
 
@@ -38,6 +41,16 @@
 <div class="flex flex-1 items-center justify-center relative">
   <img on:click={() => onImageClick()} class="bg-contain h-[50%] w-[50%] cursor-pointer z-10" src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${imageName}.png`} alt="gallery-img" />
   <div class="absolute flex w-full h-full">
+    <div class="flex justify-end self-end p-4">
+      <GalleryItemButton onClick={onSetSeed}>
+        <Tooltip>
+          <div slot="toolTipContent">Use seed</div>
+          <span slot="target">
+            <SeedIcon />
+          </span>
+        </Tooltip>
+      </GalleryItemButton>
+    </div>
     <div class="flex justify-end items-end flex-1 self-end p-4 gap-2 flex-col">
       <GalleryItemButton onClick={moveItemToArchive}>
         <ArchiveIcon />

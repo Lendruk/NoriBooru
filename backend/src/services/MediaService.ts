@@ -8,7 +8,7 @@ import { mediaItems } from '../db/vault/schema';
 import * as fs from 'fs/promises';
 
 class MediaService {  
-	public async createImageFromBase64(base64EncodedImage: string, vault: VaultInstance): Promise<{ id: number, fileName: string }> {
+	public async createImageFromBase64(base64EncodedImage: string, vault: VaultInstance): Promise<{ id: number, fileName: string, exif: string }> {
 		const { db } = vault;
 		const id = randomUUID();
 		const imageBuffer = Buffer.from(base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''), 'base64');
@@ -27,7 +27,7 @@ class MediaService {
 			exif: JSON.stringify(exif) 
 		}).returning();
 
-		return { id: mediaItem[0].id, fileName: mediaItem[0].fileName };
+		return { id: mediaItem[0].id, fileName: mediaItem[0].fileName, exif: mediaItem[0].exif! };
 	}
 }
 

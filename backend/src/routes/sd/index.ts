@@ -9,6 +9,7 @@ import promptSD from './promptSD';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
 import promptCruds from './prompts';
+import loraRoutes from './loras';
 
 export default [
 	installSDUi, 
@@ -21,5 +22,6 @@ export default [
 	promptSD, 
 	getHighResUpscalers, 
 	interruptGeneration,
-	...promptCruds
+	...promptCruds,
+	...loraRoutes
 ];

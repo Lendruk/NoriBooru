@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from "$lib/Button.svelte";
   import Select from "$lib/components/Select.svelte";
+	import DiceEmoji from "$lib/icons/DiceEmoji.svelte";
 	import type { SDSampler } from "$lib/types/SD/SDSampler";
 
   export { cssClass as class };
@@ -47,7 +48,9 @@
     <div>
       Seed
     </div>
-    <input bind:value={seed} type="number" />
+    <div class="flex gap-2">
+      <input class="w-full" bind:value={seed} type="number" /><Button onClick={() => seed = -1 }><DiceEmoji /></Button>
+    </div>
     <div class="flex flex-col flex-1">
       <div>Size</div>
       <div class="flex flex-1 gap-4">
