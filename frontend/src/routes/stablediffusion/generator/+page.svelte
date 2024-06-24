@@ -337,11 +337,6 @@
       </div>
     </div>
   </div>
-  {#if $vaultStore?.hasInstalledSD}
-  Has installed sd
-  {:else}
-  NO sd install
-  {/if}
 </div>
 {#if isSearchingPrompts}
   <PromptSearch bind:isOpen={isSearchingPrompts} onSelectPrompt={loadPrompt} onDeletePrompt={onDeletePrompt} />

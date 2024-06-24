@@ -144,7 +144,7 @@
 					href={route.navHref}>
 					{#if isSidebarOpen}
 						<div class="flex flex-col">
-							<div class="flex gap-4"> 
+							<div class="flex gap-4 items-center"> 
 								{#if route.icon} 
 									<svelte:component this={route.icon} width={16} class="fill-white" height={16} color="#FFFFFF"/> 	
 								{/if}
