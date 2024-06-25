@@ -2,7 +2,9 @@
 	import Button from "$lib/Button.svelte";
   import Select from "$lib/components/Select.svelte";
 	import DiceEmoji from "$lib/icons/DiceEmoji.svelte";
+	import type { SDCheckpoint } from "$lib/types/SD/SDCheckpoint";
 	import type { SDSampler } from "$lib/types/SD/SDSampler";
+	import LabeledComponent from "../../../components/LabeledComponent.svelte";
 
   export { cssClass as class };
   let cssClass = '';
@@ -12,7 +14,9 @@
   export let seed: number;
 
   export let samplers: SDSampler[];
+  export let checkpoints: SDCheckpoint[];
   export let selectedSampler: string;
+  export let selectedCheckpoint: string;
   export let samplingSteps: number;
   export let cfgScale: number;
 
@@ -32,15 +36,31 @@
 </script>
 
 <div class={cssClass}>
-  General settings
+  <div class="text-xl">General settings</div>
 
   <div class="flex flex-col flex-1">
-    <div>Sampling method</div>
-    <Select class="h-[40px]" bind:value={selectedSampler}>
-      {#each samplers as sampler}
-        <option value={sampler.name}>{sampler.name}</option>
-      {/each}
-    </Select>
+    <div class="flex flex-1 gap-2">
+      <LabeledComponent class="flex-1">
+        <div slot="label">Checkpoint</div>
+        <div class="w-full" slot="content">
+          <Select class="h-[40px] w-full" bind:value={selectedCheckpoint}>
+            {#each checkpoints as checkpoint}
+              <option value={checkpoint.model_name}>{checkpoint.model_name}</option>
+            {/each}
+          </Select>
+        </div>
+      </LabeledComponent>
+      <LabeledComponent class="flex-1">
+        <div slot="label">Sampling method</div>
+        <div class="w-full" slot="content">
+          <Select class="h-[40px] w-full" bind:value={selectedSampler}>
+            {#each samplers as sampler}
+              <option value={sampler.name}>{sampler.name}</option>
+            {/each}
+          </Select>
+        </div>
+      </LabeledComponent>
+    </div>
     <div>
       Steps
     </div>

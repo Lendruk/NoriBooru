@@ -294,11 +294,6 @@
           </div>
         {/if}
       </div>
-      <Select bind:value={checkpoint}>
-        {#each checkpoints as checkpoint}
-          <option value={checkpoint.model_name}>{checkpoint.model_name}</option>
-        {/each}
-      </Select>
       {#if isGeneratingImage}
         <Button onClick={() => interrupt()} class="h-[40px]">
           Interrupt
@@ -336,7 +331,9 @@
         <GeneralSettings 
           bind:samplingSteps={steps}
           bind:samplers={samplers}
+          bind:checkpoints={checkpoints}
           bind:selectedSampler={sampler}
+          bind:selectedCheckpoint={checkpoint}
           bind:width={width} 
           bind:height={height} 
           bind:seed={seed}
