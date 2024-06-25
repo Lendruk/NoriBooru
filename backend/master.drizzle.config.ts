@@ -3,9 +3,9 @@ import type { Config } from 'drizzle-kit';
 export default {
 	schema: 'src/db/master/schema.ts',
 	out: 'migrations/master',
-	driver: 'better-sqlite',
+	dialect: 'sqlite',
 	dbCredentials: {
-		url: './master_db.sqlite',
+		url: './database.sqlite',
 	},
 	verbose: true,
 } satisfies Config;
