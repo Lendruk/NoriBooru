@@ -2,15 +2,13 @@
 	import Button from "$lib/Button.svelte";
   import { HttpService } from "$lib/services/HttpService";
 	import { onMount } from "svelte";
-	import { vaultStore } from "../../../store";
-	import { beforeNavigate } from "$app/navigation";
+	import { beforeNavigate, goto } from "$app/navigation";
 	import TextArea from "$lib/components/TextArea.svelte";
 	import type { SDCheckpoint } from "$lib/types/SD/SDCheckpoint";
 	import type { SDSampler } from "$lib/types/SD/SDSampler";
 	import type { SDScheduler } from "$lib/types/SD/SDSchedulers";
 	import { SDPromptBuilder } from "$lib/utils/SDPromptBuilder";
 	import GeneralSettings from "./components/GeneralSettings.svelte";
-	import Select from "$lib/components/Select.svelte";
   import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import PreviewImage from "./components/PreviewImage.svelte";
 	import HighResSettings from "./components/HighResSettings.svelte";
@@ -26,6 +24,7 @@
 	import { createToast } from "$lib/components/toast/ToastContainer.svelte";
 	import LoraSelector from "./components/LoraSelector.svelte";
 	import type { SDLora } from "$lib/types/SD/SDLora";
+  import { page } from '$app/stores';
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
@@ -83,6 +82,40 @@
     sampler = samplers[0].name;
     highResUpscaler = upscalers[0].name;
     // await HttpService.post(`/sd/start`, {});
+
+    if ($page.url.searchParams.has('inputExif')) {
+      const rawExif = $page.url.searchParams.get('inputExif')!;
+      const parsedExif = JSON.parse(rawExif);
+      width = parsedExif['Image Width'].value;
+      height = parsedExif['Image Height'].value;
+      const splitPrompt = parsedExif.parameters.value.split('\n');
+      positivePrompt = splitPrompt[0];
+
+      for(let i=1; i < splitPrompt.length; i++) {
+        const value = splitPrompt[i];
+        if(value.includes('Negative prompt:')) {
+          negativePrompt = value.split(': ')[1];
+        } else {
+          const settingsObject: Record<string, string> = {};
+          for(const part of value.split(',')) {
+            const splitPart = part.split(': ');
+            settingsObject[splitPart[0].trim()] = splitPart[1];
+          }
+          seed = Number.parseInt(settingsObject.Seed);
+          checkpoint = settingsObject.Model;
+          sampler = settingsObject.Sampler;
+          steps = Number.parseInt(settingsObject.Steps);
+          cfgScale = Number.parseInt(settingsObject['CFG scale']);
+
+          if (settingsObject['Hires upscaler']) {
+            highResUpscaler = settingsObject['Hires upscaler'];
+            isHighResEnabled = true;
+            highResDenoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+            upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
+          }
+        }
+      }
+    }
   }
 
   async function generate() {
@@ -110,6 +143,10 @@
       const result = await HttpService.post<{ items: { fileName: string, id: number, exif: string }[] }>(`/sd/prompt`, prompt.build());
       generatedImage = result.items[0];
       lastGenExif = JSON.parse(result.items[0].exif);
+
+      if ($page.url.searchParams.has('inputExif')) {
+        goto('/stablediffusion/generator');
+      }
     } catch {
       // TODO
     } finally {
@@ -342,7 +379,7 @@
         />
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
           <HighResSettings 
-            bind:upscaler={highResUpscaler}
+            bind:selectedUpscaler={highResUpscaler}
             bind:steps={highResSteps}
             bind:denoisingStrength={highResDenoisingStrength}
             bind:upscaleBy={upscaleBy}

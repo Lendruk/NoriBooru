@@ -21,14 +21,14 @@
 		 switch(e.keyCode) {
        // Left
 			 case 37:
-        if (previous) {
-          goto(`/gallery/${previous}`);
+        if (next) {
+          goto(`/gallery/${next}`);
         }
         break;
        // Right
 			 case 39:
-        if (next) {
-          goto(`/gallery/${next}`);
+        if (previous) {
+          goto(`/gallery/${previous}`);
         }
         break;
 		 }

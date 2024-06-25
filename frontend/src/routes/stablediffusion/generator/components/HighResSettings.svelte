@@ -3,7 +3,7 @@
 	import type { SDUpscaler } from "$lib/types/SD/SDUpscaler";
   export { cssClass as class };
 
-  export let upscaler: string;
+  export let selectedUpscaler: string;
   export let steps: number;
   export let denoisingStrength: number;
   export let upscaleBy: number;
@@ -17,7 +17,7 @@
     <div>
       Upscaler
     </div>
-    <Select bind:value={upscaler}>
+    <Select bind:value={selectedUpscaler}>
       {#each upscalers as upscaler}
         <option value={upscaler.name}>{upscaler.name ?? upscaler.model_name}</option>
       {/each}

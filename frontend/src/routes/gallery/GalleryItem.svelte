@@ -2,8 +2,10 @@
   import ArchiveIcon from "$lib/icons/ArchiveIcon.svelte";
   import CheckIcon from "$lib/icons/CheckIcon.svelte";
   import InboxIcon from "$lib/icons/InboxIcon.svelte";
+	import PenIcon from "$lib/icons/PenIcon.svelte";
   import TagIcon from "$lib/icons/TagIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
+	import { vaultStore } from "../../store";
   import GalleryItemButton from "./GalleryItemButton.svelte";
 
   export let href = "";
@@ -11,10 +13,12 @@
   export let onMoveToArchive = () => {};
   export let onMoveToInbox = () => {};
   export let onTagButtonClick = () => {};
+  export let onGotoGeneratorClick: () => void;
   export let isArchived = false;
   export let style = '';
   
   export let isSelected = false;
+  export let isAiGen = false;
   export let onSelectClick = () => {};
   export let isSelectionModeActive = false;
   export { className as class };
@@ -61,6 +65,11 @@
         </div>
       </div>
       <div class="flex gap-4 flex-1 items-end justify-end justify-items-end m-2">
+        {#if $vaultStore?.hasInstalledSD && isAiGen}
+          <GalleryItemButton onClick={onGotoGeneratorClick}>
+            <PenIcon />
+          </GalleryItemButton>
+        {/if}
         <GalleryItemButton onClick={onTagButtonClick}>
           <TagIcon />
         </GalleryItemButton>

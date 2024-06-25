@@ -13,6 +13,7 @@ type BaseMediaItem = {
   createdAt: number;
   updatedAt: number | null;
   isArchived: boolean;
+	exif: string;
 }
 
 type QueryType = 'AND' | 'OR';
@@ -23,7 +24,16 @@ export type MediaItem = BaseMediaItem & {
 
 export type MediaItemWithTags = BaseMediaItem & { tags: TagTableSchema[] };
 
-export type MediaSearchQuery = { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string, positiveQueryType: QueryType, negativeQueryType: QueryType };
+export type MediaSearchQuery = { 
+	positiveTags: string, 
+	negativeTags: string, 
+	sortMethod: SortMethods, 
+	page: string, 
+	archived: string, 
+	positiveQueryType: QueryType, 
+	negativeQueryType: QueryType,
+	exif: string
+};
 
 const PAGE_SIZE = 30;
 type SortMethods = 'newest' | 'oldest';
@@ -62,6 +72,7 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			extension: row.extension,
 			fileName: row.fileName,
 			fileSize: row.fileSize,
+			exif: row.exif ?? '',
 			id: row.id,
 			isArchived: row.isArchived === 1 ? true : false,
 			type: row.type,

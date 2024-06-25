@@ -18,6 +18,7 @@
 	import TagIcon from '$lib/icons/TagIcon.svelte';
 	import MassTagEditModal from '../components/MassTagEditModal.svelte';
 	import Link from '$lib/Link.svelte';
+	import { goto } from '$app/navigation';
 
   let mediaItems: MediaItem[]  = [];
   let appliedPositiveTags: PopulatedTag[] = [];
@@ -206,6 +207,10 @@
     }
   }
 
+  function goToGenerator(inputExif: string) { 
+    goto(`/stablediffusion/generator?inputExif=${inputExif}`);
+  }
+
   $: {
       if (mediaItems.length > 0 && oldHeight !== 0) {
         tick().then(() => {
@@ -307,11 +312,13 @@
       >
         {#each mediaItems as mediaItem}
           <GalleryItem 
+            isAiGen={mediaItem.exif.includes('Model hash')}
             isArchived={mediaItem.isArchived} onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)} 
             onMoveToInbox={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}  
             onConfirmDelete={() => deleteItems([mediaItem.id])} 
             onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
             onSelectClick={() => onMediaItemSelect(mediaItem)}
+            onGotoGeneratorClick={() => goToGenerator(mediaItem.exif)}
             isSelected={selectedItems.has(mediaItem.id)}
             isSelectionModeActive={isSelectionModeActive}
             href={`/gallery/${mediaItem.id}`}

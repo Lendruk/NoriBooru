@@ -119,6 +119,7 @@ export class SDPromptBuilder {
     this.promptRequest.hr_upscaler = options.upscaler;
     this.promptRequest.hr_scale = options.upscaleBy;
     this.promptRequest.hr_second_pass_steps = options.steps;
+    this.promptRequest.denoising_strength = options.denoisingStrength;
     
     this.promptRequest.enable_hr = true;
     return this;
