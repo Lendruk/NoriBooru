@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Tooltip from "$lib/Tooltip.svelte";
+	import { createToast } from "$lib/components/toast/ToastContainer.svelte";
 	import ArchiveIcon from "$lib/icons/ArchiveIcon.svelte";
+	import InboxIcon from "$lib/icons/InboxIcon.svelte";
 	import SeedIcon from "$lib/icons/SeedIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
   import { HttpService } from "$lib/services/HttpService";
@@ -11,14 +13,17 @@
   export let onSetSeed: () => void;
 
   let isFullscreen = false;
+  let isArchived = false;
 
   async function deleteItem() {
     await HttpService.delete(`/mediaItems/${JSON.stringify([imageId])}`);
     onDeletion();
   }
 
-  async function moveItemToArchive() {
-    await HttpService.patch(`/mediaItems/${JSON.stringify([imageId])}`, { isArchived: true });
+  async function toggleArchival() {
+    isArchived = !isArchived;
+    await HttpService.patch(`/mediaItems/${JSON.stringify([imageId])}`, { isArchived: isArchived });
+    createToast(`Image ${isArchived ? 'archived' : 'un-archived' } successfully!`);
   }
 
   function onImageClick() {
@@ -52,8 +57,12 @@
       </GalleryItemButton>
     </div>
     <div class="flex justify-end items-end flex-1 self-end p-4 gap-2 flex-col">
-      <GalleryItemButton onClick={moveItemToArchive}>
-        <ArchiveIcon />
+      <GalleryItemButton onClick={toggleArchival}>
+        {#if !isArchived}
+          <InboxIcon />
+        {:else}
+          <ArchiveIcon />
+        {/if}
       </GalleryItemButton>
       <GalleryItemButton onClick={deleteItem}>
         <TrashIcon/>
