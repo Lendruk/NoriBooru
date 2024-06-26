@@ -27,6 +27,7 @@
     [768, 1344],
     [1280, 768],
     [768, 1280],
+    [2048, 2048],
   ];
 
   let aspectRatio = 0;
@@ -39,7 +40,7 @@
   <div class="text-xl">General settings</div>
 
   <div class="flex flex-col flex-1">
-    <div class="flex flex-1 gap-2">
+    <div class="flex gap-2">
       <LabeledComponent class="flex-1">
         <div slot="label">Checkpoint</div>
         <div class="w-full" slot="content">
