@@ -25,6 +25,7 @@
 	import LoraSelector from "./components/LoraSelector.svelte";
 	import type { SDLora } from "$lib/types/SD/SDLora";
   import { page } from '$app/stores';
+	import { vaultStore } from "../../../store";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
@@ -64,6 +65,7 @@
   let lastGenExif: Record<string, any> | undefined;
 
   async function setup() {
+    await HttpService.post(`/sd/start`);
     const [fetchedSamplers, fetchedCheckpoints, fetchedSchedulers, fetchedUpscalers, fetchedLoras] = await Promise.all([
       HttpService.get<SDSampler[]>(`/sd/samplers`),
       HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
@@ -81,7 +83,6 @@
     checkpoint = checkpoints[0].model_name;
     sampler = samplers[0].name;
     highResUpscaler = upscalers[0].name;
-    // await HttpService.post(`/sd/start`, {});
 
     if ($page.url.searchParams.has('inputExif')) {
       const rawExif = $page.url.searchParams.get('inputExif')!;

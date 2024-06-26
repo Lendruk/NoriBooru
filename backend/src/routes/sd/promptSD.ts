@@ -4,6 +4,7 @@ import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
 import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
 import { mediaService } from '../../services/MediaService';
+import { sdUiService } from '../../services/SDUiService';
 
 type PromptResponse = {
 	fileName: string;
@@ -16,10 +17,14 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	if(!vault) {
 		return reply.status(400).send('No vault provided');
 	}
+	const sdPort = sdUiService.getSdPort(vault.id);
+	if (!sdPort) {
+		return reply.status(400).send('SD Ui is not running for the given vault');
+	}
 
 	const requestBody = request.body;
 
-	const result = await fetch('http://localhost:7861/sdapi/v1/txt2img', { 
+	const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/txt2img`, { 
 		method: 'POST', 
 		body: JSON.stringify(requestBody), 
 		headers: {
