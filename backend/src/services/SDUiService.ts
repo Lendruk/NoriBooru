@@ -3,6 +3,7 @@ import { VaultInstance } from '../db/VaultController';
 import { promisify } from 'util';
 import kill from 'tree-kill';
 import fs from 'fs/promises';
+import { createConnection } from 'net';
 
 const execAsync = promisify(exec);
 
@@ -138,8 +139,28 @@ class SDUiService {
 		await fs.writeFile(`${path}/stable-diffusion-webui/webui-user.sh`, `export COMMANDLINE_ARGS="--api --nowebui --port ${port}"`);
 	}
 
-	private findOpenPort(): Promise<number> {
-		return Promise.resolve(9000);
+	private async findOpenPort(): Promise<number> {
+		for (let i = 8080; i < 65535; i++) {
+			try {
+				await new Promise<void>((resolve, reject) => {
+					const socket = createConnection({ port: i });
+					socket.once('connect', () => { socket.end(); reject(); });
+					socket.once('error', (e: NodeJS.ErrnoException) => {
+						socket.destroy();
+						if (e.code === 'ECONNREFUSED') {
+							resolve();
+						} else {
+							reject();
+						}
+					});
+				});
+				return i;
+			} catch {
+				continue;
+			}
+		}
+
+		throw new Error('No available port');
 	}
 }			
 
