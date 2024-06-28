@@ -5,6 +5,7 @@
 	import type { SDCheckpoint } from "$lib/types/SD/SDCheckpoint";
 	import type { SDSampler } from "$lib/types/SD/SDSampler";
 	import LabeledComponent from "../../../components/LabeledComponent.svelte";
+	import RefinerSelection from "./RefinerSelection.svelte";
 
   export { cssClass as class };
   let cssClass = '';
@@ -19,6 +20,10 @@
   export let selectedCheckpoint: string;
   export let samplingSteps: number;
   export let cfgScale: number;
+
+  export let isRefinerEnabled: boolean;
+  export let refinerCheckpint: string;
+  export let refinerSwitchAt: number;
 
   let sizePresets: [number, number][] = [
     [512, 512],
@@ -108,6 +113,15 @@
         Cfg Scale
       </div>
       <input bind:value={cfgScale} type="number" />
+    </div>
+    <div>
+      <RefinerSelection 
+        bind:checkpoints={checkpoints} 
+        bind:currentRefinerCheckpoint={refinerCheckpint}
+        bind:currentCheckpoint={selectedCheckpoint}
+        bind:refinerSwitchAt={refinerSwitchAt}
+        bind:isRefinerEnabled={isRefinerEnabled}
+      />
     </div>
   </div>
 </div>

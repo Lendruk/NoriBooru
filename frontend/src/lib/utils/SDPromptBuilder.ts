@@ -7,6 +7,11 @@ type HighResOptions = {
   upscaleBy: number;
 }
 
+type RefinerOptions = {
+  refinerCheckpoint: string;
+  switchAt: number;
+};
+
 export class SDPromptBuilder {
   private promptRequest: SDPromptRequest;
   
@@ -122,6 +127,12 @@ export class SDPromptBuilder {
     this.promptRequest.denoising_strength = options.denoisingStrength;
     
     this.promptRequest.enable_hr = true;
+    return this;
+  }
+
+  public withRefiner(options: RefinerOptions): this {
+    this.promptRequest.refiner_checkpoint = options.refinerCheckpoint;
+    this.promptRequest.refiner_switch_at = options.switchAt;
     return this;
   }
 

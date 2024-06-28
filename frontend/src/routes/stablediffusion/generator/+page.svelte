@@ -63,6 +63,11 @@
   let highResSteps = 0;
   let highResDenoisingStrength = 0.7;
 
+  // Refiner
+  let isRefinerEnabled = false;
+  let refinerCheckpoint = '';
+  let refinerSwitchAt = 0.8;
+
   let lastGenExif: Record<string, any> | undefined;
 
   async function setup(vault: Vault) {
@@ -86,6 +91,7 @@
     checkpoint = checkpoints[0].model_name;
     sampler = samplers[0].name;
     highResUpscaler = upscalers[0].name;
+    refinerCheckpoint = checkpoints[1].model_name;
 
     if ($page.url.searchParams.has('inputExif')) {
       const rawExif = $page.url.searchParams.get('inputExif')!;
@@ -117,6 +123,13 @@
             highResDenoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
             upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
           }
+
+          if (settingsObject.Refiner) {
+            isRefinerEnabled = true;
+            console.log(settingsObject.Refiner.trim().split(' ')[0]);
+            refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
+            refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
+          }
         }
       }
     }
@@ -133,6 +146,13 @@
     .withCheckpoint(checkpoint)
     .withCfgScale(cfgScale);
 
+    if (isRefinerEnabled) {
+      prompt.withRefiner({
+        refinerCheckpoint,
+        switchAt: refinerSwitchAt
+      })
+    }
+
     if (isHighResEnabled) {
       prompt.withHighResOptions({
         denoisingStrength: highResDenoisingStrength,
@@ -147,7 +167,7 @@
       const result = await HttpService.post<{ items: { fileName: string, id: number, exif: string }[] }>(`/sd/prompt`, prompt.build());
       generatedImage = result.items[0];
       lastGenExif = JSON.parse(result.items[0].exif);
-
+      console.log(lastGenExif);
       if ($page.url.searchParams.has('inputExif')) {
         goto('/stablediffusion/generator');
       }
@@ -217,6 +237,7 @@
     steps = prompt.steps;
     isHighResEnabled = !!prompt.highRes;
     promptId = prompt.id ?? '';
+    refinerCheckpoint = checkpoints.find(checkpoint => checkpoint.model_name !== prompt.checkpoint)?.model_name ?? prompt.checkpoint;
 
     if (prompt.highRes) {
       highResDenoisingStrength = prompt.highRes.denoisingStrength;
@@ -383,6 +404,9 @@
           bind:height={height} 
           bind:seed={seed}
           bind:cfgScale={cfgScale}
+          bind:refinerCheckpint={refinerCheckpoint}
+          bind:refinerSwitchAt={refinerSwitchAt}
+          bind:isRefinerEnabled={isRefinerEnabled}
           class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
         />
         <div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
