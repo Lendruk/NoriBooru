@@ -11,6 +11,9 @@
 	import PaletteIcon from './icons/PaletteIcon.svelte';
 	import PenIcon from './icons/PenIcon.svelte';
 	import FolderClosedIcon from './icons/FolderClosedIcon.svelte';
+	import DownloadIcon from './icons/DownloadIcon.svelte';
+	import { onMount } from 'svelte';
+	import { vaultStore } from '../store';
 
 	let isSidebarOpen = true;
 
@@ -24,6 +27,7 @@
 		subRoutes?: Route[];
 	}
 
+	let stableDiffusionRoutes: Route[] = [];
 	let routes: Route[] = [
 		{
 			name: 'Upload',
@@ -55,8 +59,22 @@
 			navHref: '',
 			path: '',
 			icon: PaletteIcon,
-			subRoutes: [
-				{
+			subRoutes: []
+		},
+		{
+			name: 'Playlists',
+			path: /\/playlists|playlists\/(\d)/g,
+			navHref: '/playlists',
+      icon: PlayIcon,
+			subNavPaths: ['view', /(\d)/g]
+		}
+	];
+
+	onMount(() => {
+		vaultStore.subscribe(vault => {
+			if (vault?.hasInstalledSD) {
+				stableDiffusionRoutes = [
+					{
 					icon: FolderClosedIcon,
 					name: 'Resources',
 					path: '/stablediffusion/resource-manager',
@@ -67,17 +85,20 @@
 					name: 'Generator',
 					path: '/stablediffusion/generator',
 					navHref: '/stablediffusion/generator',
-				}
-			]
-		},
-		{
-			name: 'Playlists',
-			path: /\/playlists|playlists\/(\d)/g,
-			navHref: '/playlists',
-      icon: PlayIcon,
-			subNavPaths: ['view', /(\d)/g]
-		}
-	];
+				}]
+			} else {
+				stableDiffusionRoutes = [{
+					icon: DownloadIcon,
+					name: 'Install',
+					path: '/stablediffusion/install',
+					navHref: '/stablediffusion/install',
+				}];
+			}
+			const index = routes.findIndex(route => route.name === 'Stable Diffusion');
+			routes[index].subRoutes = stableDiffusionRoutes;
+			routes = routes;
+		})
+	})
 
   function isCurrentPathSelected(route: Route): boolean {
 		if ($page.url.pathname === '/') {

@@ -4,6 +4,9 @@ import { promisify } from 'util';
 import kill from 'tree-kill';
 import fs from 'fs/promises';
 import { createConnection } from 'net';
+import { masterDb } from '../db/master/db';
+import { vaults } from '../db/master/schema';
+import { eq } from 'drizzle-orm';
 
 const execAsync = promisify(exec);
 
@@ -49,6 +52,9 @@ class SDUiService {
 		}
 
 		const { stderr, stdout } = await execAsync(`bash ./scripts/installAutomatic.sh ${vault.path} ${SDUiService.SD_UI_LINK}`);
+
+		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, vault.id ));
+		await this.startSDUi(vault);
 
 		console.log(stderr);
 		console.log(stdout);
@@ -140,7 +146,7 @@ class SDUiService {
 	}
 
 	private async findOpenPort(): Promise<number> {
-		for (let i = 8080; i < 65535; i++) {
+		for (let i = 9000; i < 65535; i++) {
 			try {
 				await new Promise<void>((resolve, reject) => {
 					const socket = createConnection({ port: i });

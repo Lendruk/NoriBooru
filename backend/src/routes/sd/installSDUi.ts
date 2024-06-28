@@ -8,10 +8,13 @@ const installSDUi= async (request: Request, reply: FastifyReply) => {
 	if(!vault) {
 		return reply.status(400).send('No vault provided');
 	}
+	if(vault.hasInstalledSD) {
+		return reply.status(400).send('Vault has SD already installed');
+	}
 
 	await sdUiService.install(vault);
 	
-	reply.send();
+	reply.send({ message: 'SD ui installed successfully!' });
 };
 
 export default {

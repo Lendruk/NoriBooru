@@ -26,6 +26,7 @@
 	import type { SDLora } from "$lib/types/SD/SDLora";
   import { page } from '$app/stores';
 	import { vaultStore } from "../../../store";
+	import type { Vault } from "$lib/types/Vault";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
@@ -64,7 +65,9 @@
 
   let lastGenExif: Record<string, any> | undefined;
 
-  async function setup() {
+  async function setup(vault: Vault) {
+    if(!vault.hasInstalledSD) return;
+
     await HttpService.post(`/sd/start`);
     const [fetchedSamplers, fetchedCheckpoints, fetchedSchedulers, fetchedUpscalers, fetchedLoras] = await Promise.all([
       HttpService.get<SDSampler[]>(`/sd/samplers`),
@@ -268,7 +271,11 @@
   });
 
   onMount(() => {
-    void setup();
+    vaultStore.subscribe(vault => {
+      if (vault) {
+        void setup(vault);
+      }
+    });
   });
 </script>
 

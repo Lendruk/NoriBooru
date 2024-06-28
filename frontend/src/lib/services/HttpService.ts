@@ -11,10 +11,8 @@ export class HttpService {
       return curVault.id;
     } else {
       const storedVault = localStorage.getItem("currentVault");
-
       if (storedVault) {
-        vaultStore.set(JSON.parse(storedVault) as Vault);
-        return get(vaultStore)?.id;
+        return (JSON.parse(storedVault) as Vault).id;
       }
     }
   };

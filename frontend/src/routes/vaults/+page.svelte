@@ -4,6 +4,7 @@
 	import type { Vault } from '$lib/types/Vault';
 	import Button from '$lib/Button.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
+	import { vaultStore } from '../../store';
 
 	let vaults: Vault[] = $state([]);
 
@@ -79,6 +80,7 @@
 
 	function publishVaultToLocalStorage(vault: Vault) {
 		localStorage.setItem('currentVault', JSON.stringify(vault));
+		vaultStore.set(vault);
 		goto('/');
 	}
 </script>
