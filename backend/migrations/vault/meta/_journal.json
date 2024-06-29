@@ -1,19 +1,12 @@
 {
-  "version": "5",
+  "version": "7",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1718055782457,
-      "tag": "0000_natural_steel_serpent",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1718983680286,
-      "tag": "0001_sticky_betty_brant",
+      "version": "6",
+      "when": 1719659776736,
+      "tag": "0000_chemical_black_widow",
       "breakpoints": true
     }
   ]

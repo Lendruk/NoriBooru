@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "generate:drizzle:master": "drizzle-kit generate:sqlite --config=./master.drizzle.config.ts",
-    "generate:drizzle:vault": "drizzle-kit generate:sqlite --config=./vault.drizzle.config.ts",
+    "generate:drizzle:master": "drizzle-kit generate --config=./master.drizzle.config.ts",
+    "generate:drizzle:vault": "drizzle-kit generate --config=./vault.drizzle.config.ts",
     "generate:drizzle": "npm run generate:drizzle:master && npm run generate:drizzle:vault",
     "build": "tsc",
     "dev": "nodemon ./src/main.ts",

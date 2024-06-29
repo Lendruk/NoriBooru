@@ -91,3 +91,21 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	highResUpscaleBy: integer('high_res_upscale_by'),
 	createdAt: integer('created_at').notNull()
 });
+
+export const lorasToMediaItems = sqliteTable('loras_to_mediaItems', {
+	mediaItemId: integer('media_item_id').notNull().references(() => mediaItems.id, { onDelete: 'cascade'}),
+	loraId: integer('lora_id').notNull().references(() => sdLoras.id,  { onDelete: 'cascade'}),
+}, (t) => ({ pk: primaryKey({ columns: [t.mediaItemId, t.loraId]})}));
+
+export const tagsToLoras = sqliteTable('tags_to_loras', {
+	tagId: integer('tag_id').notNull().references(() => tags.id),
+	loraId: integer('lora_id').notNull().references(() => sdLoras.id, { onDelete: 'cascade' }),
+}, (t) => ({ pk: primaryKey({ columns: [t.tagId, t.loraId]})}));
+
+export const sdLoras = sqliteTable('sd_loras', {
+	id: text('id').primaryKey(),
+	name: text('name'),
+	path: text('path'),
+	previewImage: text('preview_image'),
+	activationWords: text('activation_words')
+});

@@ -28,12 +28,48 @@ CREATE TABLE `playlists_media_items` (
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `sd_loras` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text,
+	`path` text,
+	`preview_image` text,
+	`activation_words` text
+);
+--> statement-breakpoint
+CREATE TABLE `sd_prompts` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text,
+	`preview_image` text,
+	`positive_prompt` text NOT NULL,
+	`negative_prompt` text NOT NULL,
+	`sampler` text NOT NULL,
+	`steps` integer NOT NULL,
+	`width` integer NOT NULL,
+	`height` integer NOT NULL,
+	`checkpoint` text NOT NULL,
+	`cfg_scale` integer NOT NULL,
+	`is_high_res_enabled` integer NOT NULL,
+	`high_res_upscaler` text,
+	`high_res_steps` integer,
+	`high_res_denoising_strength` integer,
+	`high_res_upscale_by` integer,
+	`created_at` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `tags` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`color` text NOT NULL,
 	`media_count` integer DEFAULT 0 NOT NULL,
 	`parent_id` integer
+);
+--> statement-breakpoint
+CREATE TABLE `tags_to_loras` (
+	`tag_id` integer NOT NULL,
+	`lora_id` integer NOT NULL,
+	PRIMARY KEY(`lora_id`, `tag_id`),
+	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `tags_to_media_items` (
