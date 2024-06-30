@@ -1,4 +1,4 @@
-import { TagTableSchema } from '../../db/vault/schema';
+import { PopulatedTag } from '../../services/TagService';
 
 export type SDLora = {
   id: string;
@@ -14,6 +14,6 @@ export type SDLora = {
       ['1_cate']: Record<string, number>
     }
   },
-  previewImage: string;
-  tags: TagTableSchema[],
+  previewImage: string | null;
+  tags: PopulatedTag[],
 }

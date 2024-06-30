@@ -15,7 +15,7 @@ export const tags = sqliteTable('tags', {
 	mediaCount: integer('media_count').notNull().default(0),
 	parentTagId: integer('parent_id'),
 });
-export type TagTableSchema = InferSelectModel<typeof tags>;
+export type TagSchema = InferSelectModel<typeof tags>;
 
 export const mediaItems = sqliteTable('media_items', {
 	id: integer('id').primaryKey(),
@@ -70,7 +70,7 @@ export const playlists_mediaItems_table = sqliteTable('playlists_media_items', {
 	itemIndex: integer('item_index').notNull(),
 }, (t) => ({ pk: primaryKey({ columns: [t.playlistId, t.mediaItemId]})}));
 
-export type MediaItem = InferSelectModel<typeof mediaItems> & { tags?: TagTableSchema[] };
+export type MediaItem = InferSelectModel<typeof mediaItems> & { tags?: TagSchema[] };
 
 export const sdPrompts = sqliteTable('sd_prompts', {
 	id: text('id').primaryKey(),
@@ -94,18 +94,20 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 
 export const lorasToMediaItems = sqliteTable('loras_to_mediaItems', {
 	mediaItemId: integer('media_item_id').notNull().references(() => mediaItems.id, { onDelete: 'cascade'}),
-	loraId: integer('lora_id').notNull().references(() => sdLoras.id,  { onDelete: 'cascade'}),
+	loraId: text('lora_id').notNull().references(() => sdLoras.id,  { onDelete: 'cascade'}),
 }, (t) => ({ pk: primaryKey({ columns: [t.mediaItemId, t.loraId]})}));
 
 export const tagsToLoras = sqliteTable('tags_to_loras', {
 	tagId: integer('tag_id').notNull().references(() => tags.id),
-	loraId: integer('lora_id').notNull().references(() => sdLoras.id, { onDelete: 'cascade' }),
+	loraId: text('lora_id').notNull().references(() => sdLoras.id, { onDelete: 'cascade' }),
 }, (t) => ({ pk: primaryKey({ columns: [t.tagId, t.loraId]})}));
 
 export const sdLoras = sqliteTable('sd_loras', {
 	id: text('id').primaryKey(),
-	name: text('name'),
-	path: text('path'),
+	name: text('name').notNull(),
+	path: text('path').notNull(),
 	previewImage: text('preview_image'),
-	activationWords: text('activation_words')
+	activationWords: text('activation_words').notNull()
 });
+
+export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
