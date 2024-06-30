@@ -1,11 +1,11 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import {  TagTableSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
+import {  TagSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 import { VaultDb } from '../../db/VaultController';
 
-const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagTableSchema): Promise<boolean> => {
+const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagSchema): Promise<boolean> => {
 	try {
 		await db.insert(tagsToMediaItems).values({ tagId: tag.id, mediaItemId: mediaId });
 		return true;
@@ -22,12 +22,12 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 
 	const { ids } = request.params as { ids: string };
 	const parsedIdArray: string[] = JSON.parse(ids);
-	const body = request.body as TagTableSchema | { tags: TagTableSchema[] };
+	const body = request.body as TagSchema | { tags: TagSchema[] };
   
 	try {
 		const { db } = vault;
 		if (parsedIdArray && Array.isArray(parsedIdArray)) {
-			let tagsToInsert: TagTableSchema[] = [];
+			let tagsToInsert: TagSchema[] = [];
 			if ('tags' in body) {
 				tagsToInsert = body.tags;
 			} else { 

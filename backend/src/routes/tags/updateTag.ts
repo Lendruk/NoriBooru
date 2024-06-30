@@ -1,8 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { eq } from 'drizzle-orm';
-import { tags } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import TagService from '../../services/TagService';
 
 const updateTag = async (request: Request, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
@@ -12,13 +11,15 @@ const updateTag = async (request: Request, reply: FastifyReply) => {
 	if(!vaultInstance) {
 		return reply.status(400).send('No vault provided');
 	}
+	
+	const parsedId = Number.parseInt(params.id);
+	if (!parsedId || Number.isNaN(parsedId) ) {
+		return reply.status(400).send('Invalid tag id sent');
+	}
 
-	const { db } = vaultInstance;
-	const updated = await db.update(tags)
-		.set({ name: body.name, parentTagId: body.parentId, color: body.color })
-		.where(eq(tags.id, Number.parseInt(params.id ?? ''))).returning();
+	const updatedTag = await TagService.updateTag(vaultInstance, parsedId, body);
 
-	return reply.send({ ...updated[0] });
+	return reply.send(updatedTag);
 };
 
 export default {
