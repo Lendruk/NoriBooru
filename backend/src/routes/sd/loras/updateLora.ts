@@ -6,7 +6,8 @@ import { eq, sql } from 'drizzle-orm';
 
 const updateLora = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	const body = request.body as { loraId: string, name: string, tags: number[], previewImage?: string };
+	const { id } = request.params as { id: string };
+	const body = request.body as { name: string, tags: number[], previewImage?: string };
 	if(!vault) {
 		return reply.status(400).send('No vault provided');
 	}
@@ -14,8 +15,8 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	const { db } = vault;
 	await db.update(sdLoras)
 		.set({ previewImage: body.previewImage, name: body.name })
-		.where(eq(sdLoras.id, body.loraId));
-	const currentTags = (await db.query.tagsToLoras.findMany({ where: eq(tagsToLoras.loraId, body.loraId)})).map(({ tagId }) => tagId);
+		.where(eq(sdLoras.id, id));
+	const currentTags = (await db.query.tagsToLoras.findMany({ where: eq(tagsToLoras.loraId, id)})).map(({ tagId }) => tagId);
 	const tagsToRemove: number[] = [];
 	const tagsToAdd: number[] = [];
 
@@ -36,7 +37,7 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	}
 
 	if (tagsToAdd.length > 0) {
-		await db.insert(tagsToLoras).values(tagsToAdd.map((tag) => ({ loraId: body.loraId, tagId: tag })));
+		await db.insert(tagsToLoras).values(tagsToAdd.map((tag) => ({ loraId: id, tagId: tag })));
 	}
 
 	reply.send();
