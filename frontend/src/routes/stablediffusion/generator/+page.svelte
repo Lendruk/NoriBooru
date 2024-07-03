@@ -27,12 +27,14 @@
   import { page } from '$app/stores';
 	import { vaultStore } from "../../../store";
 	import type { Vault } from "$lib/types/Vault";
+	import type { PopulatedTag } from "$lib/types/PopulatedTag";
 
   let checkpoints: SDCheckpoint[] = [];
   let samplers: SDSampler[] = [];
   let schedulers: SDScheduler[] = [];
   let upscalers: SDUpscaler[] = [];
   let loras: SDLora[] = [];
+  let allTags: PopulatedTag[] = [];
 
   
   let generatedImage: { fileName: string, id: number } | undefined = undefined;
@@ -74,14 +76,16 @@
     if(!vault.hasInstalledSD) return;
 
     await HttpService.post(`/sd/start`);
-    const [fetchedSamplers, fetchedCheckpoints, fetchedSchedulers, fetchedUpscalers, fetchedLoras] = await Promise.all([
+    const [fetchedSamplers, fetchedCheckpoints, fetchedSchedulers, fetchedUpscalers, fetchedLoras, fetchedTags] = await Promise.all([
       HttpService.get<SDSampler[]>(`/sd/samplers`),
       HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
       HttpService.get<SDScheduler[]>(`/sd/schedulers`),
       HttpService.get<SDUpscaler[]>(`/sd/highres/upscalers`),
-      HttpService.get<SDLora[]>(`/sd/loras`)
+      HttpService.get<SDLora[]>(`/sd/loras`),
+      HttpService.get<PopulatedTag[]>('/tags')
     ]);
 
+    allTags = fetchedTags;
     samplers = fetchedSamplers;
     checkpoints = fetchedCheckpoints;
     schedulers = fetchedSchedulers;
@@ -421,6 +425,8 @@
         <div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
           <LoraSelector
             bind:loras={loras}
+            bind:allTags={allTags}
+            lastGen={generatedImage}
             onLoraClick={onLoraClick}
           />
         </div>
