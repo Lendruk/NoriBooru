@@ -34,10 +34,11 @@ import SettingsIcon from "$lib/icons/SettingsIcon.svelte";
   }
 
   async function setPreviewImage(lora: SDLora) {
-    if (lastGen) {
+    if (lastGen && loraInEdit) {
       await HttpService.put(`/sd/loras/${lora.id}`, {
         previewImage: lastGen.fileName,
       });
+      loraInEdit.previewImage = lastGen.fileName!;
     }
   }
 
