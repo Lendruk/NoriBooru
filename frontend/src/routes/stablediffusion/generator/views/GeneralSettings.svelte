@@ -115,14 +115,16 @@
 			<div>Cfg Scale</div>
 			<input bind:value={cfgScale} type="number" />
 		</div>
-		<div>
-			<RefinerSelection
-				bind:checkpoints
-				bind:currentRefinerCheckpoint={refinerCheckpint}
-				bind:currentCheckpoint={selectedCheckpoint}
-				bind:refinerSwitchAt
-				bind:isRefinerEnabled
-			/>
-		</div>
+		{#if checkpoints.length > 1}
+			<div>
+				<RefinerSelection
+					bind:checkpoints
+					bind:currentRefinerCheckpoint={refinerCheckpint}
+					bind:currentCheckpoint={selectedCheckpoint}
+					bind:refinerSwitchAt
+					bind:isRefinerEnabled
+				/>
+			</div>
+		{/if}
 	</div>
 </div>
