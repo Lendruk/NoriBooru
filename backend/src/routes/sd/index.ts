@@ -8,6 +8,7 @@ import loraRoutes from './loras';
 import markSDAsInactive from './markSDAsInactive';
 import promptCruds from './prompts';
 import promptSD from './promptSD';
+import refreshCheckpoints from './refreshCheckpoints';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
 import wildcardRoutes from './wildcards';
@@ -23,6 +24,7 @@ export default [
 	promptSD,
 	getHighResUpscalers,
 	interruptGeneration,
+	refreshCheckpoints,
 	...promptCruds,
 	...loraRoutes,
 	...wildcardRoutes

@@ -7,8 +7,8 @@
 	export { cssClasses as class };
 	let cssClasses = '';
 
-	let width = 35;
-	let height = 35;
+	export let width = 35;
+	export let height = 35;
 </script>
 
 <button

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ImageIcon from '$lib/icons/ImageIcon.svelte';
+	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 	import Modal from '$lib/Modal.svelte';
@@ -82,10 +83,21 @@
 		}
 		filterTags = filterTags;
 	}
+
+	async function refreshLoras() {
+		await HttpService.post(`/sd/refresh-loras`);
+		const updatedLoras = await HttpService.get<SDLora[]>(`/sd/loras`);
+		loras = updatedLoras;
+	}
 </script>
 
 <div class="flex flex-col gap-2">
-	<div class="text-xl">Loras</div>
+	<div class="flex items-center gap-4">
+		<div class="text-xl">Loras</div>
+		<GalleryItemButton class={'p-2'} onClick={refreshLoras}>
+			<RefreshIcon />
+		</GalleryItemButton>
+	</div>
 	<TagSearchInput
 		availableTags={allTags}
 		appliedTags={filterTags}

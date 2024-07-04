@@ -2,9 +2,12 @@
 	import Button from '$lib/Button.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import DiceEmoji from '$lib/icons/DiceEmoji.svelte';
+	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
+	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	import RefinerSelection from '../components/RefinerSelection.svelte';
 
 	export { cssClass as class };
@@ -24,6 +27,11 @@
 	export let isRefinerEnabled: boolean;
 	export let refinerCheckpint: string;
 	export let refinerSwitchAt: number;
+
+	async function refreshCheckpoints() {
+		await HttpService.post(`/sd/refresh-checkpoints`);
+		checkpoints = await HttpService.get(`/sd/checkpoints`);
+	}
 
 	let sizePresets: [number, number][] = [
 		[512, 512],
@@ -47,7 +55,12 @@
 	<div class="flex flex-col flex-1">
 		<div class="flex gap-2">
 			<LabeledComponent class="flex-1">
-				<div slot="label">Checkpoint</div>
+				<div slot="label" class="flex justify-between items-center">
+					<div>Checkpoint</div>
+					<GalleryItemButton width={16} height={16} onClick={refreshCheckpoints}>
+						<RefreshIcon />
+					</GalleryItemButton>
+				</div>
 				<div class="w-full" slot="content">
 					<Select class="h-[40px] w-full" bind:value={selectedCheckpoint}>
 						{#each checkpoints as checkpoint}
