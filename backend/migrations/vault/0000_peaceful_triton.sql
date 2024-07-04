@@ -1,3 +1,11 @@
+CREATE TABLE `loras_to_mediaItems` (
+	`media_item_id` integer NOT NULL,
+	`lora_id` text NOT NULL,
+	PRIMARY KEY(`lora_id`, `media_item_id`),
+	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `media_items` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`file_name` text NOT NULL,
@@ -30,10 +38,10 @@ CREATE TABLE `playlists_media_items` (
 --> statement-breakpoint
 CREATE TABLE `sd_loras` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text,
-	`path` text,
+	`name` text NOT NULL,
+	`path` text NOT NULL,
 	`preview_image` text,
-	`activation_words` text
+	`activation_words` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `sd_prompts` (
@@ -56,6 +64,12 @@ CREATE TABLE `sd_prompts` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `sd_wildcards` (
+	`id` text PRIMARY KEY NOT NULL,
+	`list_name` text NOT NULL,
+	`text` text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `tags` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -66,10 +80,10 @@ CREATE TABLE `tags` (
 --> statement-breakpoint
 CREATE TABLE `tags_to_loras` (
 	`tag_id` integer NOT NULL,
-	`lora_id` integer NOT NULL,
+	`lora_id` text NOT NULL,
 	PRIMARY KEY(`lora_id`, `tag_id`),
-	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `tags_to_media_items` (

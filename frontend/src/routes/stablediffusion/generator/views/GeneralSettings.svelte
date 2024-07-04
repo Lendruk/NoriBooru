@@ -5,7 +5,7 @@
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
-	import RefinerSelection from './RefinerSelection.svelte';
+	import RefinerSelection from '../components/RefinerSelection.svelte';
 
 	export { cssClass as class };
 	let cssClass = '';

@@ -34,11 +34,13 @@
 	export let cols: Col[] = [];
 	export let actions: Action[] = [];
 	export let orderable: OrderableOptions | undefined = undefined;
+	export { cssClass as class };
 
 	let showToolTip = false;
 	let toolTipX = 0;
 	let toolTipY = 0;
 	let toolTipContent = '';
+	let cssClass = '';
 
 	function onMouseEnterAction(
 		e: MouseEvent & { currentTarget: EventTarget & HTMLSpanElement },
@@ -67,7 +69,7 @@
 	}
 </script>
 
-<table class="flex flex-col relative box-border">
+<table class={`flex flex-col relative box-border ${cssClass}`}>
 	<Tooltip
 		x={toolTipX}
 		y={toolTipY}

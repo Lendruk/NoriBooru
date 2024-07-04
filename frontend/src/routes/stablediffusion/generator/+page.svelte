@@ -18,27 +18,30 @@
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
+	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
 	import type { Vault } from '$lib/types/Vault';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
-	import GeneralSettings from './components/GeneralSettings.svelte';
-	import HighResSettings from './components/HighResSettings.svelte';
-	import LoraSelector from './components/LoraSelector.svelte';
 	import PreviewImage from './components/PreviewImage.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
+	import GeneralSettings from './views/GeneralSettings.svelte';
+	import HighResSettings from './views/HighResSettings.svelte';
+	import LoraSelector from './views/LoraSelector.svelte';
+	import WildcardManager from './views/WildcardManager.svelte';
 
 	let checkpoints: SDCheckpoint[] = [];
 	let samplers: SDSampler[] = [];
 	let schedulers: SDScheduler[] = [];
 	let upscalers: SDUpscaler[] = [];
 	let loras: SDLora[] = [];
+	let wildcards: SDWildcard[] = [];
 	let allTags: PopulatedTag[] = [];
 
 	let generatedImage: { fileName: string; id: number } | undefined = undefined;
 
-	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' = 'GENERAL';
+	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
 	let isGeneratingImage = false;
 	let isSearchingPrompts = false;
 	let isSavingPrompt = false;
@@ -81,14 +84,16 @@
 			fetchedSchedulers,
 			fetchedUpscalers,
 			fetchedLoras,
-			fetchedTags
+			fetchedTags,
+			fetchedWildcards
 		] = await Promise.all([
 			HttpService.get<SDSampler[]>(`/sd/samplers`),
 			HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
 			HttpService.get<SDScheduler[]>(`/sd/schedulers`),
 			HttpService.get<SDUpscaler[]>(`/sd/highres/upscalers`),
 			HttpService.get<SDLora[]>(`/sd/loras`),
-			HttpService.get<PopulatedTag[]>('/tags')
+			HttpService.get<PopulatedTag[]>('/tags'),
+			HttpService.get<SDWildcard[]>('/sd/wildcards')
 		]);
 
 		allTags = fetchedTags;
@@ -97,6 +102,7 @@
 		schedulers = fetchedSchedulers;
 		upscalers = fetchedUpscalers;
 		loras = fetchedLoras;
+		wildcards = fetchedWildcards;
 
 		checkpoint = checkpoints[0].model_name;
 		sampler = samplers[0].name;
@@ -402,7 +408,7 @@
 
 		<div class="flex gap-4 pt-4">
 			<div class="flex flex-[0.6] flex-col gap-2">
-				<div class="flex flex-1 gap-1">
+				<div class="flex gap-1">
 					<button
 						on:click={() => (selectedTab = 'GENERAL')}
 						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'GENERAL' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
@@ -425,24 +431,32 @@
 					>
 						Loras
 					</button>
+					<button
+						on:click={() => (selectedTab = 'WILDCARDS')}
+						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'WILDCARDS' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
+					>
+						Wildcards
+					</button>
 				</div>
 				<div class="flex">
-					<GeneralSettings
-						bind:samplingSteps={steps}
-						bind:samplers
-						bind:checkpoints
-						bind:selectedSampler={sampler}
-						bind:selectedCheckpoint={checkpoint}
-						bind:width
-						bind:height
-						bind:seed
-						bind:cfgScale
-						bind:refinerCheckpint={refinerCheckpoint}
-						bind:refinerSwitchAt
-						bind:isRefinerEnabled
-						class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
-					/>
-					<div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
+					{#if selectedTab === 'GENERAL'}
+						<GeneralSettings
+							bind:samplingSteps={steps}
+							bind:samplers
+							bind:checkpoints
+							bind:selectedSampler={sampler}
+							bind:selectedCheckpoint={checkpoint}
+							bind:width
+							bind:height
+							bind:seed
+							bind:cfgScale
+							bind:refinerCheckpint={refinerCheckpoint}
+							bind:refinerSwitchAt
+							bind:isRefinerEnabled
+							class={'flex flex-col flex-1'}
+						/>
+					{/if}
+					{#if selectedTab === 'HIGHRES'}
 						<HighResSettings
 							bind:selectedUpscaler={highResUpscaler}
 							bind:steps={highResSteps}
@@ -450,10 +464,13 @@
 							bind:upscaleBy
 							bind:upscalers
 						/>
-					</div>
-					<div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
+					{/if}
+					{#if selectedTab === 'LORAS'}
 						<LoraSelector bind:loras bind:allTags lastGen={generatedImage} {onLoraClick} />
-					</div>
+					{/if}
+					{#if selectedTab === 'WILDCARDS'}
+						<WildcardManager bind:wildcards />
+					{/if}
 				</div>
 			</div>
 			<div class="flex flex-[0.4] items-center justify-center bg-surface-color">

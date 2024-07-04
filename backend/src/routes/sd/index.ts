@@ -4,12 +4,13 @@ import getSamplers from './getSamplers';
 import getSchedulers from './getSchedulers';
 import installSDUi from './installSDUi';
 import interruptGeneration from './interruptGeneration';
+import loraRoutes from './loras';
 import markSDAsInactive from './markSDAsInactive';
+import promptCruds from './prompts';
 import promptSD from './promptSD';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
-import promptCruds from './prompts';
-import loraRoutes from './loras';
+import wildcardRoutes from './wildcards';
 
 export default [
 	installSDUi,
@@ -23,5 +24,6 @@ export default [
 	getHighResUpscalers,
 	interruptGeneration,
 	...promptCruds,
-	...loraRoutes
+	...loraRoutes,
+	...wildcardRoutes
 ];

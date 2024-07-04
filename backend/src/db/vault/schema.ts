@@ -130,7 +130,7 @@ export const tagsToLoras = sqliteTable(
 	{
 		tagId: integer('tag_id')
 			.notNull()
-			.references(() => tags.id),
+			.references(() => tags.id, { onDelete: 'cascade'}),
 		loraId: text('lora_id')
 			.notNull()
 			.references(() => sdLoras.id, { onDelete: 'cascade' })
@@ -145,5 +145,11 @@ export const sdLoras = sqliteTable('sd_loras', {
 	previewImage: text('preview_image'),
 	activationWords: text('activation_words').notNull()
 });
-
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
+
+export const sdWildcards = sqliteTable('sd_wildcards', {
+	id: text('id').primaryKey(),
+	listName: text('list_name').notNull(),
+	values: text('text').notNull(),
+});
+export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;
