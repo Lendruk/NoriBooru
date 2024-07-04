@@ -15,6 +15,7 @@
 	export let onLoraClick: (lora: SDLora) => void;
 	export let lastGen: Partial<MediaItem> | undefined;
 	export let allTags: PopulatedTag[];
+	let filterTags: PopulatedTag[] = [];
 
 	let showLoraEditModal = false;
 	let loraInEdit: SDLora | undefined;
@@ -61,10 +62,43 @@
 			});
 		}
 	}
+
+	async function searchLoras() {
+		const filteredLoras = await HttpService.get<SDLora[]>(
+			`/sd/loras?tags=${filterTags.map((tag) => tag.id).join(',')}`
+		);
+		loras = filteredLoras;
+	}
+
+	function addTagToFilter(tag: PopulatedTag) {
+		filterTags.push(tag);
+		filterTags = filterTags;
+	}
+
+	function removeTagFromFilter(tag: PopulatedTag) {
+		const index = filterTags.findIndex((t) => t.id === tag.id);
+		if (index !== -1) {
+			filterTags.splice(index, 1);
+		}
+		filterTags = filterTags;
+	}
 </script>
 
-<div>
+<div class="flex flex-col gap-2">
 	<div class="text-xl">Loras</div>
+	<TagSearchInput
+		availableTags={allTags}
+		appliedTags={filterTags}
+		ignoredTags={filterTags}
+		onAppliedTagClick={(tag) => {
+			removeTagFromFilter(tag);
+			searchLoras();
+		}}
+		onTagSearchSubmit={(tag) => {
+			addTagToFilter(tag);
+			searchLoras();
+		}}
+	/>
 	<div class="flex flex-wrap gap-2">
 		{#each loras as lora}
 			<button
