@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onMount } from 'svelte';
 	export let content = '';
 	export let visible = false;
 	export let automaticMode = true;
@@ -14,7 +14,7 @@
 		x = contentDiv.offsetLeft - toolTipDiv.clientWidth;
 		y = contentDiv.offsetTop + 15;
 	}
-	
+
 	function onMouseLeave() {
 		visible = false;
 	}

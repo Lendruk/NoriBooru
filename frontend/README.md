@@ -1,7 +1,9 @@
 # NoriBooru
+
 WIP self-hosted media database and management system.
 
 ## Why?
+
 I want to learn sveltekit and this seems like an interesting idea to execute.
 
 ## Developing

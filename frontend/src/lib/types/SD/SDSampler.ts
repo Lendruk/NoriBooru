@@ -1,5 +1,5 @@
 export type SDSampler = {
-  name: string;
-  aliases: string[];
-  options: Record<string, string>;
-}
+	name: string;
+	aliases: string[];
+	options: Record<string, string>;
+};

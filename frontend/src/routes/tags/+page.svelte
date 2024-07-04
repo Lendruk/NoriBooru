@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Button.svelte';
-import Modal from '$lib/Modal.svelte';
+	import Modal from '$lib/Modal.svelte';
 	import Tag from '$lib/Tag.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import { HttpService } from '$lib/services/HttpService';
@@ -33,7 +33,7 @@ import Modal from '$lib/Modal.svelte';
 		});
 		tags = [...tags, newTag];
 		tagName = '';
-		tagColor = "#ffffff";
+		tagColor = '#ffffff';
 		tagParentId = undefined;
 		appliedParent = [];
 	}
@@ -51,12 +51,11 @@ import Modal from '$lib/Modal.svelte';
 		tagInEditName = '';
 		tagInEditTypeId = 0;
 	}
-	
+
 	async function deleteTag(id: number) {
 		await HttpService.delete(`/tags/${id}`);
 		tags = tags.filter((tag) => tag.id !== id);
 	}
-
 </script>
 
 <div class="flex m-2 gap-2 h-full">
@@ -65,11 +64,17 @@ import Modal from '$lib/Modal.svelte';
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col gap-4">
 				<label for="name">Tag name</label>
-				<input name="name" type="text" bind:value={tagName} placeholder="Tag Name" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"/>
+				<input
+					name="name"
+					type="text"
+					bind:value={tagName}
+					placeholder="Tag Name"
+					class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"
+				/>
 			</div>
 			<div class="flex flex-col gap-4">
 				<label for="tagType">Parent</label>
-				<TagSearchInput 
+				<TagSearchInput
 					availableTags={tags}
 					limit={1}
 					appliedTags={appliedParent}
@@ -86,9 +91,17 @@ import Modal from '$lib/Modal.svelte';
 			</div>
 			<div class="flex flex-col gap-4">
 				<label for="tagColor">Color</label>
-				<input name="tagColor" type="color" bind:value={tagColor} class="h-[40px] bg-zinc-800 indent-2" />
+				<input
+					name="tagColor"
+					type="color"
+					bind:value={tagColor}
+					class="h-[40px] bg-zinc-800 indent-2"
+				/>
 			</div>
-			<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={() => tagName.length > 0 && createTag()}>Add</Button>
+			<Button
+				class="bg-red-950 hover:bg-red-800 h-[40px]"
+				onClick={() => tagName.length > 0 && createTag()}>Add</Button
+			>
 		</div>
 		<h2 class="text-2xl mb-2 mt-10">Tags</h2>
 		<div class="h-[1px] border-t-2 border-red-950 w-[80%] flex mt-2 mb-10"></div>
@@ -102,7 +115,7 @@ import Modal from '$lib/Modal.svelte';
 						tagInEditColor = tag.color;
 						tagInEditAppliedParent = [tag.parent as PopulatedTag]
 					}}
-					tag={tag}
+					{tag}
 					onDelete={() => deleteTag(tag.id)}
 				/>
 			{/each}
@@ -115,29 +128,43 @@ import Modal from '$lib/Modal.svelte';
 		<div class="flex flex-1 flex-col justify-center m-4 gap-4">
 			<div class="flex flex-col gap-4">
 				<label for="tagEditName">Tag name</label>
-				<input name="tagEditName" type="text" bind:value={tagInEditName} placeholder="Tag Name" class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"/>
+				<input
+					name="tagEditName"
+					type="text"
+					bind:value={tagInEditName}
+					placeholder="Tag Name"
+					class="outline-none h-[40px] indent-2 bg-zinc-800 rounded-md"
+				/>
 			</div>
 			<div class="flex flex-col gap-4">
 				<label for="tagType">Parent</label>
-				<TagSearchInput 
-				availableTags={tags}
-				limit={1}
-				appliedTags={tagInEditAppliedParent}
-				onAppliedTagClick={() => {
-					tagInEditParent = undefined;
-					tagInEditAppliedParent = [];
-				}}
-				onTagSearchSubmit={(tag) => {
-					tagInEditAppliedParent = [tag];
-					tagInEditParent = tag.id;
-				}}
-			/>
+				<TagSearchInput
+					availableTags={tags}
+					limit={1}
+					appliedTags={tagInEditAppliedParent}
+					onAppliedTagClick={() => {
+						tagInEditParent = undefined;
+						tagInEditAppliedParent = [];
+					}}
+					onTagSearchSubmit={(tag) => {
+						tagInEditAppliedParent = [tag];
+						tagInEditParent = tag.id;
+					}}
+				/>
 			</div>
 			<div class="flex flex-col gap-4">
 				<label for="tagColor">Color</label>
-				<input name="tagColor" type="color" bind:value={tagInEditColor} class="h-[40px] bg-zinc-800 indent-2" />
+				<input
+					name="tagColor"
+					type="color"
+					bind:value={tagInEditColor}
+					class="h-[40px] bg-zinc-800 indent-2"
+				/>
 			</div>
-			<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={() => tagInEditName.length > 0 && updateTag()}>Save</Button>
+			<Button
+				class="bg-red-950 hover:bg-red-800 h-[40px]"
+				onClick={() => tagInEditName.length > 0 && updateTag()}>Save</Button
+			>
 		</div>
 	{/if}
 </Modal>

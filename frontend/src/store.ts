@@ -1,4 +1,3 @@
-
 import { writable } from 'svelte/store';
 import type { Vault } from '$lib/types/Vault';
 

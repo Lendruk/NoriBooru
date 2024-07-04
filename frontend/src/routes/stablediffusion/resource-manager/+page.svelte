@@ -1,3 +1,1 @@
-<div>
-  resource-manager
-</div>
+<div>resource-manager</div>
