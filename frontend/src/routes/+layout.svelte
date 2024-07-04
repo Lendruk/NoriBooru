@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 	import Topbar from '$lib/Topbar.svelte';
+	import type { Vault } from '$lib/types/Vault';
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
 	import { vaultStore } from '../store';
-	import type { Vault } from '$lib/types/Vault';
 
 	onMount(() => {
 		document.documentElement.className = 'darkTheme';
@@ -27,7 +27,7 @@
 		<Sidebar />
 		<main>
 			<Topbar />
-			<div class="slot">
+			<div class="slot m-2">
 				<slot />
 			</div>
 		</main>

@@ -41,7 +41,7 @@
 	}
 </script>
 
-<div class="bg-zinc-900 m-2 p-2 rounded-md max-h-full">
+<div class="bg-zinc-900 p-2 rounded-md max-h-full">
 	<h2>Media Upload</h2>
 	<div class="flex">
 		<div class="flex shrink flex-1">

@@ -1,24 +1,24 @@
 <script lang="ts">
-	import Video from '$lib/Video.svelte';
-	import type { MediaItem } from '$lib/types/MediaItem';
-	import { onMount, tick } from 'svelte';
-	import GalleryItem from './GalleryItem.svelte';
-	import { HttpService } from '$lib/services/HttpService';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
-	import Modal from '$lib/Modal.svelte';
-	import { pause } from '$lib/utils/time';
-	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import FilterIcon from '$lib/icons/FilterIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import CheckIcon from '$lib/icons/CheckIcon.svelte';
-	import XIcon from '$lib/icons/XIcon.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
+	import CheckIcon from '$lib/icons/CheckIcon.svelte';
+	import FilterIcon from '$lib/icons/FilterIcon.svelte';
+	import InboxIcon from '$lib/icons/InboxIcon.svelte';
 	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import MassTagEditModal from '../components/MassTagEditModal.svelte';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import XIcon from '$lib/icons/XIcon.svelte';
 	import Link from '$lib/Link.svelte';
-	import { goto } from '$app/navigation';
+	import Modal from '$lib/Modal.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import type { MediaItem } from '$lib/types/MediaItem';
+	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import { pause } from '$lib/utils/time';
+	import Video from '$lib/Video.svelte';
+	import { onMount, tick } from 'svelte';
+	import MassTagEditModal from '../components/MassTagEditModal.svelte';
+	import GalleryItem from './GalleryItem.svelte';
 
 	let mediaItems: MediaItem[] = [];
 	let appliedPositiveTags: PopulatedTag[] = [];
@@ -363,7 +363,7 @@
 		{/if}
 		<div
 			bind:this={galleryDiv}
-			class="grid w-full gap-2 justify-center p-2"
+			class="grid w-full gap-2 justify-center"
 			style={`grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));`}
 		>
 			{#each mediaItems as mediaItem}

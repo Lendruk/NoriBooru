@@ -58,7 +58,7 @@
 	}
 </script>
 
-<div class="flex m-2 gap-2 h-full">
+<div class="flex gap-2 h-full">
 	<div class="flex flex-col h-fit max-h-full flex-1 bg-zinc-900 p-4">
 		<h2 class="text-2xl mb-4">Add Tag</h2>
 		<div class="flex flex-col gap-4">

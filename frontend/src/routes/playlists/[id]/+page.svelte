@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import { HttpService } from '$lib/services/HttpService';
-	import type { MediaItem } from '$lib/types/MediaItem';
-	import type { Playlist } from '$lib/types/Playlist';
-	import SimpleTable from '$lib/SimpleTable.svelte';
-	import TableImage from './TableImage.svelte';
-	import VerticalDrawer from '$lib/VerticalDrawer.svelte';
-	import SidebarMediaItem from './SidebarMediaItem.svelte';
-	import Video from '$lib/Video.svelte';
 	import Button from '$lib/Button.svelte';
 	import Checkbox from '$lib/Checkbox.svelte';
-	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+	import SimpleTable from '$lib/SimpleTable.svelte';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import type { MediaItem } from '$lib/types/MediaItem';
+	import type { Playlist } from '$lib/types/Playlist';
+	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import VerticalDrawer from '$lib/VerticalDrawer.svelte';
+	import Video from '$lib/Video.svelte';
+	import SidebarMediaItem from './SidebarMediaItem.svelte';
+	import TableImage from './TableImage.svelte';
 
 	let playlistName = $state('');
 	let timePerItem = $state(0);
@@ -141,7 +141,7 @@
 	}
 </script>
 
-<div class="flex flex-col flex-1 justify-between bg-zinc-900 m-2 rounded-md">
+<div class="flex flex-col flex-1 justify-between bg-zinc-900 rounded-md">
 	<Button
 		class="w-[150px] h-[40px] self-end mr-4 mt-4"
 		onClick={() => ($page.params.id !== 'new' ? updatePlaylist() : createPlaylist())}

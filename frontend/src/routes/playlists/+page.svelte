@@ -1,11 +1,11 @@
 <script lang="ts">
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { goto } from '$app/navigation';
+	import SimpleTable from '$lib/SimpleTable.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import EditIcon from '$lib/icons/editIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SimplePlaylist } from '$lib/types/SimplePlaylist';
-	import SimpleTable from '$lib/SimpleTable.svelte';
-	import EditIcon from '$lib/icons/editIcon.svelte';
-	import { goto } from '$app/navigation';
 
 	let playlists: SimplePlaylist[] = $state([]);
 
@@ -23,7 +23,7 @@
 	}
 </script>
 
-<div class="m-2 bg-zinc-900 rounded-md p-4">
+<div class=" bg-zinc-900 rounded-md p-4">
 	<div class="flex justify-between mb-10">
 		<div class="text-3xl">Playlists</div>
 		<a

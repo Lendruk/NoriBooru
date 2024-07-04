@@ -107,7 +107,9 @@
 		checkpoint = checkpoints[0].model_name;
 		sampler = samplers[0].name;
 		highResUpscaler = upscalers[0].name;
-		refinerCheckpoint = checkpoints[1].model_name;
+		if (checkpoints.length > 1) {
+			refinerCheckpoint = checkpoints[1].model_name;
+		}
 
 		if ($page.url.searchParams.has('inputExif')) {
 			const rawExif = $page.url.searchParams.get('inputExif')!;
@@ -325,7 +327,7 @@
 	});
 </script>
 
-<div class="m-2 bg-zinc-900 rounded-md p-4 flex flex-1 flex-col">
+<div class=" bg-zinc-900 rounded-md p-4 flex flex-1 flex-col">
 	<div class="flex justify-between">
 		<div class="flex gap-2 items-center">
 			<div>Prompt</div>
