@@ -1,33 +1,33 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import { HttpService } from '$lib/services/HttpService';
-	import { onMount } from 'svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import TextArea from '$lib/components/TextArea.svelte';
-	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { SDSampler } from '$lib/types/SD/SDSampler';
-	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
-	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
-	import GeneralSettings from './components/GeneralSettings.svelte';
+	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import PreviewImage from './components/PreviewImage.svelte';
-	import HighResSettings from './components/HighResSettings.svelte';
-	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
-	import SaveIcon from '$lib/icons/SaveIcon.svelte';
-	import Tooltip from '$lib/Tooltip.svelte';
-	import SearchIcon from '$lib/icons/SearchIcon.svelte';
+	import Button from '$lib/Button.svelte';
+	import TextArea from '$lib/components/TextArea.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
-	import PromptSearch from './components/PromptSearch.svelte';
-	import PromptSaveModal from './components/PromptSaveModal.svelte';
-	import type { SavedPrompt } from '$lib/types/SavedPrompt';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import LoraSelector from './components/LoraSelector.svelte';
-	import type { SDLora } from '$lib/types/SD/SDLora';
-	import { page } from '$app/stores';
-	import { vaultStore } from '../../../store';
-	import type { Vault } from '$lib/types/Vault';
+	import SaveIcon from '$lib/icons/SaveIcon.svelte';
+	import SearchIcon from '$lib/icons/SearchIcon.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+	import Tooltip from '$lib/Tooltip.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import type { SavedPrompt } from '$lib/types/SavedPrompt';
+	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
+	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { SDSampler } from '$lib/types/SD/SDSampler';
+	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
+	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
+	import type { Vault } from '$lib/types/Vault';
+	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
+	import { onMount } from 'svelte';
+	import { vaultStore } from '../../../store';
+	import GeneralSettings from './components/GeneralSettings.svelte';
+	import HighResSettings from './components/HighResSettings.svelte';
+	import LoraSelector from './components/LoraSelector.svelte';
+	import PreviewImage from './components/PreviewImage.svelte';
+	import PromptSaveModal from './components/PromptSaveModal.svelte';
+	import PromptSearch from './components/PromptSearch.svelte';
 
 	let checkpoints: SDCheckpoint[] = [];
 	let samplers: SDSampler[] = [];
@@ -400,61 +400,63 @@
 			<TextArea bind:value={negativePrompt} />
 		</div>
 
-		<div class="flex pt-4 gap-2">
-			<div class="flex flex-col w-[10%]">
-				<button
-					on:click={() => (selectedTab = 'GENERAL')}
-					class={`tab-option ${selectedTab === 'GENERAL' ? 'active-tab-option bg-red-950' : ''}`}
-				>
-					General
-				</button>
-				<button
-					on:click={() => (selectedTab = 'HIGHRES')}
-					class={`tab-option flex gap-2 ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950' : ''}`}
-				>
-					<input
-						on:click={(e) => e.stopPropagation()}
-						bind:checked={isHighResEnabled}
-						type="checkbox"
-					/> <span>High Res</span>
-				</button>
-				<button
-					on:click={() => (selectedTab = 'LORAS')}
-					class={`tab-option ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950' : ''}`}
-				>
-					Loras
-				</button>
-			</div>
-			<div class="flex flex-1">
-				<GeneralSettings
-					bind:samplingSteps={steps}
-					bind:samplers
-					bind:checkpoints
-					bind:selectedSampler={sampler}
-					bind:selectedCheckpoint={checkpoint}
-					bind:width
-					bind:height
-					bind:seed
-					bind:cfgScale
-					bind:refinerCheckpint={refinerCheckpoint}
-					bind:refinerSwitchAt
-					bind:isRefinerEnabled
-					class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
-				/>
-				<div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
-					<HighResSettings
-						bind:selectedUpscaler={highResUpscaler}
-						bind:steps={highResSteps}
-						bind:denoisingStrength={highResDenoisingStrength}
-						bind:upscaleBy
-						bind:upscalers
+		<div class="flex gap-4 pt-4">
+			<div class="flex flex-[0.6] flex-col gap-2">
+				<div class="flex flex-1 gap-1">
+					<button
+						on:click={() => (selectedTab = 'GENERAL')}
+						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'GENERAL' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
+					>
+						General
+					</button>
+					<button
+						on:click={() => (selectedTab = 'HIGHRES')}
+						class={`tab-option min-w-[15%] flex justify-center flex gap-2 ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
+					>
+						<input
+							on:click={(e) => e.stopPropagation()}
+							bind:checked={isHighResEnabled}
+							type="checkbox"
+						/> <span>High Res</span>
+					</button>
+					<button
+						on:click={() => (selectedTab = 'LORAS')}
+						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
+					>
+						Loras
+					</button>
+				</div>
+				<div class="flex">
+					<GeneralSettings
+						bind:samplingSteps={steps}
+						bind:samplers
+						bind:checkpoints
+						bind:selectedSampler={sampler}
+						bind:selectedCheckpoint={checkpoint}
+						bind:width
+						bind:height
+						bind:seed
+						bind:cfgScale
+						bind:refinerCheckpint={refinerCheckpoint}
+						bind:refinerSwitchAt
+						bind:isRefinerEnabled
+						class={selectedTab === 'GENERAL' ? 'visible flex flex-col flex-1' : 'hidden'}
 					/>
-				</div>
-				<div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
-					<LoraSelector bind:loras bind:allTags lastGen={generatedImage} {onLoraClick} />
+					<div class={selectedTab === 'HIGHRES' ? 'visible' : 'hidden'}>
+						<HighResSettings
+							bind:selectedUpscaler={highResUpscaler}
+							bind:steps={highResSteps}
+							bind:denoisingStrength={highResDenoisingStrength}
+							bind:upscaleBy
+							bind:upscalers
+						/>
+					</div>
+					<div class={selectedTab === 'LORAS' ? 'visible' : 'hidden'}>
+						<LoraSelector bind:loras bind:allTags lastGen={generatedImage} {onLoraClick} />
+					</div>
 				</div>
 			</div>
-			<div class="flex flex-1 items-center justify-center bg-surface-color">
+			<div class="flex flex-[0.4] items-center justify-center bg-surface-color">
 				{#if isGeneratingImage}
 					<img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
 				{:else if generatedImage}
