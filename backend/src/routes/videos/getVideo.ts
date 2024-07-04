@@ -3,11 +3,10 @@ import { VaultController } from '../../db/VaultController';
 import { createReadStream } from 'fs';
 import path from 'path';
 
-
 const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
-	const params = request.params as { vaultId: string, fileName: string };
+	const params = request.params as { vaultId: string; fileName: string };
 	const vaultId = params.vaultId;
-	if(!vaultId) {
+	if (!vaultId) {
 		return reply.status(400).send('Vault ID is required');
 	}
 
@@ -22,5 +21,5 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 export default {
 	method: 'GET',
 	url: '/videos/:vaultId/:fileName',
-	handler: getVideo,
+	handler: getVideo
 } as RouteOptions;

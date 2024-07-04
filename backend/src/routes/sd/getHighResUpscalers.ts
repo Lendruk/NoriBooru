@@ -5,7 +5,7 @@ import { sdUiService } from '../../services/SDUiService';
 
 const getHighresUpscalers = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 	const sdPort = sdUiService.getSdPort(vault.id);
@@ -23,5 +23,5 @@ export default {
 	method: 'GET',
 	url: '/sd/highres/upscalers',
 	handler: getHighresUpscalers,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

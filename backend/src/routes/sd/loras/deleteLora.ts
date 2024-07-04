@@ -7,18 +7,18 @@ import { eq } from 'drizzle-orm';
 const deleteLora = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 	const { id } = request.params as { id: string };
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
 	const { db } = vault;
-	await db.delete(sdLoras).where(eq(sdLoras.id, id ));
-	reply.send({ message: 'Lora deleted successfully '});
+	await db.delete(sdLoras).where(eq(sdLoras.id, id));
+	reply.send({ message: 'Lora deleted successfully ' });
 };
 
 export default {
 	method: 'DELETE',
 	url: '/sd/loras/:id',
 	handler: deleteLora,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

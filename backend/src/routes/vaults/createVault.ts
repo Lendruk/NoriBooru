@@ -12,7 +12,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 
 	try {
 		const stats = await fs.stat(vaultPath);
-  
+
 		if (!stats.isDirectory()) {
 			throw new Error('Path is not a directory');
 		}
@@ -21,8 +21,11 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 		return reply.status(400).send({ message: 'Path is not a directory' });
 	}
 
-	const newVault = await masterDb.insert(vaults).values({ id: randomUUID(),  path: body.path, name: body.name }).returning();
-  
+	const newVault = await masterDb
+		.insert(vaults)
+		.values({ id: randomUUID(), path: body.path, name: body.name })
+		.returning();
+
 	await fs.mkdir(`${vaultPath}/media`);
 	await fs.mkdir(`${vaultPath}/media/images`);
 	await fs.mkdir(`${vaultPath}/media/images/.thumb`);
@@ -34,5 +37,5 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 export default {
 	method: 'POST',
 	url: '/vaults',
-	handler: createVault,
+	handler: createVault
 } as RouteOptions;

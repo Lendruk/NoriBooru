@@ -5,7 +5,7 @@ import { sdUiService } from '../../services/SDUiService';
 
 const getSDSamplers = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 	const sdPort = sdUiService.getSdPort(vault.id);
@@ -23,5 +23,5 @@ export default {
 	method: 'GET',
 	url: '/sd/samplers',
 	handler: getSDSamplers,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

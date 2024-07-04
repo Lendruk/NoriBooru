@@ -5,7 +5,7 @@ export default {
 	out: 'migrations/vault',
 	dialect: 'sqlite',
 	dbCredentials: {
-		url: './database.sqlite',
+		url: './database.sqlite'
 	},
-	verbose: true,
+	verbose: true
 } satisfies Config;

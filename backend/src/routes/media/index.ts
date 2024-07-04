@@ -8,4 +8,14 @@ import removeTagFromMediaItem from './removeTagFromMediaItem';
 import searchMediaItems from './searchMediaItems';
 import toggleMediaItemArchival from './toggleMediaItemArchival';
 
-export default [addTagToMediaItems, removeTagFromMediaItem, getMediaToReview, deleteMediaItem, getMediaItem, searchMediaItems, toggleMediaItemArchival, createMediaItems, getMediaItemTags];
+export default [
+	addTagToMediaItems,
+	removeTagFromMediaItem,
+	getMediaToReview,
+	deleteMediaItem,
+	getMediaItem,
+	searchMediaItems,
+	toggleMediaItemArchival,
+	createMediaItems,
+	getMediaItemTags
+];

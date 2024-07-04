@@ -7,7 +7,7 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 	const params = request.params as { fileName: string; vaultId: string };
 
 	const vaultId = params.vaultId;
-	if(!vaultId) {
+	if (!vaultId) {
 		return reply.status(400).send('Vault ID is required');
 	}
 
@@ -23,5 +23,5 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 export default {
 	method: 'GET',
 	url: '/images/:vaultId/thumb/:fileName',
-	handler: getImageThumbnail,
+	handler: getImageThumbnail
 } as RouteOptions;

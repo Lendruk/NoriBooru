@@ -14,23 +14,24 @@ type ProcessEntry = {
 	process: ChildProcessWithoutNullStreams;
 	isActive: boolean;
 	port: number;
-}
+};
 
 class SDUiService {
-	private processMap:  Map<string, ProcessEntry> = new Map();
+	private processMap: Map<string, ProcessEntry> = new Map();
 	private inactiveProcessTimers: Map<string, NodeJS.Timeout> = new Map();
-	
+
 	/**
 	 * Current SD ui link
 	 * Using the Automatic1111 web ui
-	*/
-	private static readonly SD_UI_LINK = 'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
-	
+	 */
+	private static readonly SD_UI_LINK =
+		'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
+
 	private static readonly PROCESS_INACTIVE_TTL = 60 * 1000 * 10; // 10 Minutes
 	public constructor() {
 		process.on('SIGINT', () => {
 			console.log(`Shutdown received killing ${this.processMap.size} child processes`);
-			for(const processEntry of this.processMap.values()) {
+			for (const processEntry of this.processMap.values()) {
 				setTimeout(() => {
 					processEntry.process.kill();
 				}, 1000);
@@ -41,7 +42,7 @@ class SDUiService {
 
 	public getSdPort(vaultId: string): number | undefined {
 		const entry = this.processMap.get(vaultId);
-		if(entry) {
+		if (entry) {
 			return entry.port;
 		}
 	}
@@ -51,9 +52,11 @@ class SDUiService {
 			return;
 		}
 
-		const { stderr, stdout } = await execAsync(`bash ./scripts/installAutomatic.sh ${vault.path} ${SDUiService.SD_UI_LINK}`);
+		const { stderr, stdout } = await execAsync(
+			`bash ./scripts/installAutomatic.sh ${vault.path} ${SDUiService.SD_UI_LINK}`
+		);
 
-		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, vault.id ));
+		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, vault.id));
 		await this.startSDUi(vault);
 
 		console.log(stderr);
@@ -63,10 +66,10 @@ class SDUiService {
 	public markProcessAsActive(vault: VaultInstance): void {
 		const processEntry = this.processMap.get(vault.id);
 
-		if(processEntry) {
-			if(!processEntry.isActive) {
+		if (processEntry) {
+			if (!processEntry.isActive) {
 				const timer = this.inactiveProcessTimers.get(vault.id);
-				
+
 				if (timer) {
 					clearTimeout(timer);
 				}
@@ -78,7 +81,7 @@ class SDUiService {
 	public markProcessAsInactive(vault: VaultInstance): void {
 		const processEntry = this.processMap.get(vault.id);
 
-		if(processEntry && processEntry.isActive) {
+		if (processEntry && processEntry.isActive) {
 			processEntry.isActive = false;
 
 			const timer = setTimeout(() => {
@@ -90,7 +93,7 @@ class SDUiService {
 	}
 
 	public async startSDUi(vault: VaultInstance): Promise<number> {
-		if(!this.processMap.has(vault.id)) {
+		if (!this.processMap.has(vault.id)) {
 			const port = await this.findOpenPort();
 
 			try {
@@ -99,12 +102,11 @@ class SDUiService {
 				console.log(error);
 				throw error;
 			}
-			const newProcess = spawn('bash',[`${vault.path}/stable-diffusion-webui/webui.sh`]);
+			const newProcess = spawn('bash', [`${vault.path}/stable-diffusion-webui/webui.sh`]);
 			newProcess.on('error', (err) => console.log(err));
 			newProcess.stdout.on('data', (data) => {
 				console.log(data.toString());
 			});
-
 
 			const startUpCompletionPromise = new Promise<void>((resolve) => {
 				const startUpListener = (data: Buffer) => {
@@ -115,11 +117,15 @@ class SDUiService {
 				};
 				newProcess.stderr.addListener('data', startUpListener);
 			});
-	
+
 			newProcess.stderr.on('data', (data) => {
 				console.log(data.toString());
 			});
-			this.processMap.set(vault.id, { process: newProcess, isActive: true, port });
+			this.processMap.set(vault.id, {
+				process: newProcess,
+				isActive: true,
+				port
+			});
 
 			await startUpCompletionPromise;
 			return port;
@@ -133,8 +139,8 @@ class SDUiService {
 		console.log(`Stopping SD ui for vault ${vault.name}`);
 		const processEntry = this.processMap.get(vault.id);
 
-		if(processEntry) {
-			if(processEntry.process.pid) {
+		if (processEntry) {
+			if (processEntry.process.pid) {
 				kill(processEntry.process.pid);
 				this.processMap.delete(vault.id);
 			}
@@ -142,7 +148,10 @@ class SDUiService {
 	}
 
 	private async modifySDUiPort(path: string, port: number): Promise<void> {
-		await fs.writeFile(`${path}/stable-diffusion-webui/webui-user.sh`, `export COMMANDLINE_ARGS="--api --nowebui --port ${port}"`);
+		await fs.writeFile(
+			`${path}/stable-diffusion-webui/webui-user.sh`,
+			`export COMMANDLINE_ARGS="--api --nowebui --port ${port}"`
+		);
 	}
 
 	private async findOpenPort(): Promise<number> {
@@ -150,7 +159,10 @@ class SDUiService {
 			try {
 				await new Promise<void>((resolve, reject) => {
 					const socket = createConnection({ port: i });
-					socket.once('connect', () => { socket.end(); reject(); });
+					socket.once('connect', () => {
+						socket.end();
+						reject();
+					});
 					socket.once('error', (e: NodeJS.ErrnoException) => {
 						socket.destroy();
 						if (e.code === 'ECONNREFUSED') {
@@ -168,6 +180,6 @@ class SDUiService {
 
 		throw new Error('No available port');
 	}
-}			
+}
 
 export const sdUiService = new SDUiService();

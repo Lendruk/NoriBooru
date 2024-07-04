@@ -12,15 +12,15 @@ import promptCruds from './prompts';
 import loraRoutes from './loras';
 
 export default [
-	installSDUi, 
-	startSDUi, 
-	stopSDUi, 
-	markSDAsInactive, 
-	getCheckpoints, 
-	getSamplers, 
-	getSchedulers, 
-	promptSD, 
-	getHighResUpscalers, 
+	installSDUi,
+	startSDUi,
+	stopSDUi,
+	markSDAsInactive,
+	getCheckpoints,
+	getSamplers,
+	getSchedulers,
+	promptSD,
+	getHighResUpscalers,
 	interruptGeneration,
 	...promptCruds,
 	...loraRoutes

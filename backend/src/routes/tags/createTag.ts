@@ -5,8 +5,12 @@ import TagService from '../../services/TagService';
 
 const createTag = async (request: Request, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
-	const body = request.body as { name: string, color: string, parentId?: number };
-	if(!vaultInstance) {
+	const body = request.body as {
+		name: string;
+		color: string;
+		parentId?: number;
+	};
+	if (!vaultInstance) {
 		return reply.status(400).send('No vault provided');
 	}
 
@@ -18,5 +22,5 @@ export default {
 	method: 'POST',
 	url: '/tags',
 	handler: createTag,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

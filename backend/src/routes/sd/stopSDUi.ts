@@ -3,9 +3,9 @@ import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
 import { sdUiService } from '../../services/SDUiService';
 
-const stopSDUi= async (request: Request, reply: FastifyReply) => {
+const stopSDUi = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
@@ -18,5 +18,5 @@ export default {
 	method: 'POST',
 	url: '/sd/stop',
 	handler: stopSDUi,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

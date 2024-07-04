@@ -20,12 +20,12 @@ const checkVaultPath = async (request: FastifyRequest, reply: FastifyReply) => {
 	} else {
 		return reply.status(400).send({ message: 'Path must be absolute' });
 	}
-  
+
 	return reply.send({ message: 'Path is valid' });
 };
 
 export default {
 	method: 'POST',
 	url: '/vaults/check-path',
-	handler: checkVaultPath,
+	handler: checkVaultPath
 } as RouteOptions;
