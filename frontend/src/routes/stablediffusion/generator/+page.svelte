@@ -19,6 +19,7 @@
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
 	import type { Vault } from '$lib/types/Vault';
+	import { processPrompt } from '$lib/utils/promptUtils';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
@@ -161,8 +162,8 @@
 	async function generate() {
 		const prompt = new SDPromptBuilder();
 		prompt
-			.withPositivePrompt(positivePrompt)
-			.withNegativePrompt(negativePrompt)
+			.withPositivePrompt(processPrompt(wildcards, positivePrompt))
+			.withNegativePrompt(processPrompt(wildcards, negativePrompt))
 			.withSampler(sampler)
 			.withSteps(steps)
 			.withSize(width, height)
