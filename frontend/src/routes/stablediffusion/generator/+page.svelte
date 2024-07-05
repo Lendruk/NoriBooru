@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import Button from '$lib/Button.svelte';
-	import TextArea from '$lib/components/TextArea.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
@@ -25,6 +24,8 @@
 	import { vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import ProgressTracker from './components/ProgressTracker.svelte';
+	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
+	import SimplePrompt from './components/prompting/SimplePrompt.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
 	import GeneralSettings from './views/GeneralSettings.svelte';
@@ -45,6 +46,7 @@
 		| undefined = undefined;
 
 	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
+	let promptMode: 'SIMPLE' | 'BLOCK' = 'SIMPLE';
 	let isGeneratingImage = false;
 	let isSearchingPrompts = false;
 	let isSavingPrompt = false;
@@ -332,10 +334,25 @@
 
 <div class=" bg-zinc-900 rounded-md p-4 flex flex-1 flex-col">
 	<div class="flex justify-between">
-		<div class="flex gap-2 items-center">
-			<div>Prompt</div>
+		<div class="flex flex-1 gap-4 items-center">
+			<div class="flex flex-[0.25] gap-2 items-center">
+				<div>Prompt Mode:</div>
+				<div class="flex flex-1">
+					<button
+						on:click={() => (promptMode = 'SIMPLE')}
+						class={`${promptMode === 'SIMPLE' ? 'bg-red-950' : 'bg-zinc-950 hover:bg-red-900 hover:transition'} h-[40px] rounded-l-md w-[50%]`}
+						>Simple</button
+					>
+					<button
+						on:click={() => (promptMode = 'BLOCK')}
+						class={`${promptMode === 'BLOCK' ? 'bg-red-950' : 'bg-zinc-950 hover:bg-red-900 hover:transition'} h-[40px] rounded-r-md w-[50%]`}
+						>Block</button
+					>
+				</div>
+			</div>
 			<Tooltip>
-				<Button onClick={() => (isSearchingPrompts = true)} slot="target" class="h-full">
+				<Button onClick={() => (isSearchingPrompts = true)} slot="target" class="h-full flex gap-2">
+					<div>Search Prompts</div>
 					<SearchIcon />
 				</Button>
 				<div slot="toolTipContent">Search saved prompts</div>
@@ -402,15 +419,11 @@
 		</div>
 	</div>
 	<div class="flex flex-col flex-1">
-		<div class="flex flex-col">
-			<div>Prompt</div>
-			<TextArea bind:value={positivePrompt} />
-		</div>
-		<div class="flex flex-col">
-			<div>Negative Prompt</div>
-			<TextArea bind:value={negativePrompt} />
-		</div>
-
+		{#if promptMode === 'SIMPLE'}
+			<SimplePrompt bind:negativePrompt bind:positivePrompt />
+		{:else}
+			<BlockPrompt />
+		{/if}
 		<div class="flex gap-4 pt-4">
 			<div class="flex flex-[0.6] flex-col gap-2">
 				<div class="flex gap-1">
