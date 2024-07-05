@@ -23,7 +23,7 @@
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
-	import PreviewImage from './components/PreviewImage.svelte';
+	import PreviewImages from './components/PreviewImages.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
 	import GeneralSettings from './views/GeneralSettings.svelte';
@@ -39,7 +39,9 @@
 	let wildcards: SDWildcard[] = [];
 	let allTags: PopulatedTag[] = [];
 
-	let generatedImage: { fileName: string; id: number } | undefined = undefined;
+	let generatedImages:
+		| { fileName: string; id: number; isArchived: boolean; exif: string }[]
+		| undefined = undefined;
 
 	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
 	let isGeneratingImage = false;
@@ -59,6 +61,8 @@
 	let steps = 20;
 	let seed = -1;
 	let cfgScale = 7;
+	let numberOfGenerations = 1;
+	let imagesPerGeneration = 1;
 
 	// High res
 	let isHighResEnabled = false;
@@ -71,8 +75,6 @@
 	let isRefinerEnabled = false;
 	let refinerCheckpoint = '';
 	let refinerSwitchAt = 0.8;
-
-	let lastGenExif: Record<string, any> | undefined;
 
 	async function setup(vault: Vault) {
 		if (!vault.hasInstalledSD) return;
@@ -163,6 +165,7 @@
 			.withSize(width, height)
 			.withSeed(seed)
 			.withCheckpoint(checkpoint)
+			.withBatching(numberOfGenerations, imagesPerGeneration)
 			.withCfgScale(cfgScale);
 
 		if (isRefinerEnabled) {
@@ -184,11 +187,9 @@
 		isGeneratingImage = true;
 		try {
 			const result = await HttpService.post<{
-				items: { fileName: string; id: number; exif: string }[];
+				items: { fileName: string; id: number; exif: string; isArchived: boolean }[];
 			}>(`/sd/prompt`, prompt.build());
-			generatedImage = result.items[0];
-			lastGenExif = JSON.parse(result.items[0].exif);
-			console.log(lastGenExif);
+			generatedImages = result.items;
 			if ($page.url.searchParams.has('inputExif')) {
 				goto('/stablediffusion/generator');
 			}
@@ -299,9 +300,10 @@
 		}
 	}
 
-	function setSeedFromLastGen() {
-		if (!lastGenExif) return;
-		const value = lastGenExif.parameters.value;
+	function setSeedFromLastGen(exif: string) {
+		const parsedExif = JSON.parse(exif);
+		if (!parsedExif) return;
+		const value = parsedExif.parameters.value;
 		// Bad performance
 		for (const entry of value.split(',')) {
 			if (entry.includes('Seed:')) {
@@ -455,6 +457,8 @@
 							bind:refinerCheckpint={refinerCheckpoint}
 							bind:refinerSwitchAt
 							bind:isRefinerEnabled
+							bind:numberOfGenerations
+							bind:imagesPerGeneration
 							class={'flex flex-col flex-1'}
 						/>
 					{/if}
@@ -468,7 +472,7 @@
 						/>
 					{/if}
 					{#if selectedTab === 'LORAS'}
-						<LoraSelector bind:loras bind:allTags lastGen={generatedImage} {onLoraClick} />
+						<LoraSelector bind:loras bind:allTags lastGen={generatedImages?.[0]} {onLoraClick} />
 					{/if}
 					{#if selectedTab === 'WILDCARDS'}
 						<WildcardManager bind:wildcards />
@@ -478,13 +482,8 @@
 			<div class="flex flex-[0.4] items-center justify-center bg-surface-color">
 				{#if isGeneratingImage}
 					<img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
-				{:else if generatedImage}
-					<PreviewImage
-						imageName={generatedImage.fileName}
-						imageId={generatedImage.id}
-						onDeletion={() => (generatedImage = undefined)}
-						onSetSeed={setSeedFromLastGen}
-					/>
+				{:else if generatedImages}
+					<PreviewImages images={generatedImages} onSetSeed={setSeedFromLastGen} />
 				{/if}
 			</div>
 		</div>

@@ -28,6 +28,9 @@
 	export let refinerCheckpint: string;
 	export let refinerSwitchAt: number;
 
+	export let numberOfGenerations: number;
+	export let imagesPerGeneration: number;
+
 	async function refreshCheckpoints() {
 		await HttpService.post(`/sd/refresh-checkpoints`);
 		checkpoints = await HttpService.get(`/sd/checkpoints`);
@@ -139,5 +142,32 @@
 				/>
 			</div>
 		{/if}
+		<LabeledComponent>
+			<div slot="label">Batching</div>
+			<div slot="content">
+				<LabeledComponent>
+					<div slot="label">Iterations ({numberOfGenerations})</div>
+					<input
+						slot="content"
+						type="range"
+						bind:value={numberOfGenerations}
+						step={1}
+						min={1}
+						max={100}
+					/>
+				</LabeledComponent>
+				<LabeledComponent>
+					<div slot="label">Images per Iteration ({imagesPerGeneration})</div>
+					<input
+						slot="content"
+						type="range"
+						bind:value={imagesPerGeneration}
+						step={1}
+						min={1}
+						max={8}
+					/>
+				</LabeledComponent>
+			</div>
+		</LabeledComponent>
 	</div>
 </div>

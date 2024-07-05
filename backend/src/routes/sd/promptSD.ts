@@ -1,14 +1,15 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
-import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
 import { mediaService } from '../../services/MediaService';
 import { sdUiService } from '../../services/SDUiService';
+import { Request } from '../../types/Request';
+import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
 
 type PromptResponse = {
 	fileName: string;
 	id: number;
 	exif: string;
+	isArchived: boolean;
 };
 
 const promptSD = async (request: Request, reply: FastifyReply) => {
@@ -34,7 +35,7 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 	for (const image of body.images) {
 		const { fileName, id, exif } = await mediaService.createImageFromBase64(image, vault);
-		items.push({ fileName, id, exif });
+		items.push({ fileName, id, exif, isArchived: false });
 	}
 
 	reply.send({ items });

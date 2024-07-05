@@ -28,7 +28,7 @@ export class SDPromptBuilder {
 			sampler_name: 'Euler a',
 			scheduler: 'automatic',
 			batch_size: 1,
-			n_iter: 1,
+			n_iter: 1, // Number of iterations of the prompt
 			steps: 20,
 			cfg_scale: 7,
 			width: 512,
@@ -118,6 +118,12 @@ export class SDPromptBuilder {
 	public withCfgScale(cfgScale: number): this {
 		this.promptRequest.cfg_scale = cfgScale;
 		return this;
+	}
+
+	public withBatching(numberOfGenerations: number, imagesPerGeneration: number): this {
+		this.promptRequest.n_iter = numberOfGenerations;
+		this.promptRequest.batch_size = imagesPerGeneration;
+		return this
 	}
 
 	public withHighResOptions(options: HighResOptions): this {
