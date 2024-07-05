@@ -11,15 +11,12 @@
 	}
 
 	$: {
-		console.log('react');
 		if (isGeneratingImage) {
-			console.log('enters is generating');
 			void getProgress();
 			interval = setInterval(async () => {
 				await getProgress();
 			}, 400);
 		} else {
-			console.log('exits is generating');
 			clearInterval(interval);
 		}
 	}

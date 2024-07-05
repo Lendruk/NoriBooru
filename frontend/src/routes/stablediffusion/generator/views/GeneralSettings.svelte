@@ -128,8 +128,8 @@
 			</div>
 		</div>
 		<div>
-			<div>Cfg Scale</div>
-			<input bind:value={cfgScale} type="number" />
+			<div>Cfg Scale ({cfgScale})</div>
+			<input bind:value={cfgScale} type="range" min={1} max={14} />
 		</div>
 		{#if checkpoints.length > 1}
 			<div>

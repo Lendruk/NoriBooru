@@ -25,7 +25,7 @@
 		<LabeledComponent>
 			<div slot="label" class="flex gap-2">
 				<div>Switch At</div>
-				<input type="number" bind:value={refinerSwitchAt} />
+				<input type="number" bind:value={refinerSwitchAt} step={0.1} min={0} max={1} />
 			</div>
 			<input slot="content" type="range" min={0} max={1} step={0.1} bind:value={refinerSwitchAt} />
 		</LabeledComponent>
