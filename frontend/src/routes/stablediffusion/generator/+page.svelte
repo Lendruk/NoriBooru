@@ -24,6 +24,7 @@
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
+	import ProgressTracker from './components/ProgressTracker.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
 	import GeneralSettings from './views/GeneralSettings.svelte';
@@ -479,12 +480,15 @@
 					{/if}
 				</div>
 			</div>
-			<div class="flex flex-[0.4] items-center justify-center bg-surface-color">
-				{#if isGeneratingImage}
-					<img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
-				{:else if generatedImages}
-					<PreviewImages images={generatedImages} onSetSeed={setSeedFromLastGen} />
-				{/if}
+			<div class="flex flex-col flex-[0.4]">
+				<div class="flex flex-1 items-center justify-center bg-surface-color">
+					{#if isGeneratingImage}
+						<img class="w-[45px] h-[45px]" src={loadingSpinner} alt="spinner" />
+					{:else if generatedImages}
+						<PreviewImages images={generatedImages} onSetSeed={setSeedFromLastGen} />
+					{/if}
+				</div>
+				<ProgressTracker bind:isGeneratingImage />
 			</div>
 		</div>
 	</div>

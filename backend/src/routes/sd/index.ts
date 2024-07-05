@@ -1,5 +1,6 @@
 import getCheckpoints from './getCheckpoints';
 import getHighResUpscalers from './getHighResUpscalers';
+import getProgress from './getProgress';
 import getSamplers from './getSamplers';
 import getSchedulers from './getSchedulers';
 import installSDUi from './installSDUi';
@@ -25,6 +26,7 @@ export default [
 	getHighResUpscalers,
 	interruptGeneration,
 	refreshCheckpoints,
+	getProgress,
 	...promptCruds,
 	...loraRoutes,
 	...wildcardRoutes
