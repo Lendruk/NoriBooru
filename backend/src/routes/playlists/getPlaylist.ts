@@ -7,72 +7,74 @@ import { checkVault } from '../../hooks/checkVault';
 const getPlaylist = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 	const params = request.params as { id: string };
-	if(!params.id) {
+	if (!params.id) {
 		return reply.status(400).send({ message: 'Missing id' });
-  
 	}
 	const id = parseInt(params.id);
-  
-	if(!vault) {
+
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 	const { db } = vault;
-	const rows = await db.select({
-		id: playlists.id,
-		name: playlists.name,
-		createdAt: playlists.createdAt,
-		timePerItem: playlists.timePerItem,
-		randomizeOrder: playlists.randomizeOrder,
-		updatedAt: playlists.updatedAt,
-		item: {
-			id: mediaItems.id,
-			fileName: mediaItems.fileName,
-			type: mediaItems.type,
-			extension: mediaItems.extension,
-			fileSize: mediaItems.fileSize,
-			createdAt: mediaItems.createdAt,
-			updatedAt: mediaItems.updatedAt,
-			isArchived: mediaItems.isArchived,
-			exif: mediaItems.exif,
-			index: playlists_mediaItems_table.itemIndex,
-		}
-	})
+	const rows = await db
+		.select({
+			id: playlists.id,
+			name: playlists.name,
+			createdAt: playlists.createdAt,
+			timePerItem: playlists.timePerItem,
+			randomizeOrder: playlists.randomizeOrder,
+			updatedAt: playlists.updatedAt,
+			item: {
+				id: mediaItems.id,
+				fileName: mediaItems.fileName,
+				type: mediaItems.type,
+				extension: mediaItems.extension,
+				fileSize: mediaItems.fileSize,
+				createdAt: mediaItems.createdAt,
+				updatedAt: mediaItems.updatedAt,
+				isArchived: mediaItems.isArchived,
+				exif: mediaItems.exif,
+				index: playlists_mediaItems_table.itemIndex
+			}
+		})
 		.from(playlists)
 		.where(eq(playlists.id, id))
 		.leftJoin(playlists_mediaItems_table, eq(playlists_mediaItems_table.playlistId, playlists.id))
 		.leftJoin(mediaItems, eq(playlists_mediaItems_table.mediaItemId, mediaItems.id));
-  
-	const playlist = Object.values(rows.reduce<Record<number, Playlist>>((acc, row) => { 
-		const { createdAt, id, name, randomizeOrder, updatedAt, timePerItem, item} = row;
 
-		if(!acc[id]) {
-			acc[id] = {
-				createdAt,
-				id,
-				timePerItem,
-				name,
-				randomizeOrder,
-				updatedAt,
-				items: [],
-			};
-		}
+	const playlist = Object.values(
+		rows.reduce<Record<number, Playlist>>((acc, row) => {
+			const { createdAt, id, name, randomizeOrder, updatedAt, timePerItem, item } = row;
 
-		if(item) {
-      acc[id].items![item.index!] = { 
-      	createdAt: item.createdAt!, 
-      	extension: item.extension!, 
-      	fileSize: item.fileSize!, 
-      	fileName: item.fileName!, 
-      	id: item.id!, 
-      	isArchived: item.isArchived ?? 0, 
-      	type: item.type!, 
-      	updatedAt: item.updatedAt,
-      	exif: item.exif
-      };
-		}
+			if (!acc[id]) {
+				acc[id] = {
+					createdAt,
+					id,
+					timePerItem,
+					name,
+					randomizeOrder,
+					updatedAt,
+					items: []
+				};
+			}
 
-		return acc;
-	}, {}))[0];
+			if (item) {
+				acc[id].items![item.index!] = {
+					createdAt: item.createdAt!,
+					extension: item.extension!,
+					fileSize: item.fileSize!,
+					fileName: item.fileName!,
+					id: item.id!,
+					isArchived: item.isArchived ?? 0,
+					type: item.type!,
+					updatedAt: item.updatedAt,
+					exif: item.exif
+				};
+			}
+
+			return acc;
+		}, {})
+	)[0];
 
 	return reply.send(playlist);
 };
@@ -81,5 +83,5 @@ export default {
 	method: 'GET',
 	url: '/playlists/:id',
 	handler: getPlaylist,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

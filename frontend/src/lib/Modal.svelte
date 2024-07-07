@@ -1,8 +1,8 @@
 <script lang="ts">
-	export let showModal = false; 
-	export { cssClass as class};
-	
-	let cssClass = "";
+	export let showModal = false;
+	export { cssClass as class };
+
+	let cssClass = '';
 	let dialog: HTMLDialogElement;
 
 	$: if (dialog && showModal) dialog.showModal();

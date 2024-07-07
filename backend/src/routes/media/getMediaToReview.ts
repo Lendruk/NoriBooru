@@ -13,7 +13,10 @@ const getMediaToReview = async (request: Request, reply: FastifyReply) => {
 
 	const { db } = vaultInstance;
 
-	const inboxIds = await db.select({ id: mediaItems.id }).from(mediaItems).where(eq(mediaItems.isArchived, 0));
+	const inboxIds = await db
+		.select({ id: mediaItems.id })
+		.from(mediaItems)
+		.where(eq(mediaItems.isArchived, 0));
 
 	return reply.send(inboxIds.map(({ id }) => id));
 };
@@ -22,5 +25,5 @@ export default {
 	method: 'GET',
 	url: '/mediaItems/review',
 	handler: getMediaToReview,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

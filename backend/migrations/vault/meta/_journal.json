@@ -1,12 +1,12 @@
 {
-  "version": "5",
+  "version": "7",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1716239616128,
-      "tag": "0000_peaceful_snowbird",
+      "version": "6",
+      "when": 1720124113173,
+      "tag": "0000_peaceful_triton",
       "breakpoints": true
     }
   ]

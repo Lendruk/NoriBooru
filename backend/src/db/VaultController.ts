@@ -6,7 +6,7 @@ import * as vaultSchema from './vault/schema';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export type VaultInstance = Vault & { db: VaultDb }; 
+export type VaultInstance = Vault & { db: VaultDb };
 
 export class VaultController {
 	public static vaults: Map<string, VaultInstance> = new Map();

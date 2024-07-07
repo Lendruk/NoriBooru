@@ -6,7 +6,7 @@ import { checkVault } from '../../hooks/checkVault';
 
 const toggleMediaItemArchival = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
@@ -15,11 +15,14 @@ const toggleMediaItemArchival = async (request: Request, reply: FastifyReply) =>
 	const body = request.body as { isArchived: boolean };
 	const { db } = vault;
 	try {
-		for(const rawId of parsedIdArray) {
+		for (const rawId of parsedIdArray) {
 			const parsedId = Number.parseInt(rawId ?? '');
-			await db.update(mediaItems).set({ isArchived: body.isArchived ? 1 : 0 }).where(eq(mediaItems.id, parsedId));
+			await db
+				.update(mediaItems)
+				.set({ isArchived: body.isArchived ? 1 : 0 })
+				.where(eq(mediaItems.id, parsedId));
 		}
-	} catch(error) {
+	} catch (error) {
 		console.log(error);
 		return reply.status(400).send(error);
 	}
@@ -31,5 +34,5 @@ export default {
 	method: 'PATCH',
 	url: '/mediaItems/:ids',
 	handler: toggleMediaItemArchival,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

@@ -1,6 +1,6 @@
 export type Exif = {
-  parameters?: {
-    value: string;
-    description: string;
-  }
-}
+	parameters?: {
+		value: string;
+		description: string;
+	};
+};

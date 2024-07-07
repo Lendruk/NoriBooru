@@ -1,11 +1,11 @@
 <script lang="ts">
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { goto } from '$app/navigation';
+	import SimpleTable from '$lib/SimpleTable.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import EditIcon from '$lib/icons/editIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SimplePlaylist } from '$lib/types/SimplePlaylist';
-	import SimpleTable from '$lib/SimpleTable.svelte';
-	import EditIcon from '$lib/icons/editIcon.svelte';
-	import { goto } from '$app/navigation';
 
 	let playlists: SimplePlaylist[] = $state([]);
 
@@ -16,14 +16,14 @@
 	});
 
 	async function deletePlaylist(playlistId?: number) {
-    if(playlistId !== undefined) {
-      await HttpService.delete(`/playlists/${playlistId}`);
-      playlists = playlists.filter((playlist) => playlist.id !== playlistId);
-    }
+		if (playlistId !== undefined) {
+			await HttpService.delete(`/playlists/${playlistId}`);
+			playlists = playlists.filter((playlist) => playlist.id !== playlistId);
+		}
 	}
 </script>
 
-<div class="m-2 bg-zinc-900 rounded-md p-4">
+<div class=" bg-zinc-900 rounded-md p-4">
 	<div class="flex justify-between mb-10">
 		<div class="text-3xl">Playlists</div>
 		<a
@@ -34,17 +34,15 @@
 
 	<div class="flex flex-col flex-1">
 		{#if playlists.length > 0}
-      <SimpleTable
-      cols={[
-        { key: 'name', header: 'Name' },
-      ]}
-      rows={playlists}
-      actions={[
+			<SimpleTable
+				cols={[{ key: 'name', header: 'Name' }]}
+				rows={playlists}
+				actions={[
         { icon: EditIcon, name: "Edit", onClick: (id) => { goto(`/playlists/${id}`)}},
         { icon: PlayIcon, name: 'Play', onClick: (id) => { goto(`/playlists/view/${id}`)}, condition: (row) =>  (row as SimplePlaylist).items > 0},
         { icon: TrashIcon, name: 'Delete', onClick: (id) => { deletePlaylist(id as number)} }
       ]}
-      />
+			/>
 		{:else}
 			<div>No playlists</div>
 		{/if}

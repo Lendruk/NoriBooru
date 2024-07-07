@@ -1,24 +1,26 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { tags } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import TagService from '../../services/TagService';
 
 const createTag = async (request: Request, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
-	const body = request.body as { name: string, color: string, parentId?: number };
-	if(!vaultInstance) {
+	const body = request.body as {
+		name: string;
+		color: string;
+		parentId?: number;
+	};
+	if (!vaultInstance) {
 		return reply.status(400).send('No vault provided');
 	}
 
-	const { db } = vaultInstance;
-	const newTag = await db.insert(tags).values({ name: body.name, color: body.color, parentTagId: body.parentId }).returning();
-
-	return reply.send(newTag[0]);
+	const newTag = await TagService.createTag(vaultInstance, body.name, body.color, body.parentId);
+	return reply.send(newTag);
 };
 
 export default {
 	method: 'POST',
 	url: '/tags',
 	handler: createTag,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

@@ -1,29 +1,39 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import { TagTableSchema, mediaItems, tagsToMediaItems } from '../../db/vault/schema';
+import { TagSchema, mediaItems, tagsToMediaItems } from '../../db/vault/schema';
 import { asc, desc, eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 
 type BaseMediaItem = {
-  id: number;
-  fileName: string;
-  type: string;
-  extension: string;
-  fileSize: number;
-  createdAt: number;
-  updatedAt: number | null;
-  isArchived: boolean;
-}
+	id: number;
+	fileName: string;
+	type: string;
+	extension: string;
+	fileSize: number;
+	createdAt: number;
+	updatedAt: number | null;
+	isArchived: boolean;
+	exif: string;
+};
 
 type QueryType = 'AND' | 'OR';
 
 export type MediaItem = BaseMediaItem & {
-  tags: number[];
+	tags: number[];
 };
 
-export type MediaItemWithTags = BaseMediaItem & { tags: TagTableSchema[] };
+export type MediaItemWithTags = BaseMediaItem & { tags: TagSchema[] };
 
-export type MediaSearchQuery = { positiveTags: string, negativeTags: string, sortMethod: SortMethods, page: string, archived: string, positiveQueryType: QueryType, negativeQueryType: QueryType };
+export type MediaSearchQuery = {
+	positiveTags: string;
+	negativeTags: string;
+	sortMethod: SortMethods;
+	page: string;
+	archived: string;
+	positiveQueryType: QueryType;
+	negativeQueryType: QueryType;
+	exif: string;
+};
 
 const PAGE_SIZE = 30;
 type SortMethods = 'newest' | 'oldest';
@@ -44,14 +54,19 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 	const sortMethod: SortMethods = query.sortMethod ?? 'newest';
 	const hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
 	const page = parseInt(query.page ?? '0');
-	const rows = await db.select().from(mediaItems)
+	const rows = await db
+		.select()
+		.from(mediaItems)
 		.where(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0))
 		.orderBy(sortMethod === 'newest' ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt));
 
 	let finalMedia: MediaItem[] = [];
 	for (const row of rows) {
 		const tagArr: number[] = [];
-		const tagPairs = await db.select().from(tagsToMediaItems).where(eq(tagsToMediaItems.mediaItemId, row.id));
+		const tagPairs = await db
+			.select()
+			.from(tagsToMediaItems)
+			.where(eq(tagsToMediaItems.mediaItemId, row.id));
 
 		for (const tagPair of tagPairs) {
 			tagArr.push(tagPair.tagId);
@@ -62,40 +77,46 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			extension: row.extension,
 			fileName: row.fileName,
 			fileSize: row.fileSize,
+			exif: row.exif ?? '',
 			id: row.id,
 			isArchived: row.isArchived === 1 ? true : false,
 			type: row.type,
 			updatedAt: row.updatedAt,
-			tags: tagArr,
+			tags: tagArr
 		});
 	}
 
-	finalMedia = finalMedia.sort((a, b) => sortMethod === 'newest' ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+	finalMedia = finalMedia.sort((a, b) =>
+		sortMethod === 'newest' ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+	);
 	if (hasFilters) {
-		finalMedia = finalMedia.filter(item => {
+		finalMedia = finalMedia.filter((item) => {
 			let positiveQueryEvaluation = true;
 			if (positiveQueryType === 'AND') {
-				positiveQueryEvaluation = positiveTags.every(tag => item.tags.includes(tag));
+				positiveQueryEvaluation = positiveTags.every((tag) => item.tags.includes(tag));
 			} else {
-				positiveQueryEvaluation = positiveTags.some(tag => item.tags.includes(tag));
+				positiveQueryEvaluation = positiveTags.some((tag) => item.tags.includes(tag));
 			}
 
 			let negativeQueryEvaluation = true;
-			if(negativeQueryType === 'AND') {
-				negativeQueryEvaluation = negativeTags.every(tag => !item.tags.includes(tag)); 
-			}  else {
-				negativeQueryEvaluation = negativeTags.some(tag => !item.tags.includes(tag)); 
+			if (negativeQueryType === 'AND') {
+				negativeQueryEvaluation = negativeTags.every((tag) => !item.tags.includes(tag));
+			} else {
+				negativeQueryEvaluation = negativeTags.some((tag) => !item.tags.includes(tag));
 			}
-    
-			return positiveQueryEvaluation && negativeQueryEvaluation; });
+
+			return positiveQueryEvaluation && negativeQueryEvaluation;
+		});
 	}
 
-	return reply.send({ mediaItems: finalMedia.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE) });
+	return reply.send({
+		mediaItems: finalMedia.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+	});
 };
 
 export default {
 	method: 'GET',
 	url: '/mediaItems',
 	handler: searchMediaItems,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

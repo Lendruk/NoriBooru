@@ -8,13 +8,12 @@ const deletePlaylist = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 	const params = request.params as { id: string };
 
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
-	if(!params.id) {
+	if (!params.id) {
 		return reply.status(400).send({ message: 'Missing id' });
-  
 	}
 
 	const { db } = vault;
@@ -28,5 +27,5 @@ export default {
 	method: 'DELETE',
 	url: '/playlists/:id',
 	handler: deletePlaylist,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;

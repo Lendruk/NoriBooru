@@ -1,11 +1,15 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { Request } from '../../types/Request';
-import {  TagTableSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
+import { TagSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
 import { checkVault } from '../../hooks/checkVault';
 import { VaultDb } from '../../db/VaultController';
 
-const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagTableSchema): Promise<boolean> => {
+const insertTagIntoMedia = async (
+	db: VaultDb,
+	mediaId: number,
+	tag: TagSchema
+): Promise<boolean> => {
 	try {
 		await db.insert(tagsToMediaItems).values({ tagId: tag.id, mediaItemId: mediaId });
 		return true;
@@ -16,25 +20,25 @@ const insertTagIntoMedia = async (db: VaultDb , mediaId: number, tag: TagTableSc
 
 const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
-	if(!vault) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
 	const { ids } = request.params as { ids: string };
 	const parsedIdArray: string[] = JSON.parse(ids);
-	const body = request.body as TagTableSchema | { tags: TagTableSchema[] };
-  
+	const body = request.body as TagSchema | { tags: TagSchema[] };
+
 	try {
 		const { db } = vault;
 		if (parsedIdArray && Array.isArray(parsedIdArray)) {
-			let tagsToInsert: TagTableSchema[] = [];
+			let tagsToInsert: TagSchema[] = [];
 			if ('tags' in body) {
 				tagsToInsert = body.tags;
-			} else { 
+			} else {
 				tagsToInsert = [body];
 			}
 
-			for(const tag of tagsToInsert) {
+			for (const tag of tagsToInsert) {
 				let curMediaCount = tag.mediaCount;
 				for (const id of parsedIdArray) {
 					const numericId = Number.parseInt(id);
@@ -45,7 +49,7 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 				}
 			}
 		}
-	} catch(error) {
+	} catch (error) {
 		return reply.status(400).send({ message: error });
 	}
 
@@ -56,5 +60,5 @@ export default {
 	method: 'PUT',
 	url: '/mediaItems/:ids/tags',
 	handler: addTagToMediaItems,
-	onRequest: checkVault,
+	onRequest: checkVault
 } as RouteOptions;
