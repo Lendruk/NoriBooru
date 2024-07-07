@@ -22,7 +22,8 @@
 	import { processPrompt } from '$lib/utils/promptUtils';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
-	import { vaultStore } from '../../../store';
+	import { isSdStarting, vaultStore } from '../../../store';
+	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import ProgressTracker from './components/ProgressTracker.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
@@ -83,6 +84,7 @@
 	async function setup(vault: Vault) {
 		if (!vault.hasInstalledSD) return;
 
+		$isSdStarting = true;
 		await HttpService.post(`/sd/start`);
 		const [
 			fetchedSamplers,
@@ -157,6 +159,8 @@
 				}
 			}
 		}
+
+		$isSdStarting = false;
 	}
 
 	async function generate() {
@@ -333,7 +337,7 @@
 	});
 </script>
 
-<div class=" bg-zinc-900 rounded-md p-4 flex flex-1 flex-col">
+<div class=" bg-zinc-900 rounded-md p-4 flex flex-1 flex-col relative">
 	<div class="flex justify-between">
 		<div class="flex flex-1 gap-4 items-center">
 			<div class="flex flex-[0.25] gap-2 items-center">
@@ -506,6 +510,14 @@
 			</div>
 		</div>
 	</div>
+	{#if $isSdStarting}
+		<div
+			class="absolute w-full h-full top-0 left-0 backdrop-blur-lg flex items-center justify-center rounded-md gap-4"
+		>
+			<div class="text-4xl">SDUi is Starting</div>
+			<LoadingSpinner />
+		</div>
+	{/if}
 </div>
 {#if isSearchingPrompts}
 	<PromptSearch bind:isOpen={isSearchingPrompts} onSelectPrompt={loadPrompt} {onDeletePrompt} />
