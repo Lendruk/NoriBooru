@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import ImagesIcon from './icons/ImagesIcon.svelte';
-	import PlayIcon from './icons/PlayIcon.svelte';
-	import TagIcon from './icons/TagIcon.svelte';
 	import { PUBLIC_VERSION } from '$env/static/public';
-	import InboxIcon from './icons/InboxIcon.svelte';
-	import UploadIcon from './icons/UploadIcon.svelte';
-	import ArrowRight from './icons/ArrowRight.svelte';
-	import ArrowLeft from './icons/ArrowLeft.svelte';
-	import PaletteIcon from './icons/PaletteIcon.svelte';
-	import PenIcon from './icons/PenIcon.svelte';
-	import FolderClosedIcon from './icons/FolderClosedIcon.svelte';
-	import DownloadIcon from './icons/DownloadIcon.svelte';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../store';
+	import ArrowLeft from './icons/ArrowLeft.svelte';
+	import ArrowRight from './icons/ArrowRight.svelte';
+	import DownloadIcon from './icons/DownloadIcon.svelte';
+	import ImagesIcon from './icons/ImagesIcon.svelte';
+	import InboxIcon from './icons/InboxIcon.svelte';
+	import PaletteIcon from './icons/PaletteIcon.svelte';
+	import PenIcon from './icons/PenIcon.svelte';
+	import PlayIcon from './icons/PlayIcon.svelte';
+	import TagIcon from './icons/TagIcon.svelte';
+	import UploadIcon from './icons/UploadIcon.svelte';
 
 	let isSidebarOpen = true;
 
@@ -74,12 +73,13 @@
 		vaultStore.subscribe((vault) => {
 			if (vault?.hasInstalledSD) {
 				stableDiffusionRoutes = [
-					{
-						icon: FolderClosedIcon,
-						name: 'Resources',
-						path: '/stablediffusion/resource-manager',
-						navHref: '/stablediffusion/resource-manager'
-					},
+					// Soooon
+					// {
+					// 	icon: FolderClosedIcon,
+					// 	name: 'Resources',
+					// 	path: '/stablediffusion/resource-manager',
+					// 	navHref: '/stablediffusion/resource-manager'
+					// },
 					{
 						icon: PenIcon,
 						name: 'Generator',
