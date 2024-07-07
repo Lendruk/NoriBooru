@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Select from '$lib/components/Select.svelte';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import SliderInput from '../../../components/SliderInput.svelte';
 
 	export let currentCheckpoint: string;
 	export let currentRefinerCheckpoint: string;
@@ -11,23 +11,23 @@
 </script>
 
 <div>
-	<div>
-		Refiner Checkpoint <input type="checkbox" bind:checked={isRefinerEnabled} />
+	<div class="flex gap-4 text-xl items-center">
+		<input type="checkbox" bind:checked={isRefinerEnabled} />
+		<div>Refiner Checkpoint</div>
 	</div>
 
-	<Select bind:value={currentRefinerCheckpoint}>
+	<Select class={'h-[40px]'} bind:value={currentRefinerCheckpoint}>
 		{#each checkpoints.filter((check) => check.model_name !== currentCheckpoint) as checkpoint}
 			<option value={checkpoint.model_name}>{checkpoint.model_name}</option>
 		{/each}
 	</Select>
 
-	<div class="flex flex-col">
-		<LabeledComponent>
-			<div slot="label" class="flex gap-2">
-				<div>Switch At</div>
-				<input type="number" bind:value={refinerSwitchAt} step={0.1} min={0} max={1} />
-			</div>
-			<input slot="content" type="range" min={0} max={1} step={0.1} bind:value={refinerSwitchAt} />
-		</LabeledComponent>
-	</div>
+	<SliderInput
+		bind:value={refinerSwitchAt}
+		min={0}
+		max={1}
+		step={0.1}
+		hasNumericInput={true}
+		label="Switch at"
+	/>
 </div>

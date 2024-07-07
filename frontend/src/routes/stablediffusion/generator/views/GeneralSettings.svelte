@@ -7,6 +7,8 @@
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import NumberInput from '../../../components/NumberInput.svelte';
+	import SliderInput from '../../../components/SliderInput.svelte';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	import RefinerSelection from '../components/RefinerSelection.svelte';
 
@@ -83,26 +85,37 @@
 				</div>
 			</LabeledComponent>
 		</div>
-		<div>Steps</div>
-		<input bind:value={samplingSteps} type="number" />
-		<div>Seed</div>
-		<div class="flex gap-2">
-			<input class="w-full" bind:value={seed} type="number" /><Button onClick={() => (seed = -1)}
-				><DiceEmoji /></Button
-			>
+		<NumberInput label="Steps" min={1} step={1} bind:value={samplingSteps} />
+		<NumberInput label="Seed" min={1} step={1} bind:value={seed}>
+			<Button class="h-full" slot="extra" onClick={() => (seed = -1)}><DiceEmoji /></Button>
+		</NumberInput>
+		<div>
+			<SliderInput
+				bind:value={cfgScale}
+				hasValueInLabel={true}
+				min={1}
+				max={14}
+				label="Cfg Scale"
+			/>
 		</div>
 		<div class="flex flex-col flex-1">
-			<div>Size</div>
+			<div class="text-xl">Size</div>
 			<div class="flex flex-1 gap-4">
 				<div class="flex flex-1 flex-col">
-					<div class="flex flex-col flex-1">
-						<div>Width</div>
-						<input bind:value={width} type="number" />
-					</div>
-					<div class="flex flex-col flex-1">
-						<div>Height</div>
-						<input bind:value={height} type="number" />
-					</div>
+					<SliderInput
+						bind:value={width}
+						min={512}
+						max={4096}
+						hasNumericInput={true}
+						label="Width"
+					/>
+					<SliderInput
+						bind:value={height}
+						min={512}
+						max={4096}
+						hasNumericInput={true}
+						label="Height"
+					/>
 				</div>
 				<div class="flex flex-col">
 					<div>Preview</div>
@@ -127,21 +140,6 @@
 				</div>
 			</div>
 		</div>
-		<div>
-			<div>Cfg Scale ({cfgScale})</div>
-			<input bind:value={cfgScale} type="range" min={1} max={14} />
-		</div>
-		{#if checkpoints.length > 1}
-			<div>
-				<RefinerSelection
-					bind:checkpoints
-					bind:currentRefinerCheckpoint={refinerCheckpint}
-					bind:currentCheckpoint={selectedCheckpoint}
-					bind:refinerSwitchAt
-					bind:isRefinerEnabled
-				/>
-			</div>
-		{/if}
 		<LabeledComponent>
 			<div slot="label">Batching</div>
 			<div slot="content">
@@ -169,5 +167,17 @@
 				</LabeledComponent>
 			</div>
 		</LabeledComponent>
+
+		{#if checkpoints.length > 1}
+			<div>
+				<RefinerSelection
+					bind:checkpoints
+					bind:currentRefinerCheckpoint={refinerCheckpint}
+					bind:currentCheckpoint={selectedCheckpoint}
+					bind:refinerSwitchAt
+					bind:isRefinerEnabled
+				/>
+			</div>
+		{/if}
 	</div>
 </div>
