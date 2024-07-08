@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { MouseEventHandler } from 'svelte/elements';
+	import ArrowRight from './icons/ArrowRight.svelte';
 	import EditIcon from './icons/editIcon.svelte';
 	import type { PopulatedTag } from './types/PopulatedTag';
-	import ArrowRight from './icons/ArrowRight.svelte';
 
 	export let tag: PopulatedTag;
 	export let onDelete: MouseEventHandler<HTMLButtonElement> | undefined = undefined;
@@ -25,7 +25,10 @@
 					{tag.parent.name}
 				{/if}
 				<button
-					on:click={() => (showParent = !showParent)}
+					on:click={(e) => {
+						e.stopPropagation();
+						showParent = !showParent;
+					}}
 					class="hover:fill-red-900 hover:transition fill-white"
 				>
 					<ArrowRight />
