@@ -1,16 +1,16 @@
+import ExifReader from 'exifreader';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
-import util from 'node:util';
+import ffmpeg from 'fluent-ffmpeg';
 import { createWriteStream } from 'fs';
 import * as fs from 'fs/promises';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import { mediaItems } from '../../db/vault/schema';
+import util from 'node:util';
 import sharp from 'sharp';
-import ExifReader from 'exifreader';
-import ffmpeg from 'fluent-ffmpeg';
+import { mediaItems } from '../../db/vault/schema';
+import { checkVault } from '../../hooks/checkVault';
 import { Exif } from '../../types/Exif';
+import { Request } from '../../types/Request';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { pipeline } = require('node:stream');
 const pump = util.promisify(pipeline);
@@ -53,7 +53,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			const [stats, buffer] = await Promise.all([fs.stat(finalPath), fs.readFile(finalPath)]);
 
 			// Exif
-			const exif = (await ExifReader.load(buffer)) as Exif;
+			const exif = fileType === 'image' ? (await ExifReader.load(buffer)) as Exif : '';
 			await db
 				.insert(mediaItems)
 				.values({
