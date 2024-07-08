@@ -33,9 +33,21 @@
 	export let numberOfGenerations: number;
 	export let imagesPerGeneration: number;
 
+	let isUnloadingCheckpoint: boolean = false;
+
 	async function refreshCheckpoints() {
 		await HttpService.post(`/sd/refresh-checkpoints`);
 		checkpoints = await HttpService.get(`/sd/checkpoints`);
+	}
+
+	async function unloadCheckpoints() {
+		isUnloadingCheckpoint = true;
+		try {
+			await HttpService.post(`/sd/unload-checkpoint`);
+		} catch {
+		} finally {
+			isUnloadingCheckpoint = false;
+		}
 	}
 
 	let sizePresets: [number, number][] = [
@@ -67,7 +79,12 @@
 					</GalleryItemButton>
 				</div>
 				<div class="w-full" slot="content">
-					<Select class="h-[40px] w-full" bind:value={selectedCheckpoint}>
+					<Select
+						class="h-[40px] w-full"
+						bind:value={selectedCheckpoint}
+						bind:isLoading={isUnloadingCheckpoint}
+						on:change={unloadCheckpoints}
+					>
 						{#each checkpoints as checkpoint}
 							<option value={checkpoint.model_name}>{checkpoint.model_name}</option>
 						{/each}

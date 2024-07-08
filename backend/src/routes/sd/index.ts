@@ -12,6 +12,7 @@ import promptSD from './promptSD';
 import refreshCheckpoints from './refreshCheckpoints';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
+import unloadCheckpoint from './unloadCheckpoint';
 import wildcardRoutes from './wildcards';
 
 export default [
@@ -27,6 +28,7 @@ export default [
 	interruptGeneration,
 	refreshCheckpoints,
 	getProgress,
+	unloadCheckpoint,
 	...promptCruds,
 	...loraRoutes,
 	...wildcardRoutes

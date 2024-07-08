@@ -49,10 +49,12 @@
 
 	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
 	let promptMode: 'SIMPLE' | 'BLOCK' = 'SIMPLE';
-	let isGeneratingImage = false;
 	let isSearchingPrompts = false;
 	let isSavingPrompt = false;
 	let areSaveOptionsExpanded = false;
+
+	// Loading flags
+	let isGeneratingImage = false;
 
 	// General settings
 	let promptId: string = '';
@@ -152,7 +154,6 @@
 
 					if (settingsObject.Refiner) {
 						isRefinerEnabled = true;
-						console.log(settingsObject.Refiner.trim().split(' ')[0]);
 						refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
 						refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
 					}
