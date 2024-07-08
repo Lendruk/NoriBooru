@@ -9,6 +9,7 @@
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
+	import { onDestroy, onMount } from 'svelte';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
 	import TextInput from '../../../components/TextInput.svelte';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
@@ -39,12 +40,22 @@
 		activationWords.sort((a, b) => b[1] - a[1]);
 	}
 
+	onMount(() => {
+		searchLoras();
+	});
+
+	onDestroy(() => {
+		filterName = '';
+	});
+
 	async function setPreviewImage(lora: SDLora) {
 		if (lastGen && loraInEdit) {
 			await HttpService.put(`/sd/loras/${lora.id}`, {
 				previewImage: lastGen.fileName
 			});
 			loraInEdit.previewImage = lastGen.fileName!;
+			const index = loras.findIndex((l) => l.id === loraInEdit?.id);
+			loras[index].previewImage = loraInEdit!.previewImage;
 		}
 	}
 
@@ -138,7 +149,7 @@
 				<button
 					style={`background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${lora.previewImage}.png);`}
 					on:click={() => onLoraClick(lora)}
-					class="w-[150px] h-[200px] bg-zinc-700 flex items-end justify-center relative bg-cover bg-no-repeat"
+					class="w-[150px] h-[200px] bg-zinc-700 flex items-end justify-center relative bg-cover bg-no-repeat rounded-md overflow-hidden"
 				>
 					<div>{lora.name}</div>
 					<div class="absolute top-1 right-1">
