@@ -41,11 +41,11 @@
 	}
 </script>
 
-<div class="bg-zinc-900 p-2 rounded-md max-h-full">
-	<h2>Media Upload</h2>
-	<div class="flex">
-		<div class="flex shrink flex-1">
+<div class="bg-zinc-900 p-2 rounded-md h-full flex flex-col items-center justify-center">
+	<div class="flex flex-1 w-full items-center justify-center">
+		<div class="flex shrink flex-1 h-full">
 			<div class="flex flex-grow flex-col mt-40 mb-40 justify-center items-center gap-4">
+				<div class="text-3xl">Media Upload</div>
 				<UploadIcon />
 				<label
 					class="hover:bg-red-900 bg-red-950 hover:transition cursor-pointer height-[40px] min-w-[150px] p-2 rounded-md flex justify-center"
