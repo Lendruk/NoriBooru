@@ -13,7 +13,7 @@ app.register(ws);
 app.register(cors);
 app.register(multipart, {
 	limits: {
-		files: 100,
+		files: 100000,
 		fileSize: 107374182400
 	}
 });
