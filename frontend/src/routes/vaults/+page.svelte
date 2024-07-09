@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { HttpService } from '$lib/services/HttpService';
-	import type { Vault } from '$lib/types/Vault';
 	import Button from '$lib/Button.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
+	import { HttpService } from '$lib/services/HttpService';
+	import { WebsocketService } from '$lib/services/WebsocketService';
+	import type { Vault } from '$lib/types/Vault';
 	import { vaultStore } from '../../store';
 
 	let vaults: Vault[] = $state([]);
@@ -19,6 +20,7 @@
 	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
 			HttpService.clearVault();
+			WebsocketService.unregisterWebsocket();
 		}
 		getVaults();
 	});
@@ -79,6 +81,7 @@
 		localStorage.setItem('currentVault', JSON.stringify(vault));
 		vaultStore.set(vault);
 		goto('/');
+		WebsocketService.registerWebsocket();
 	}
 </script>
 

@@ -1,13 +1,15 @@
-import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import routes from './routes';
 import multipart from '@fastify/multipart';
+import ws from '@fastify/websocket';
+import Fastify from 'fastify';
+import routes from './routes';
 
 const app = Fastify({
 	logger: true,
 	bodyLimit: 100000000 // ~100mb
 });
 
+app.register(ws);
 app.register(cors);
 app.register(multipart, {
 	limits: {

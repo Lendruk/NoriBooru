@@ -1,7 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
-import { sdUiService } from '../../services/SDUiService';
+import { Request } from '../../types/Request';
 
 const installSDUi = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -12,7 +11,7 @@ const installSDUi = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('Vault has SD already installed');
 	}
 
-	await sdUiService.install(vault);
+	await vault.install();
 
 	reply.send({ message: 'SD ui installed successfully!' });
 };

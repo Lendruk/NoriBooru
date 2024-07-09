@@ -1,7 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
-import { sdUiService } from '../../services/SDUiService';
+import { Request } from '../../types/Request';
 
 const markSDAsInactive = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -9,7 +8,7 @@ const markSDAsInactive = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await sdUiService.markProcessAsInactive(vault);
+	await vault.markProcessAsInactive();
 
 	reply.status(200).send({ message: 'Instance marked as inactive' });
 };

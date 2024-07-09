@@ -1,6 +1,6 @@
+import type { Vault } from '$lib/types/Vault';
 import { get } from 'svelte/store';
 import { vaultStore } from '../../store';
-import type { Vault } from '$lib/types/Vault';
 
 export class HttpService {
 	public static BASE_URL = `http://localhost:8080`;

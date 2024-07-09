@@ -1,6 +1,6 @@
 import { eq, like, sql } from 'drizzle-orm';
-import { VaultInstance } from '../db/VaultController';
 import { TagSchema, tags } from '../db/vault/schema';
+import { VaultInstance } from '../lib/VaultInstance';
 
 export type SimpleTag = Omit<TagSchema, 'parentTagId'>;
 export type PopulatedTag = SimpleTag & {

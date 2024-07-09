@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { sdWildcards, SDWildcardSchema } from '../db/vault/schema';
-import { VaultInstance } from '../db/VaultController';
+import { VaultInstance } from '../lib/VaultInstance';
 
 export type SDWildcard = {
   id: string;

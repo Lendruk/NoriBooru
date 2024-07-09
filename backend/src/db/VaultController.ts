@@ -1,22 +1,31 @@
-import Database from 'better-sqlite3';
-import type { Vault } from './master/schema';
-import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { eq } from 'drizzle-orm';
+import { type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { VaultInstance } from '../lib/VaultInstance';
+import { masterDb } from './master/db';
+import { vaults, type Vault } from './master/schema';
 import * as vaultSchema from './vault/schema';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export type VaultInstance = Vault & { db: VaultDb };
-
 export class VaultController {
 	public static vaults: Map<string, VaultInstance> = new Map();
 
-	public static async registerVault(vault: Vault) {
-		// Create db connection
-		const newDb = new Database(`${vault.path}/vault.sqlite`);
-		const db = drizzle(newDb, { schema: vaultSchema });
-		await migrate(db, { migrationsFolder: 'migrations/vault' });
-		this.vaults.set(vault.id, { ...vault, db });
+	public static async registerVault(vault: Vault | string): Promise<VaultInstance> {
+		if (typeof vault === 'string') {
+			const result = await masterDb.query.vaults.findFirst({
+				where: eq(vaults.id, vault)
+			});
+
+			if (!result) {
+				throw new Error(`Vault with id ${vault} not found`);
+			}
+			vault = result;
+		}
+
+		const vaultInstance = new VaultInstance(vault);
+		await vaultInstance.init();
+		this.vaults.set(vault.id, vaultInstance);
+		return vaultInstance;
 	}
 
 	public static getVault(vaultId: string) {

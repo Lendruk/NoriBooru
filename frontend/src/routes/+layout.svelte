@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
-	import Sidebar from '$lib/Sidebar.svelte';
+	import { WebsocketService } from '$lib/services/WebsocketService';
 	import Topbar from '$lib/Topbar.svelte';
 	import type { Vault } from '$lib/types/Vault';
 	import { onMount } from 'svelte';
@@ -11,7 +12,6 @@
 
 	onMount(() => {
 		document.documentElement.className = 'darkTheme';
-
 		const curVault = localStorage.getItem('currentVault');
 
 		if (!curVault) {
@@ -19,6 +19,8 @@
 		} else {
 			vaultStore.set(JSON.parse(curVault) as Vault);
 		}
+
+		WebsocketService.registerWebsocket();
 	});
 </script>
 

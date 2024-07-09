@@ -1,6 +1,5 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { sdUiService } from '../../services/SDUiService';
 import { Request } from '../../types/Request';
 
 const startSDUi = async (request: Request, reply: FastifyReply) => {
@@ -9,7 +8,7 @@ const startSDUi = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await sdUiService.startSDUi(vault);
+	await vault.startSDUi();
 
 	reply.send({ message: 'SDUi has been started successfully!' });
 };

@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { SDLoraSchema, sdLoras, tagsToLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
-import { sdUiService } from '../../../services/SDUiService';
 import TagService, { PopulatedTag } from '../../../services/TagService';
 import { Request } from '../../../types/Request';
 import { SDLora } from '../../../types/sd/SDLora';
@@ -35,7 +34,7 @@ const getLoras = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const sdPort = sdUiService.getSdPort(vault.id);
+	const sdPort = vault.getSdPort();
 	if (!sdPort) {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}

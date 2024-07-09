@@ -2,17 +2,18 @@
 	import { page } from '$app/stores';
 	import { PUBLIC_VERSION } from '$env/static/public';
 	import { onMount } from 'svelte';
-	import { vaultStore } from '../store';
-	import ArrowLeft from './icons/ArrowLeft.svelte';
-	import ArrowRight from './icons/ArrowRight.svelte';
-	import DownloadIcon from './icons/DownloadIcon.svelte';
-	import ImagesIcon from './icons/ImagesIcon.svelte';
-	import InboxIcon from './icons/InboxIcon.svelte';
-	import PaletteIcon from './icons/PaletteIcon.svelte';
-	import PenIcon from './icons/PenIcon.svelte';
-	import PlayIcon from './icons/PlayIcon.svelte';
-	import TagIcon from './icons/TagIcon.svelte';
-	import UploadIcon from './icons/UploadIcon.svelte';
+	import { vaultStore } from '../../../store';
+	import ArrowLeft from '../../icons/ArrowLeft.svelte';
+	import ArrowRight from '../../icons/ArrowRight.svelte';
+	import DownloadIcon from '../../icons/DownloadIcon.svelte';
+	import ImagesIcon from '../../icons/ImagesIcon.svelte';
+	import InboxIcon from '../../icons/InboxIcon.svelte';
+	import PaletteIcon from '../../icons/PaletteIcon.svelte';
+	import PenIcon from '../../icons/PenIcon.svelte';
+	import PlayIcon from '../../icons/PlayIcon.svelte';
+	import TagIcon from '../../icons/TagIcon.svelte';
+	import UploadIcon from '../../icons/UploadIcon.svelte';
+	import SdUiStatusDisplay from './SDUiStatusDisplay.svelte';
 
 	let isSidebarOpen = true;
 
@@ -21,6 +22,7 @@
 		navHref: string;
 		path: string | RegExp;
 		icon: ConstructorOfATypedSvelteComponent;
+		addon?: ConstructorOfATypedSvelteComponent;
 		subNavPaths?: (string | RegExp)[];
 		ignoreSubNavPaths?: (string | RegExp)[];
 		subRoutes?: Route[];
@@ -82,6 +84,7 @@
 					// },
 					{
 						icon: PenIcon,
+						addon: SdUiStatusDisplay,
 						name: 'Generator',
 						path: '/stablediffusion/generator',
 						navHref: '/stablediffusion/generator'
@@ -156,7 +159,12 @@
 													color="#FFFFFF"
 												/>
 											{/if}
-											{subRoute.name}
+											<div class="flex flex-1 items-center justify-between">
+												{subRoute.name}
+												{#if subRoute.addon}
+													<svelte:component this={subRoute.addon} />
+												{/if}
+											</div>
 										</a>
 									</div>
 								{/each}

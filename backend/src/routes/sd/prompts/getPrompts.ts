@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../../types/Request';
 import { checkVault } from '../../../hooks/checkVault';
+import { Request } from '../../../types/Request';
 
 const getPrompts = async (request: Request, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
@@ -27,11 +27,11 @@ const getPrompts = async (request: Request, reply: FastifyReply) => {
 			cfgScale: prompt.cfgScale,
 			highRes: prompt.isHighResEnabled
 				? {
-						upscaler: prompt.highResUpscaler,
-						steps: prompt.highResSteps,
-						denoisingStrength: prompt.highResDenoisingStrength,
-						upscaleBy: prompt.highResUpscaleBy
-					}
+					upscaler: prompt.highResUpscaler,
+					steps: prompt.highResSteps,
+					denoisingStrength: prompt.highResDenoisingStrength,
+					upscaleBy: prompt.highResUpscaleBy
+				}
 				: null
 		}))
 	);

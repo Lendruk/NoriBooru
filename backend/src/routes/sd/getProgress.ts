@@ -1,6 +1,5 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { sdUiService } from '../../services/SDUiService';
 import { Request } from '../../types/Request';
 
 const getProgress = async (request: Request, reply: FastifyReply) => {
@@ -8,7 +7,7 @@ const getProgress = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const sdPort = sdUiService.getSdPort(vault.id);
+	const sdPort = vault.getSdPort();
 	if (!sdPort) {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}

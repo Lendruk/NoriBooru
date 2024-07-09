@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto';
-import { VaultInstance } from '../db/VaultController';
-import path from 'path';
 import ExifReader from 'exifreader';
-import sharp from 'sharp';
-import { Exif } from '../types/Exif';
-import { mediaItems } from '../db/vault/schema';
 import * as fs from 'fs/promises';
+import path from 'path';
+import sharp from 'sharp';
+import { mediaItems } from '../db/vault/schema';
+import { VaultInstance } from '../lib/VaultInstance';
+import { Exif } from '../types/Exif';
 
 class MediaService {
 	public async createImageFromBase64(
