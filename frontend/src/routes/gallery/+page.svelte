@@ -58,6 +58,11 @@
 		});
 		await search();
 		tags = await HttpService.get<PopulatedTag[]>('/tags');
+
+		if (galleryDiv.scrollHeight <= window.innerHeight) {
+			currentPage = currentPage + 1;
+			await search(true);
+		}
 	});
 
 	async function applyPositiveTagFilter(tag: PopulatedTag) {
