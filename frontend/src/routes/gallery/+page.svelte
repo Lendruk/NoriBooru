@@ -54,16 +54,24 @@
 			}
 
 			selectedItems = new Map();
-			await search();
+			currentPage = 0;
+			mediaItems = [];
+			await populateScreen();
 		});
-		await search();
 		tags = await HttpService.get<PopulatedTag[]>('/tags');
-
-		if (galleryDiv.scrollHeight <= window.innerHeight) {
-			currentPage = currentPage + 1;
-			await search(true);
-		}
 	});
+
+	async function populateScreen() {
+		await search(true);
+		currentPage = currentPage + 1;
+		while (galleryDiv.scrollHeight <= window.innerHeight) {
+			const res = await search(true);
+			currentPage = currentPage + 1;
+			if (res.length === 0) {
+				break;
+			}
+		}
+	}
 
 	async function applyPositiveTagFilter(tag: PopulatedTag) {
 		appliedPositiveTags = [...appliedPositiveTags, tag];
@@ -92,7 +100,7 @@
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
 
-	async function search(appendResults: boolean = false) {
+	async function search(appendResults: boolean = false): Promise<MediaItem[]> {
 		fetchingItems = true;
 		const res = await HttpService.get<{ mediaItems: MediaItem[] }>(
 			'/mediaItems?' +
@@ -118,6 +126,7 @@
 		}
 		await pause(1000);
 		fetchingItems = false;
+		return res.mediaItems;
 	}
 
 	async function removePositiveTagFilter(tag: PopulatedTag) {
