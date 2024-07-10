@@ -16,7 +16,7 @@
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import { pause } from '$lib/utils/time';
 	import Video from '$lib/Video.svelte';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import MassTagEditModal from '../components/MassTagEditModal.svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
@@ -34,8 +34,6 @@
 	let fetchingItems = false;
 	let isFilterSelectionVisible = false;
 	let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
-
-	let oldHeight = 0;
 
 	let galleryDiv: HTMLDivElement;
 
@@ -66,7 +64,6 @@
 		appliedPositiveTags = [...appliedPositiveTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-		oldHeight = 0;
 		await search();
 	}
 
@@ -74,7 +71,6 @@
 		appliedNegativeTags = [...appliedNegativeTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-		oldHeight = 0;
 		await search();
 	}
 
@@ -210,7 +206,6 @@
 		) {
 			if (hasMoreItems && !fetchingItems) {
 				currentPage = currentPage + 1;
-				oldHeight = galleryDiv.clientHeight;
 				await search(true);
 			}
 		}
@@ -218,14 +213,6 @@
 
 	function goToGenerator(inputExif: string) {
 		goto(`/stablediffusion/generator?inputExif=${inputExif}`);
-	}
-
-	$: {
-		if (mediaItems.length > 0 && oldHeight !== 0) {
-			tick().then(() => {
-				window.scrollBy({ top: -(galleryDiv.clientHeight - oldHeight), behavior: 'instant' });
-			});
-		}
 	}
 </script>
 
@@ -272,7 +259,7 @@
 					</div>
 				</div>
 			{/if}
-			<div class="flex w-fit p-2 mt-2 ml-2 mb-2 self-end bg-zinc-900 rounded-lg">
+			<div class="flex w-fit p-2 mt-2 mb-2 self-end bg-zinc-900 rounded-lg">
 				<button
 					class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`}
 					on:click={() => (isFilterSelectionVisible = !isFilterSelectionVisible)}
