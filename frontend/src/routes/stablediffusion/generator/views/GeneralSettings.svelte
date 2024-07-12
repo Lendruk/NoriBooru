@@ -86,7 +86,7 @@
 						on:change={unloadCheckpoints}
 					>
 						{#each checkpoints as checkpoint}
-							<option value={checkpoint.model_name}>{checkpoint.model_name}</option>
+							<option value={checkpoint.name}>{checkpoint.name}</option>
 						{/each}
 					</Select>
 				</div>

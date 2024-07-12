@@ -1,6 +1,7 @@
 export type SDCheckpoint = {
+	name: string;
+	previewImage?: string;
 	title: string;
-	model_name: string;
 	hash: string;
 	sha256: string;
 	filename: string;

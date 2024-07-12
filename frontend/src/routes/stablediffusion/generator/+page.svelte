@@ -114,11 +114,11 @@
 		loras = fetchedLoras;
 		wildcards = fetchedWildcards;
 
-		checkpoint = checkpoints[0].model_name;
+		checkpoint = checkpoints[0].name;
 		sampler = samplers[0].name;
 		highResUpscaler = upscalers[0].name;
 		if (checkpoints.length > 1) {
-			refinerCheckpoint = checkpoints[1].model_name;
+			refinerCheckpoint = checkpoints[1].name;
 		}
 
 		if ($page.url.searchParams.has('inputExif')) {
@@ -273,7 +273,7 @@
 		isHighResEnabled = !!prompt.highRes;
 		promptId = prompt.id ?? '';
 		refinerCheckpoint =
-			checkpoints.find((checkpoint) => checkpoint.model_name !== prompt.checkpoint)?.model_name ??
+			checkpoints.find((checkpoint) => checkpoint.name !== prompt.checkpoint)?.name ??
 			prompt.checkpoint;
 
 		if (prompt.highRes) {
