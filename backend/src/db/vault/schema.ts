@@ -92,6 +92,8 @@ export type MediaItem = InferSelectModel<typeof mediaItems> & {
 	tags?: TagSchema[];
 };
 
+// Stable Diffusion schemas
+
 export const sdPrompts = sqliteTable('sd_prompts', {
 	id: text('id').primaryKey(),
 	name: text('name'),
@@ -138,10 +140,19 @@ export const tagsToLoras = sqliteTable(
 	(t) => ({ pk: primaryKey({ columns: [t.tagId, t.loraId] }) })
 );
 
+export const sdCheckpoints = sqliteTable('sd_checkpoints', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	path: text('path').notNull(),
+	previewImage: text('preview_image')
+});
+export type SDCheckpointSchema = InferSelectModel<typeof sdCheckpoints>;
+
 export const sdLoras = sqliteTable('sd_loras', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	path: text('path').notNull(),
+	metadata: text('metadata').notNull(),
 	previewImage: text('preview_image'),
 	activationWords: text('activation_words').notNull()
 });
