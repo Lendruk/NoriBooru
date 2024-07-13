@@ -9,7 +9,18 @@ export type PopulatedTag = SimpleTag & {
 };
 
 class TagService {
-	public async getVaultTags(vault: VaultInstance, nameToQuery?: string): Promise<PopulatedTag[]> {
+	public async getTag(vault: VaultInstance, id: number): Promise<PopulatedTag> {
+		const { db } = vault;
+		const dbTag = await db.query.tags.findFirst({ where: eq(tags.id, id) });
+
+		if (!dbTag) {
+			throw new Error(`Error while fetching tag, tag with id ${id} not found`);
+		}
+
+		return this.populateTag(vault, dbTag);
+	}
+
+	public async getAllTags(vault: VaultInstance, nameToQuery?: string): Promise<PopulatedTag[]> {
 		const { db } = vault;
 		let foundTags: TagSchema[] = [];
 		if (nameToQuery) {
@@ -54,10 +65,11 @@ class TagService {
 		parentId?: number
 	): Promise<SimpleTag> {
 		const { db } = vault;
+		const formattedTagName = name.trim().replaceAll(' ', '_').toLowerCase();
 		const newTag = (
-			await db.insert(tags).values({ name: name, color: color, parentTagId: parentId }).returning()
+			await db.insert(tags).values({ name: formattedTagName, color: color, parentTagId: parentId }).returning()
 		)[0];
-		return newTag as TagSchema;
+		return this.populateTag(vault, newTag);
 	}
 
 	public async deleteTag(vault: VaultInstance, tagId: number): Promise<void> {
