@@ -11,7 +11,7 @@ const getTags = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { name } = query;
-	const finalTags: PopulatedTag[] = await TagService.getVaultTags(vaultInstance, name);
+	const finalTags: PopulatedTag[] = await TagService.getAllTags(vaultInstance, name);
 	return reply.send(finalTags);
 };
 

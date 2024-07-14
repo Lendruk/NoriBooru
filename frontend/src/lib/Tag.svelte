@@ -11,6 +11,10 @@
 
 	let showParent = false;
 
+	function formatTagName(name: string): string {
+		return name.replaceAll('_', ' ');
+	}
+
 	$: cssVarStyles = `--color: ${tag.color}; cursor: ${onClick ? 'pointer' : 'default'}`;
 </script>
 
@@ -22,7 +26,7 @@
 		<span class="flex items-center gap-1">
 			{#if tag.parent}
 				{#if showParent}
-					{tag.parent.name}
+					{formatTagName(tag.parent.name)}
 				{/if}
 				<button
 					on:click={(e) => {
@@ -34,7 +38,7 @@
 					<ArrowRight />
 				</button>
 			{/if}
-			{tag.name}
+			{formatTagName(tag.name)}
 			{tag.mediaCount > 0 ? `(${tag.mediaCount})` : ''}
 		</span>
 		<button class={`delete ${!onDelete && 'invisible'}`} on:click={onDelete}> X </button>
