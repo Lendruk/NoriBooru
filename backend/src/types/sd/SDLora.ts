@@ -13,6 +13,9 @@ export type SDLora = {
 			['1_cate']: Record<string, number>;
 		};
 	};
+	description: string | null;
+	origin: string;
+	sdVersion: string;
 	previewImage: string | null;
 	tags: PopulatedTag[];
 };

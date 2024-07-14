@@ -62,7 +62,7 @@ const getLoras = async (request: Request, reply: FastifyReply) => {
 		);
 
 		if (matchesTagFilter(queryTagArr, tags) && matchesNameQuery(savedLora.name, nameQuery)) {
-			finalLoraArr.push({ ...savedLora, metadata: JSON.parse(savedLora.metadata), tags });
+			finalLoraArr.push({ ...savedLora, metadata: savedLora.metadata ? JSON.parse(savedLora.metadata) : {} , tags });
 		}
 	}
 	reply.send(finalLoraArr);

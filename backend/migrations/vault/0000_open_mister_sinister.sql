@@ -36,10 +36,18 @@ CREATE TABLE `playlists_media_items` (
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `sd_checkpoints` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`path` text NOT NULL,
+	`preview_image` text
+);
+--> statement-breakpoint
 CREATE TABLE `sd_loras` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`path` text NOT NULL,
+	`metadata` text,
 	`preview_image` text,
 	`activation_words` text NOT NULL
 );
