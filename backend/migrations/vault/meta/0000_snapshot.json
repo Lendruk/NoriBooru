@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9bb49b71-5ccf-40ad-93b6-8bd4c84b02fc",
+  "id": "d7b5460b-3d98-4af2-9846-37d39463e6c5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "loras_to_mediaItems": {
@@ -128,10 +128,31 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "sd_checkpoint": {
+          "name": "sd_checkpoint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "media_items_sd_checkpoint_sd_checkpoints_id_fk": {
+          "name": "media_items_sd_checkpoint_sd_checkpoints_id_fk",
+          "tableFrom": "media_items",
+          "tableTo": "sd_checkpoints",
+          "columnsFrom": [
+            "sd_checkpoint"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -277,6 +298,34 @@
           "notNull": true,
           "autoincrement": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sd_version": {
+          "name": "sd_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "preview_image": {
           "name": "preview_image",
           "type": "text",
@@ -314,6 +363,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "metadata": {
           "name": "metadata",
           "type": "text",
@@ -326,6 +382,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sd_version": {
+          "name": "sd_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "activation_words": {

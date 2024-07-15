@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { Playlist, mediaItems, playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { Playlist, mediaItems, playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 const getPlaylist = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -30,6 +30,7 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 				type: mediaItems.type,
 				extension: mediaItems.extension,
 				fileSize: mediaItems.fileSize,
+				sdCheckpoint: mediaItems.sdCheckpoint,
 				createdAt: mediaItems.createdAt,
 				updatedAt: mediaItems.updatedAt,
 				isArchived: mediaItems.isArchived,
@@ -65,6 +66,7 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 					fileSize: item.fileSize!,
 					fileName: item.fileName!,
 					id: item.id!,
+					sdCheckpoint: item.sdCheckpoint,
 					isArchived: item.isArchived ?? 0,
 					type: item.type!,
 					updatedAt: item.updatedAt,

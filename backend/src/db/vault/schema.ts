@@ -148,6 +148,7 @@ export const sdCheckpoints = sqliteTable('sd_checkpoints', {
 	description: text('description'),
 	origin: text('origin').notNull(),
 	sdVersion: text('sd_version').notNull(),
+	sha256: text('sha256').notNull(),
 	previewImage: text('preview_image')
 });
 export type SDCheckpointSchema = InferSelectModel<typeof sdCheckpoints>;

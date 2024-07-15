@@ -1,5 +1,6 @@
 import { WebSocket } from '@fastify/websocket';
 import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
+import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import { createConnection } from 'net';
@@ -7,6 +8,9 @@ import kill from 'tree-kill';
 import { promisify } from 'util';
 import { masterDb } from '../db/master/db';
 import { Vault, vaults } from '../db/master/schema';
+import { sdCheckpoints, sdLoras } from '../db/vault/schema';
+import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
+import { RawSDLora } from '../types/sd/RawSDLora';
 import { VaultBase } from './VaultBase';
 
 const execAsync = promisify(exec);
@@ -55,6 +59,7 @@ export class VaultInstance extends VaultBase {
 
 		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, this.id));
 		await this.startSDUi();
+		await this.refreshCheckpoints();
 
 		console.log(stderr);
 		console.log(stdout);
@@ -140,7 +145,74 @@ export class VaultInstance extends VaultBase {
 			}
 		}
 	}
-  
+	
+	public async refreshLoras(): Promise<void> {
+		const sdPort = this.getSdPort();
+		if (!sdPort) {
+			throw new Error('Cannot refresh loras the SD ui is not running');
+		}
+
+		await fetch(`http://localhost:${sdPort}/sdapi/v1/refresh-loras`, {
+			method: 'POST'
+		});
+
+		const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/loras`);
+		const sdClientLoras = (await result.json()) as RawSDLora[];
+		const savedLoras = await this.db.query.sdLoras.findMany();
+
+		for (const rawLora of sdClientLoras) {
+			const savedLora = savedLoras.find(lora => lora.path === rawLora.name);
+
+			// We need to create a new lora in our database
+			if (!savedLora) {
+				await this.db.insert(sdLoras).values({
+					id: randomUUID(),
+					name: rawLora.name,
+					path: rawLora.path,
+					origin: 'LOCAL',
+					sdVersion: '',
+					activationWords: '',
+					metadata: JSON.stringify(rawLora.metadata),
+				});
+			}
+		}
+	}
+
+	public async refreshCheckpoints(): Promise<void> {
+		const sdPort = this.getSdPort();
+		if (!sdPort) {
+			throw new Error('Cannot refresh checkpoints the SD ui is not running');
+		}
+		await fetch(`http://localhost:${sdPort}/sdapi/v1/refresh-checkpoints`, {
+			method: 'POST'
+		});
+
+		const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/sd-models`);
+		const sdClientCheckpoints = (await result.json()) as RawSDCheckpoint[];
+		console.log(sdClientCheckpoints);
+		const savedCheckpoints = await this.db.query.sdCheckpoints.findMany();
+
+		for (const rawCheckpoint of sdClientCheckpoints) {
+			const savedCheckpoint = savedCheckpoints.find(checkpoint => checkpoint.sha256 === rawCheckpoint.sha256);
+
+			if (!savedCheckpoint) {
+				await this.db.insert(sdCheckpoints).values({
+					id: randomUUID(),
+					name: rawCheckpoint.model_name,
+					origin: 'LOCAL',
+					path: rawCheckpoint.filename,
+					sdVersion: '',
+					sha256: rawCheckpoint.sha256,
+				});
+			}
+		}
+	}
+
+	public override registerWebsocketConnection(connection: WebSocket) {
+		super.registerWebsocketConnection(connection);
+		connection.send(JSON.stringify({ event: 'SD', data: { status: this.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' } }));
+	}
+
 	private async findOpenPort(): Promise<number> {
 		for (let i = 9000; i < 65535; i++) {
 			try {
@@ -166,10 +238,5 @@ export class VaultInstance extends VaultBase {
 		}
 
 		throw new Error('No available port');
-	}
-
-	public override registerWebsocketConnection(connection: WebSocket) {
-		super.registerWebsocketConnection(connection);
-		connection.send(JSON.stringify({ event: 'SD', data: { status: this.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' } }));
 	}
 }

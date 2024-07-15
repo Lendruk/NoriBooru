@@ -114,7 +114,7 @@
 		loras = fetchedLoras;
 		wildcards = fetchedWildcards;
 
-		checkpoint = checkpoints[0].name;
+		checkpoint = checkpoints[0]?.name;
 		sampler = samplers[0].name;
 		highResUpscaler = upscalers[0].name;
 		if (checkpoints.length > 1) {

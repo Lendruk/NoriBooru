@@ -13,14 +13,18 @@ const websocketHandler = (connection: WebSocket) => {
 		const event = JSON.parse(message.toString()) as WebSocketRegisterEvent;
 		console.log(event);
 
-		if (event.type === 'register') {
-			let vault: VaultInstance;
-			try {
-				vault = VaultController.getVault(event.data.vault);
-			} catch {
-				vault = await VaultController.registerVault(event.data.vault);
+		try {
+			if (event.type === 'register') {
+				let vault: VaultInstance;
+				try {
+					vault = VaultController.getVault(event.data.vault);
+				} catch {
+					vault = await VaultController.registerVault(event.data.vault);
+				}
+				vault!.registerWebsocketConnection(connection);
 			}
-			vault!.registerWebsocketConnection(connection);
+		} catch {
+			console.error('There was an error establishing the websocket connection');
 		}
 	});
 

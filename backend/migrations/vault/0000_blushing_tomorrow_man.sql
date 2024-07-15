@@ -15,7 +15,9 @@ CREATE TABLE `media_items` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`is_archived` integer DEFAULT 0 NOT NULL,
-	`exif` text
+	`exif` text,
+	`sd_checkpoint` text,
+	FOREIGN KEY (`sd_checkpoint`) REFERENCES `sd_checkpoints`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `playlists` (
@@ -40,6 +42,10 @@ CREATE TABLE `sd_checkpoints` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`path` text NOT NULL,
+	`description` text,
+	`origin` text NOT NULL,
+	`sd_version` text NOT NULL,
+	`sha256` text NOT NULL,
 	`preview_image` text
 );
 --> statement-breakpoint
@@ -47,8 +53,11 @@ CREATE TABLE `sd_loras` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`path` text NOT NULL,
+	`description` text,
 	`metadata` text,
 	`preview_image` text,
+	`origin` text NOT NULL,
+	`sd_version` text NOT NULL,
 	`activation_words` text NOT NULL
 );
 --> statement-breakpoint

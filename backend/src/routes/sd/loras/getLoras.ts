@@ -18,12 +18,6 @@ const getLoras = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	// const sdPort = vault.getSdPort();
-	// if (!sdPort) {
-	// 	return reply.status(400).send('SD Ui is not running for the given vault');
-	// }
-	// const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/loras`);
-	// const sdClientLoras = (await result.json()) as RawSDLora[];
 	const { db } = vault;
 	const savedLoras = (await db.query.sdLoras.findMany()) as SDLoraSchema[];
 	const finalLoraArr: SDLora[] = [];
@@ -34,24 +28,6 @@ const getLoras = async (request: Request, reply: FastifyReply) => {
 	}
 
 	for (const savedLora of savedLoras) {
-
-		// if (!savedLora) {
-		// 	const newSavedLora = (
-		// 		await db
-		// 			.insert(sdLoras)
-		// 			.values({
-		// 				id: randomUUID(),
-		// 				name: rawLora.name,
-		// 				path: rawLora.path,
-		// 				activationWords: ''
-		// 			})
-		// 			.returning()
-		// 	)[0];
-
-		// 	if (queryTagArr.length === 0) {
-		// 		finalLoraArr.push(convertDBLora(rawLora, newSavedLora, []));
-		// 	}
-		// } else {
 		const tagLoraPairs =
 				(await db.query.tagsToLoras.findMany({
 					where: eq(tagsToLoras.loraId, savedLora.id)
@@ -67,21 +43,6 @@ const getLoras = async (request: Request, reply: FastifyReply) => {
 	}
 	reply.send(finalLoraArr);
 };
-
-// const convertDBLora = (
-// 	rawSDLora: RawSDLora,
-// 	dbLora: SDLoraSchema,
-// 	tags: PopulatedTag[]
-// ): SDLora => {
-// 	return {
-// 		metadata: rawSDLora.metadata,
-// 		id: dbLora.id,
-// 		name: dbLora.name,
-// 		path: dbLora.path,
-// 		previewImage: dbLora.previewImage,
-// 		tags
-// 	};
-// };
 
 const matchesNameQuery = (loraName: string, nameQuery?: string): boolean => {
 	if (nameQuery && !loraName.toLowerCase().includes(nameQuery.toLowerCase())) {
