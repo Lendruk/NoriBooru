@@ -2,17 +2,36 @@
 	import Button from '$lib/Button.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
+	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import LoadingSpinner from '../../../components/LoadingSpinner.svelte';
 	import TextInput from '../../../components/TextInput.svelte';
 
 	export let checkpoint: SDCheckpoint;
 	export let isOpen: boolean;
 
+	let isLoading = false;
 	let checkpointName: string;
 	let checkpointDescription: string;
 	let sdVersion: string;
+
+	async function updateCheckpoint() {
+		isLoading = true;
+		try {
+			await HttpService.put(`/sd/checkpoints/${checkpoint.id}`, {
+				name: checkpointName,
+				description: checkpointDescription,
+				sdVersion
+			});
+			createToast('Checkpoint updated successfully!');
+		} catch (error) {
+		} finally {
+			isLoading = false;
+		}
+	}
 
 	$: {
 		checkpointName = checkpoint.name;
@@ -21,7 +40,14 @@
 	}
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col relative">
+	{#if isLoading}
+		<div
+			class="absolute top-0 w-full h-full backdrop-blur-md flex items-center justify-center rounded-sm z-10"
+		>
+			<LoadingSpinner />
+		</div>
+	{/if}
 	<div class="flex gap-4">
 		<button on:click={() => (isOpen = false)}><ArrowLeft class="fill-white" /></button>
 		<div class="text-xl">Edit Checkpoint</div>
@@ -46,5 +72,5 @@
 		</Select>
 	</LabeledComponent>
 
-	<Button class="h-[40px] mt-4">Update</Button>
+	<Button onClick={updateCheckpoint} class="h-[40px] mt-4">Update</Button>
 </div>

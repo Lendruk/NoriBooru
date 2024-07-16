@@ -2,12 +2,14 @@
 	import Button from '$lib/Button.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import LoadingSpinner from '../../../components/LoadingSpinner.svelte';
 	import TextInput from '../../../components/TextInput.svelte';
 
 	export let sdLora: SDLora;
@@ -17,6 +19,7 @@
 	let loraName: string;
 	let loraDescription: string;
 	let sdVersion: string;
+	let isLoading = false;
 
 	async function addTagToLora(tag: PopulatedTag) {
 		sdLora.tags = sdLora.tags.concat(tag);
@@ -34,13 +37,37 @@
 		});
 	}
 
+	async function updateLora() {
+		isLoading = true;
+
+		try {
+			await HttpService.put(`/sd/loras/${sdLora.id}`, {
+				name: loraName,
+				description: loraDescription,
+				sdVersion
+			});
+			createToast('Lora updated successfully!');
+		} catch (error) {
+		} finally {
+			isLoading = false;
+		}
+	}
+
 	$: {
 		loraName = sdLora.name;
 		loraDescription = sdLora.description;
+		sdVersion = sdLora.sdVersion;
 	}
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col relative">
+	{#if isLoading}
+		<div
+			class="absolute top-0 w-full h-full backdrop-blur-md flex items-center justify-center rounded-sm z-10"
+		>
+			<LoadingSpinner />
+		</div>
+	{/if}
 	<div class="flex gap-4">
 		<button on:click={() => (isOpen = false)}><ArrowLeft class="fill-white" /></button>
 		<div class="text-xl">Edit Lora</div>
@@ -77,5 +104,5 @@
 		</div>
 	</LabeledComponent>
 
-	<Button class="h-[40px] mt-4">Update</Button>
+	<Button onClick={updateLora} class="h-[40px] mt-4">Update</Button>
 </div>
