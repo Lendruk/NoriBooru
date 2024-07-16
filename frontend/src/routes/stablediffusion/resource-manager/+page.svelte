@@ -1,4 +1,8 @@
 <script lang="ts">
+	import Button from '$lib/Button.svelte';
+	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
@@ -9,6 +13,12 @@
 	import ResourceList from './components/ResourceList.svelte';
 
 	let currentTab: 'CHECKPOINTS' | 'LORAS' = 'CHECKPOINTS';
+
+	// Delete Modal
+	let isDeleteModalOpen = false;
+	let deletionResource: { id: string; name: string } | undefined;
+	let deletionResourceType = '';
+	let isModalLoading = false;
 
 	let loras: SDLora[] = [];
 	let checkpoints: SDCheckpoint[] = [];
@@ -27,6 +37,41 @@
 	function onLoraClick(sdLora: SDLora): void {
 		currentlySelectedResource = { ...sdLora, type: 'lora' };
 		isEditWindowOpen = true;
+	}
+
+	function openDeleteModal(resourceId: string, resourceName: string, type: 'LORA' | 'CHECKPOINT') {
+		isDeleteModalOpen = true;
+		deletionResource = { id: resourceId, name: resourceName };
+		deletionResourceType = type;
+	}
+
+	async function deleteResource() {
+		isModalLoading = true;
+
+		try {
+			await HttpService.delete(
+				`/sd/${deletionResourceType === 'LORA' ? 'loras' : 'checkpoints'}/${deletionResource?.id}`
+			);
+
+			if (deletionResourceType === 'LORA') {
+				const index = loras.findIndex((lora) => lora.id === deletionResource?.id);
+				loras.splice(index, 1);
+				loras = loras;
+			} else {
+				const index = checkpoints.findIndex((checkpoint) => checkpoint.id === deletionResource?.id);
+				checkpoints.splice(index, 1);
+				checkpoints = checkpoints;
+			}
+
+			createToast(`${deletionResource?.name} deleted successfully!`);
+		} catch {
+			createToast(`There was an error while deleting ${deletionResource?.name}`);
+		} finally {
+			isDeleteModalOpen = false;
+			deletionResource = undefined;
+			deletionResourceType = '';
+			isModalLoading = false;
+		}
 	}
 
 	onMount(() => {
@@ -77,6 +122,7 @@
 					onResourceClick={onCheckpointClick}
 					resources={checkpoints}
 					selectedResourceId={currentlySelectedResource?.id}
+					onResourceDeleteClick={(id, name) => openDeleteModal(id, name, 'CHECKPOINT')}
 				/>
 			</div>
 		{/if}
@@ -87,6 +133,7 @@
 					onResourceClick={onLoraClick}
 					resources={loras}
 					selectedResourceId={currentlySelectedResource?.id}
+					onResourceDeleteClick={(id, name) => openDeleteModal(id, name, 'LORA')}
 				/>
 			</div>
 		{/if}
@@ -109,6 +156,21 @@
 		{/if}
 	</div>
 </div>
+<Modal class="min-h-0" bind:showModal={isDeleteModalOpen}>
+	{#if isModalLoading}
+		<LoadingBackground />
+	{/if}
+	<div class="p-4 w-full flex flex-col">
+		<div class="text-xl">Are you sure you want to delete</div>
+		<div class="font-bold text-xl self-center pt-4 pb-4">{deletionResource?.name}</div>
+		<div class="flex flex-1 w-full gap-2">
+			<Button class="flex flex-1 w-full h-[40px]" onClick={deleteResource}>Yes</Button>
+			<Button class="flex flex-1 w-full h-[40px]" onClick={() => (isDeleteModalOpen = false)}
+				>No</Button
+			>
+		</div>
+	</div>
+</Modal>
 
 <svelte:head>
 	<title>NoriBooru - SD Resources</title>

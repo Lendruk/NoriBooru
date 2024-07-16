@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Button.svelte';
+	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
@@ -9,7 +10,6 @@
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import LabeledComponent from '../../../components/LabeledComponent.svelte';
-	import LoadingSpinner from '../../../components/LoadingSpinner.svelte';
 	import TextInput from '../../../components/TextInput.svelte';
 
 	export let sdLora: SDLora;
@@ -62,11 +62,7 @@
 
 <div class="flex flex-col relative">
 	{#if isLoading}
-		<div
-			class="absolute top-0 w-full h-full backdrop-blur-md flex items-center justify-center rounded-sm z-10"
-		>
-			<LoadingSpinner />
-		</div>
+		<LoadingBackground />
 	{/if}
 	<div class="flex gap-4">
 		<button on:click={() => (isOpen = false)}><ArrowLeft class="fill-white" /></button>
