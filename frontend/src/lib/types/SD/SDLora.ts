@@ -4,8 +4,8 @@ export type SDLora = {
 	name: string;
 	previewImage?: string;
 	id: string;
-	alias: string;
 	path: string;
+	description: string;
 	tags: PopulatedTag[];
 	metadata: {
 		ss_sd_model_name: string;

@@ -1,9 +1,10 @@
 export type SDCheckpoint = {
+	id: string;
 	name: string;
 	previewImage?: string;
-	title: string;
-	hash: string;
+	description: string;
+	path: string;
+	origin: string;
+	sdVersion: string;
 	sha256: string;
-	filename: string;
-	config: string;
 };

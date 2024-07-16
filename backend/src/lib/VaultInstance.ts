@@ -59,7 +59,6 @@ export class VaultInstance extends VaultBase {
 
 		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, this.id));
 		await this.startSDUi();
-		await this.refreshCheckpoints();
 
 		console.log(stderr);
 		console.log(stdout);
@@ -126,6 +125,8 @@ export class VaultInstance extends VaultBase {
 			};
 
 			await startUpCompletionPromise;
+			await this.refreshCheckpoints();
+			await this.refreshLoras();
 
 			this.broadcastEvent({ event: 'SD', data: { status: 'RUNNING' } });
 			return port;
@@ -161,7 +162,7 @@ export class VaultInstance extends VaultBase {
 		const savedLoras = await this.db.query.sdLoras.findMany();
 
 		for (const rawLora of sdClientLoras) {
-			const savedLora = savedLoras.find(lora => lora.path === rawLora.name);
+			const savedLora = savedLoras.find(lora => lora.path === rawLora.path);
 
 			// We need to create a new lora in our database
 			if (!savedLora) {
