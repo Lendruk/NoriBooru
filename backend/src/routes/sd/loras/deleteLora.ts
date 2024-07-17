@@ -1,8 +1,9 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../../types/Request';
-import { checkVault } from '../../../hooks/checkVault';
-import { sdLoras } from '../../../db/vault/schema';
 import { eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import fs from 'fs/promises';
+import { sdLoras } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { Request } from '../../../types/Request';
 
 const deleteLora = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -12,8 +13,13 @@ const deleteLora = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { db } = vault;
+	const lora = await db.query.sdLoras.findFirst({ where: eq(sdLoras.id, id) });
+	if (lora) {
+		await fs.unlink(lora.path);
+	}
+
 	await db.delete(sdLoras).where(eq(sdLoras.id, id));
-	reply.send({ message: 'Lora deleted successfully ' });
+	reply.send({ message: 'Lora deleted successfully' });
 };
 
 export default {

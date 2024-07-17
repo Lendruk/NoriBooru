@@ -2,10 +2,12 @@ import type { PopulatedTag } from '../PopulatedTag';
 
 export type SDLora = {
 	name: string;
+	previewImage?: string;
 	id: string;
-	alias: string;
 	path: string;
-	previewImage: string;
+	description: string;
+	sdVersion: string;
+	origin: string;
 	tags: PopulatedTag[];
 	metadata: {
 		ss_sd_model_name: string;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { PUBLIC_VERSION } from '$env/static/public';
+	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
@@ -75,13 +76,12 @@
 		vaultStore.subscribe((vault) => {
 			if (vault?.hasInstalledSD) {
 				stableDiffusionRoutes = [
-					// Soooon
-					// {
-					// 	icon: FolderClosedIcon,
-					// 	name: 'Resources',
-					// 	path: '/stablediffusion/resource-manager',
-					// 	navHref: '/stablediffusion/resource-manager'
-					// },
+					{
+						icon: FolderClosedIcon,
+						name: 'Resources',
+						path: '/stablediffusion/resource-manager',
+						navHref: '/stablediffusion/resource-manager'
+					},
 					{
 						icon: PenIcon,
 						addon: SdUiStatusDisplay,

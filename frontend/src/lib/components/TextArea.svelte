@@ -2,4 +2,7 @@
 	export let value: string;
 </script>
 
-<textarea bind:value class="text-black"></textarea>
+<textarea
+	class="focus:outline-none bg-surface-color border-red-950 pl-2 border-2 rounded-md shadow-xl"
+	bind:value
+></textarea>

@@ -1,8 +1,6 @@
-import { PopulatedTag } from '../../services/TagService';
-
-export type SDLora = {
-	id: string;
+export type RawSDLora = {
 	name: string;
+	alias: string;
 	path: string;
 	metadata: {
 		ss_sd_model_name: string;
@@ -13,9 +11,4 @@ export type SDLora = {
 			['1_cate']: Record<string, number>;
 		};
 	};
-	description: string | null;
-	origin: string;
-	sdVersion: string;
-	previewImage: string | null;
-	tags: PopulatedTag[];
 };

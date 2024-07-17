@@ -26,7 +26,8 @@ export const mediaItems = sqliteTable('media_items', {
 	createdAt: integer('created_at').notNull(),
 	updatedAt: integer('updated_at'),
 	isArchived: integer('is_archived').notNull().default(0),
-	exif: text('exif')
+	exif: text('exif'),
+	sdCheckpoint: text('sd_checkpoint').references(() => sdCheckpoints.id)
 });
 
 export const tags_mediaItems_relation = relations(mediaItems, ({ many }) => ({
@@ -92,6 +93,8 @@ export type MediaItem = InferSelectModel<typeof mediaItems> & {
 	tags?: TagSchema[];
 };
 
+// Stable Diffusion schemas
+
 export const sdPrompts = sqliteTable('sd_prompts', {
 	id: text('id').primaryKey(),
 	name: text('name'),
@@ -138,11 +141,27 @@ export const tagsToLoras = sqliteTable(
 	(t) => ({ pk: primaryKey({ columns: [t.tagId, t.loraId] }) })
 );
 
+export const sdCheckpoints = sqliteTable('sd_checkpoints', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	path: text('path').notNull(),
+	description: text('description'),
+	origin: text('origin').notNull(),
+	sdVersion: text('sd_version').notNull(),
+	sha256: text('sha256').notNull(),
+	previewImage: text('preview_image')
+});
+export type SDCheckpointSchema = InferSelectModel<typeof sdCheckpoints>;
+
 export const sdLoras = sqliteTable('sd_loras', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	path: text('path').notNull(),
+	description: text('description'),
+	metadata: text('metadata'),
 	previewImage: text('preview_image'),
+	origin: text('origin').notNull(),
+	sdVersion: text('sd_version').notNull(),
 	activationWords: text('activation_words').notNull()
 });
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;

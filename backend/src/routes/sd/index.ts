@@ -1,3 +1,4 @@
+import deleteCheckpoint from './deleteCheckpoint';
 import getCheckpoints from './getCheckpoints';
 import getHighResUpscalers from './getHighResUpscalers';
 import getProgress from './getProgress';
@@ -13,6 +14,7 @@ import refreshCheckpoints from './refreshCheckpoints';
 import startSDUi from './startSDUi';
 import stopSDUi from './stopSDUi';
 import unloadCheckpoint from './unloadCheckpoint';
+import updateCheckpoint from './updateCheckpoint';
 import wildcardRoutes from './wildcards';
 
 export default [
@@ -29,6 +31,8 @@ export default [
 	refreshCheckpoints,
 	getProgress,
 	unloadCheckpoint,
+	updateCheckpoint,
+	deleteCheckpoint,
 	...promptCruds,
 	...loraRoutes,
 	...wildcardRoutes

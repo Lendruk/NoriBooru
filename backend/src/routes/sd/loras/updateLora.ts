@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../../types/Request';
-import { checkVault } from '../../../hooks/checkVault';
-import { sdLoras, tagsToLoras } from '../../../db/vault/schema';
 import { eq, sql } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { sdLoras, tagsToLoras } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { Request } from '../../../types/Request';
 
 const updateLora = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -10,6 +10,9 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	const body = request.body as {
 		name?: string;
 		tags?: number[];
+		description?: string;
+		sdVersion?: string;
+		origin?: string;
 		previewImage?: string;
 	};
 	if (!vault) {
@@ -19,7 +22,7 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	const updatePayload: Record<string, unknown> = {};
 
 	for (const key in body) {
-		if (key === 'name' || key === 'previewImage') {
+		if (['name', 'previewImage', 'origin', 'description', 'sdVersion'].includes(key)) {
 			updatePayload[key] = body[key as keyof typeof body];
 		}
 	}
@@ -28,7 +31,7 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	if (Object.keys(updatePayload).length > 0) {
 		await db
 			.update(sdLoras)
-			.set({ previewImage: body.previewImage, name: body.name })
+			.set({...updatePayload })
 			.where(eq(sdLoras.id, id));
 	}
 	const currentTags = (

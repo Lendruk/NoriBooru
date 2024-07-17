@@ -1,21 +1,29 @@
+import { like } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
+import { sdCheckpoints } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { Request } from '../../types/Request';
+
+type CheckpointQuery = {
+	name: string;
+}
 
 const getSDCheckpoints = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const sdPort = vault.getSdPort();
-	if (!sdPort) {
-		return reply.status(400).send('SD Ui is not running for the given vault');
+	const {  name: nameQuery } = request.query as CheckpointQuery;
+	const { db } = vault;
+	let checkpoints = [];
+
+	if (nameQuery) {
+		checkpoints = await db.select().from(sdCheckpoints).where(like(sdCheckpoints.name,  `%${nameQuery}%` ));
+	} else {
+		checkpoints = await db.query.sdCheckpoints.findMany();
 	}
 
-	const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/sd-models`);
-	const body = await result.json();
-
-	reply.send(body);
+	reply.send(checkpoints);
 };
 
 export default {
