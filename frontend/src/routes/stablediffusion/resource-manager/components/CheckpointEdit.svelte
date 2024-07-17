@@ -15,6 +15,7 @@
 
 	let isLoading = false;
 	let checkpointName: string;
+	let checkpointOrigin: string;
 	let checkpointDescription: string;
 	let sdVersion: string;
 
@@ -24,8 +25,13 @@
 			await HttpService.put(`/sd/checkpoints/${checkpoint.id}`, {
 				name: checkpointName,
 				description: checkpointDescription,
+				origin: checkpointOrigin,
 				sdVersion
 			});
+			checkpoint.name = checkpointName;
+			checkpoint.description = checkpointDescription;
+			checkpoint.origin = checkpointOrigin;
+			checkpoint.sdVersion = sdVersion;
 			createToast('Checkpoint updated successfully!');
 		} catch (error) {
 		} finally {
@@ -37,6 +43,7 @@
 		checkpointName = checkpoint.name;
 		checkpointDescription = checkpoint.description;
 		sdVersion = checkpoint.sdVersion;
+		checkpointOrigin = checkpoint.origin;
 	}
 </script>
 
@@ -63,6 +70,10 @@
 	<LabeledComponent>
 		<div slot="label">Path</div>
 		<TextInput slot="content" disabled bind:value={checkpoint.path} />
+	</LabeledComponent>
+	<LabeledComponent>
+		<div slot="label">Origin</div>
+		<TextInput slot="content" bind:value={checkpointOrigin} />
 	</LabeledComponent>
 	<LabeledComponent>
 		<div slot="label">SD Version</div>

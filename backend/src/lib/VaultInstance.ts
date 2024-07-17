@@ -194,7 +194,7 @@ export class VaultInstance extends VaultBase {
 		const savedCheckpoints = await this.db.query.sdCheckpoints.findMany();
 
 		for (const rawCheckpoint of sdClientCheckpoints) {
-			const savedCheckpoint = savedCheckpoints.find(checkpoint => checkpoint.sha256 === rawCheckpoint.sha256);
+			const savedCheckpoint = savedCheckpoints.find(checkpoint => checkpoint.path === rawCheckpoint.filename);
 
 			if (!savedCheckpoint) {
 				await this.db.insert(sdCheckpoints).values({
@@ -203,7 +203,7 @@ export class VaultInstance extends VaultBase {
 					origin: 'LOCAL',
 					path: rawCheckpoint.filename,
 					sdVersion: '',
-					sha256: rawCheckpoint.sha256,
+					sha256: rawCheckpoint.sha256 ?? '',
 				});
 			}
 		}

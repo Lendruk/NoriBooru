@@ -4,10 +4,13 @@
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import { onMount } from 'svelte';
+	import LabeledComponent from '../../components/LabeledComponent.svelte';
+	import TextInput from '../../components/TextInput.svelte';
 	import CheckpointEdit from './components/CheckpointEdit.svelte';
 	import LoraEdit from './components/LoraEdit.svelte';
 	import ResourceList from './components/ResourceList.svelte';
@@ -28,6 +31,13 @@
 		| (SDLora & { type: string })
 		| (SDCheckpoint & { type: string })
 		| undefined;
+
+	// Query
+	let queryLoraName: string;
+	let loraFilterTags: PopulatedTag[] = [];
+	let loraNameInputTimeout: NodeJS.Timeout | undefined;
+	let checkpointNameInputTimeout: NodeJS.Timeout | undefined;
+	let queryCheckpointName: string;
 
 	function onCheckpointClick(sdCheckpoint: SDCheckpoint): void {
 		currentlySelectedResource = { ...sdCheckpoint, type: 'checkpoint' };
@@ -94,6 +104,54 @@
 		isEditWindowOpen = false;
 		currentlySelectedResource = undefined;
 	}
+
+	// Querying
+	async function searchLoras() {
+		const filteredLoras = await HttpService.get<SDLora[]>(
+			`/sd/loras?tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+		);
+		loras = filteredLoras;
+	}
+
+	async function searchCheckpoints() {
+		const filteredCheckpoints = await HttpService.get<SDCheckpoint[]>(
+			`/sd/checkpoints${queryCheckpointName ? `?name=${queryCheckpointName}` : ''}`
+		);
+		checkpoints = filteredCheckpoints;
+	}
+
+	function addTagToFilter(tag: PopulatedTag) {
+		loraFilterTags.push(tag);
+		loraFilterTags = loraFilterTags;
+	}
+
+	function removeTagFromFilter(tag: PopulatedTag) {
+		const index = loraFilterTags.findIndex((t) => t.id === tag.id);
+		if (index !== -1) {
+			loraFilterTags.splice(index, 1);
+		}
+		loraFilterTags = loraFilterTags;
+	}
+
+	async function startOnLoraInputTimeout() {
+		if (loraNameInputTimeout) {
+			clearTimeout(loraNameInputTimeout);
+		}
+
+		loraNameInputTimeout = setTimeout(() => {
+			searchLoras();
+		}, 750);
+	}
+
+	async function startOnCheckpointInputTimeout() {
+		if (checkpointNameInputTimeout) {
+			clearTimeout(checkpointNameInputTimeout);
+		}
+
+		checkpointNameInputTimeout = setTimeout(() => {
+			searchCheckpoints();
+		}, 750);
+	}
 </script>
 
 <div class="bg-zinc-900 p-2 rounded-md h-full flex flex-col">
@@ -118,6 +176,17 @@
 	<div class="flex justify-between h-full">
 		{#if currentTab === 'CHECKPOINTS'}
 			<div class="mt-2 flex-[0.7]">
+				<div class="flex">
+					<LabeledComponent>
+						<div slot="label">Search by name</div>
+						<TextInput
+							bind:value={queryCheckpointName}
+							on:input={startOnCheckpointInputTimeout}
+							placeholder="name"
+							slot="content"
+						/>
+					</LabeledComponent>
+				</div>
 				<ResourceList
 					onResourceClick={onCheckpointClick}
 					resources={checkpoints}
@@ -128,7 +197,35 @@
 		{/if}
 		{#if currentTab === 'LORAS'}
 			<div class="mt-2 flex-[0.7]">
-				<!-- <TagSearchInput  /> -->
+				<div class="flex gap-4">
+					<LabeledComponent>
+						<div slot="label">Search by name</div>
+						<TextInput
+							bind:value={queryLoraName}
+							on:input={startOnLoraInputTimeout}
+							placeholder="name"
+							slot="content"
+						/>
+					</LabeledComponent>
+					<LabeledComponent>
+						<div slot="label">Query tags</div>
+						<TagSearchInput
+							availableTags={tags}
+							appliedTags={loraFilterTags}
+							ignoredTags={loraFilterTags}
+							onAppliedTagClick={(tag) => {
+								removeTagFromFilter(tag);
+								searchLoras();
+							}}
+							onTagSearchSubmit={(tag) => {
+								addTagToFilter(tag);
+								searchLoras();
+							}}
+							slot="content"
+						/>
+					</LabeledComponent>
+				</div>
+
 				<ResourceList
 					onResourceClick={onLoraClick}
 					resources={loras}

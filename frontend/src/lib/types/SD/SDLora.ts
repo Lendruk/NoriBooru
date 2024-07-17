@@ -7,6 +7,7 @@ export type SDLora = {
 	path: string;
 	description: string;
 	sdVersion: string;
+	origin: string;
 	tags: PopulatedTag[];
 	metadata: {
 		ss_sd_model_name: string;

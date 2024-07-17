@@ -18,6 +18,7 @@
 
 	let loraName: string;
 	let loraDescription: string;
+	let loraOrigin: string;
 	let sdVersion: string;
 	let isLoading = false;
 
@@ -44,8 +45,13 @@
 			await HttpService.put(`/sd/loras/${sdLora.id}`, {
 				name: loraName,
 				description: loraDescription,
+				origin: loraOrigin,
 				sdVersion
 			});
+			sdLora.name = loraName;
+			sdLora.description = loraDescription;
+			sdLora.origin = loraOrigin;
+			sdLora.sdVersion = sdVersion;
 			createToast('Lora updated successfully!');
 		} catch (error) {
 		} finally {
@@ -57,6 +63,7 @@
 		loraName = sdLora.name;
 		loraDescription = sdLora.description;
 		sdVersion = sdLora.sdVersion;
+		loraOrigin = sdLora.origin;
 	}
 </script>
 
