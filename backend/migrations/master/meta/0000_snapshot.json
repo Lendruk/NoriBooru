@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a5833e65-0fce-4b15-8891-7cbf1ff33ce3",
+  "id": "c9d43870-6a7d-41e6-a4c8-3f277ea83c5c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "vaults": {
@@ -34,7 +34,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1721067822749
+          "default": 1721243329025
         },
         "has_installed_sd": {
           "name": "has_installed_sd",
@@ -43,6 +43,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "civitai_apikey": {
+          "name": "civitai_apikey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},

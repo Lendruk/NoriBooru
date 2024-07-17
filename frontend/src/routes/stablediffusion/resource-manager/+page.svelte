@@ -9,10 +9,12 @@
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import { onMount } from 'svelte';
+	import { vaultStore } from '../../../store';
 	import LabeledComponent from '../../components/LabeledComponent.svelte';
 	import TextInput from '../../components/TextInput.svelte';
 	import CheckpointEdit from './components/CheckpointEdit.svelte';
 	import LoraEdit from './components/LoraEdit.svelte';
+	import RegisterApiKey from './components/RegisterApiKey.svelte';
 	import ResourceList from './components/ResourceList.svelte';
 
 	let currentTab: 'CHECKPOINTS' | 'LORAS' = 'CHECKPOINTS';
@@ -38,6 +40,24 @@
 	let loraNameInputTimeout: NodeJS.Timeout | undefined;
 	let checkpointNameInputTimeout: NodeJS.Timeout | undefined;
 	let queryCheckpointName: string;
+
+	// Civitai importing
+	let isCivitaiModalOpen = false;
+	let isDownloadingModel = false;
+	let civitaiModelLink: string;
+
+	async function downloadCivitaiResource() {
+		isDownloadingModel = true;
+		try {
+			await HttpService.post(`/sd/civitai/download-resource`, { url: civitaiModelLink });
+			await fetchResources();
+			createToast('Model added successfully!');
+		} catch {
+		} finally {
+			isDownloadingModel = false;
+			isCivitaiModalOpen = false;
+		}
+	}
 
 	function onCheckpointClick(sdCheckpoint: SDCheckpoint): void {
 		currentlySelectedResource = { ...sdCheckpoint, type: 'checkpoint' };
@@ -170,7 +190,9 @@
 				closeEditWindow();
 			}}>Loras</button
 		>
-		<div class="border-b-2 border-zinc-950 flex-1 h-full"></div>
+		<div class="border-b-2 border-zinc-950 flex-1 flex justify-end h-full">
+			<Button onClick={() => (isCivitaiModalOpen = true)} class="mb-2">Civitai Import</Button>
+		</div>
 	</div>
 
 	<div class="flex justify-between h-full">
@@ -267,6 +289,22 @@
 			>
 		</div>
 	</div>
+</Modal>
+
+<Modal bind:showModal={isCivitaiModalOpen} class="min-h-0">
+	{#if $vaultStore?.civitaiApiKey}
+		<div class="flex flex-col w-full gap-4 relative">
+			{#if isDownloadingModel}
+				<LoadingBackground />
+			{/if}
+			<div>Enter civitai model link</div>
+			<TextInput bind:value={civitaiModelLink} />
+			NOTE: use for small files for now
+			<Button onClick={downloadCivitaiResource} class={'h-[40px]'}>Submit</Button>
+		</div>
+	{:else}
+		<RegisterApiKey />
+	{/if}
 </Modal>
 
 <svelte:head>

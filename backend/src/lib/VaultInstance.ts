@@ -175,6 +175,10 @@ export class VaultInstance extends VaultBase {
 					activationWords: '',
 					metadata: JSON.stringify(rawLora.metadata),
 				});
+			} else {
+				if (!savedLora.metadata) {
+					await this.db.update(sdLoras).set({ metadata:  JSON.stringify(rawLora.metadata)}).where(eq(sdLoras.id, savedLora.id));
+				}
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "d7b5460b-3d98-4af2-9846-37d39463e6c5",
+  "id": "7303f855-8969-49f3-ba05-2888fa361f91",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "loras_to_mediaItems": {

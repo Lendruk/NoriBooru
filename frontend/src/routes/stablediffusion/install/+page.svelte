@@ -11,7 +11,9 @@
 		if (!$vaultStore?.hasInstalledSD) {
 			await HttpService.post(`/sd/install`);
 			vaultStore.set({ ...$vaultStore!, hasInstalledSD: true });
-			goto('/stablediffusion/generator');
+			setTimeout(() => {
+				goto('/stablediffusion/generator');
+			}, 250);
 		}
 		installing = false;
 	}

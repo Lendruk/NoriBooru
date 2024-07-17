@@ -3,4 +3,5 @@ export type Vault = {
 	name: string;
 	path: string;
 	hasInstalledSD: boolean;
+	civitaiApiKey: string | null;
 };

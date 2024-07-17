@@ -1,3 +1,4 @@
+import civtaiRoutes from './civtai';
 import deleteCheckpoint from './deleteCheckpoint';
 import getCheckpoints from './getCheckpoints';
 import getHighResUpscalers from './getHighResUpscalers';
@@ -35,5 +36,6 @@ export default [
 	deleteCheckpoint,
 	...promptCruds,
 	...loraRoutes,
-	...wildcardRoutes
+	...wildcardRoutes,
+	...civtaiRoutes
 ];

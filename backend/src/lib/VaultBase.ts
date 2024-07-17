@@ -15,6 +15,7 @@ export abstract class VaultBase implements Vault {
 	public createdAt: number;
 	public hasInstalledSD: number;
 	public db: VaultDb;
+	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
 
 	public constructor(vault: Vault) {
@@ -23,6 +24,7 @@ export abstract class VaultBase implements Vault {
 		this.path = vault.path;
 		this.createdAt = vault.createdAt;
 		this.hasInstalledSD = vault.hasInstalledSD;
+		this.civitaiApiKey = vault.civitaiApiKey;
 		// Create db connection
 		const newDb = new Database(`${vault.path}/vault.sqlite`);
 		this.db = drizzle(newDb, { schema: vaultSchema });
