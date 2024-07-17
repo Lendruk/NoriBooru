@@ -1,5 +1,6 @@
 <script lang="ts">
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { HttpService } from '$lib/services/HttpService';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 
 	export let resources: { name: string; id: string; previewImage?: string }[];
@@ -18,7 +19,10 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			on:click={() => onResourceClick(resource)}
-			class={`w-[150px] h-[200px] ${selectedResourceId === resource.id ? 'border-4 ' : ''} bg-zinc-950 relative break-words rounded-sm border-red-950 hover:border-4  hover:transition-all`}
+			class={`w-[150px] h-[200px] ${selectedResourceId === resource.id ? 'border-4 ' : ''} bg-zinc-950 bg-cover bg-no-repeat relative break-words rounded-sm border-red-950 hover:border-4  hover:transition-all`}
+			style={resource.previewImage
+				? `background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${resource.previewImage}.png)`
+				: ''}
 		>
 			{resource.name}
 			<GalleryItemButton
