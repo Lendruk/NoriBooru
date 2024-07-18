@@ -1,7 +1,6 @@
 type TagDef = {
 	id: number;
 	name: string;
-	mediaCount: number;
 	color: string;
 	parentTagId: number | null;
 };

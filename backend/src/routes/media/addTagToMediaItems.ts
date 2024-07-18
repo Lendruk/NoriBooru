@@ -1,22 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { TagSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
-import { eq } from 'drizzle-orm';
+import { TagSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { VaultDb } from '../../db/VaultController';
-
-const insertTagIntoMedia = async (
-	db: VaultDb,
-	mediaId: number,
-	tag: TagSchema
-): Promise<boolean> => {
-	try {
-		await db.insert(tagsToMediaItems).values({ tagId: tag.id, mediaItemId: mediaId });
-		return true;
-	} catch {
-		return false;
-	}
-};
+import { mediaService } from '../../services/MediaService';
+import { Request } from '../../types/Request';
 
 const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -29,7 +15,6 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 	const body = request.body as TagSchema | { tags: TagSchema[] };
 
 	try {
-		const { db } = vault;
 		if (parsedIdArray && Array.isArray(parsedIdArray)) {
 			let tagsToInsert: TagSchema[] = [];
 			if ('tags' in body) {
@@ -39,13 +24,9 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 			}
 
 			for (const tag of tagsToInsert) {
-				let curMediaCount = tag.mediaCount;
 				for (const id of parsedIdArray) {
-					const numericId = Number.parseInt(id);
-					if (await insertTagIntoMedia(db, numericId, tag)) {
-						curMediaCount++;
-						await db.update(tags).set({ mediaCount: curMediaCount }).where(eq(tags.id, tag.id));
-					}
+					const parsedMediaId = Number.parseInt(id);
+					await mediaService.addTagToMediaItem(vault, parsedMediaId , tag.id);
 				}
 			}
 		}

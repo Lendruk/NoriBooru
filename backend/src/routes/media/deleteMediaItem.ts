@@ -1,15 +1,15 @@
+import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
+import * as fs from 'fs/promises';
+import path from 'path';
 import {
 	mediaItems,
 	playlists_mediaItems_table,
 	tags,
 	tagsToMediaItems
 } from '../../db/vault/schema';
-import { eq } from 'drizzle-orm';
-import path from 'path';
-import * as fs from 'fs/promises';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -36,10 +36,6 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 							where: eq(tags.id, mediaTag.tagId)
 						});
 						console.log(tag);
-						await db
-							.update(tags)
-							.set({ mediaCount: tag!.mediaCount - 1 })
-							.where(eq(tags.id, tag!.id));
 					}
 					await db.delete(tagsToMediaItems).where(eq(tagsToMediaItems.mediaItemId, parsedId));
 					await db.delete(mediaItems).where(eq(mediaItems.id, parsedId));

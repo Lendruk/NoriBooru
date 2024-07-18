@@ -39,7 +39,7 @@
 				</button>
 			{/if}
 			{formatTagName(tag.name)}
-			{tag.mediaCount > 0 ? `(${tag.mediaCount})` : ''}
+			<!-- {tag.mediaCount > 0 ? `(${tag.mediaCount})` : ''} -->
 		</span>
 		<button class={`delete ${!onDelete && 'invisible'}`} on:click={onDelete}> X </button>
 	</slot>

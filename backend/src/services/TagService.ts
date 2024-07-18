@@ -119,7 +119,6 @@ class TagService {
 				parentTag = {
 					color: result.color,
 					id: result.id,
-					mediaCount: result.mediaCount,
 					name: result.name
 				};
 			}
@@ -140,7 +139,6 @@ class TagService {
 		return {
 			color: tag.color,
 			id: tag.id,
-			mediaCount: tag.mediaCount,
 			name: tag.name,
 			parent: parentTag,
 			subTags

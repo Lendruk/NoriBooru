@@ -12,7 +12,6 @@ export const tags = sqliteTable('tags', {
 	id: integer('id').primaryKey(),
 	name: text('name').notNull(),
 	color: text('color').notNull(),
-	mediaCount: integer('media_count').notNull().default(0),
 	parentTagId: integer('parent_id')
 });
 export type TagSchema = InferSelectModel<typeof tags>;

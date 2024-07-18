@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { TagSchema, tags, tagsToMediaItems } from '../../db/vault/schema';
 import { and, eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { TagSchema, tagsToMediaItems } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 const removeTagFromMediaItem = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -23,10 +23,6 @@ const removeTagFromMediaItem = async (request: Request, reply: FastifyReply) => 
 						eq(tagsToMediaItems.mediaItemId, Number.parseInt(id))
 					)
 				);
-			await db
-				.update(tags)
-				.set({ mediaCount: body.mediaCount - 1 })
-				.where(eq(tags.id, body.id));
 		}
 	} catch (error) {
 		return reply.status(400).send({ message: error });
