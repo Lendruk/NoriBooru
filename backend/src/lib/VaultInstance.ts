@@ -181,6 +181,15 @@ export class VaultInstance extends VaultBase {
 				}
 			}
 		}
+		
+		// We need to also check if something has been deleted from the file system
+		for (const savedLora of savedLoras) {
+			const sdClientLora = sdClientLoras.find(lora => lora.path === savedLora.path);
+
+			if (!sdClientLora) {
+				await this.db.delete(sdLoras).where(eq(sdLoras.id, savedLora.id));
+			}
+		}
 	}
 
 	public async refreshCheckpoints(): Promise<void> {
@@ -209,6 +218,15 @@ export class VaultInstance extends VaultBase {
 					sdVersion: '',
 					sha256: rawCheckpoint.sha256 ?? '',
 				});
+			}
+		}
+
+		// We need to also check if something has been deleted from the file system
+		for (const savedCheckpoint of savedCheckpoints) {
+			const sdClientCheckpoint = sdClientCheckpoints.find(checkpoint => checkpoint.filename === savedCheckpoint.path);
+
+			if (!sdClientCheckpoint) {
+				await this.db.delete(sdCheckpoints).where(eq(sdCheckpoints.id, savedCheckpoint.id));
 			}
 		}
 	}
