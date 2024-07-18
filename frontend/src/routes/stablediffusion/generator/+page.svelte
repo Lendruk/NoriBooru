@@ -63,7 +63,7 @@
 	let promptName: string = '';
 	let positivePrompt: string = '';
 	let negativePrompt: string = '';
-	let checkpoint: string;
+	let checkpointId: string;
 	let width = 512;
 	let height = 512;
 	let sampler = '';
@@ -84,6 +84,8 @@
 	let isRefinerEnabled = false;
 	let refinerCheckpoint = '';
 	let refinerSwitchAt = 0.8;
+
+	let usedLoras: string[] = [];
 
 	async function setup(vault: Vault) {
 		if (!vault.hasInstalledSD) return;
@@ -116,7 +118,7 @@
 		loras = fetchedLoras;
 		wildcards = fetchedWildcards;
 
-		checkpoint = checkpoints[0]?.name;
+		checkpointId = checkpoints[0]?.id;
 		sampler = samplers[0].name;
 		highResUpscaler = upscalers[0].name;
 		if (checkpoints.length > 1) {
@@ -142,7 +144,7 @@
 						settingsObject[splitPart[0].trim()] = splitPart[1];
 					}
 					seed = Number.parseInt(settingsObject.Seed);
-					checkpoint = settingsObject.Model;
+					checkpointId = settingsObject.Model;
 					sampler = settingsObject.Sampler;
 					steps = Number.parseInt(settingsObject.Steps);
 					cfgScale = Number.parseInt(settingsObject['CFG scale']);
@@ -168,6 +170,7 @@
 
 	async function generate() {
 		const prompt = new SDPromptBuilder();
+		const checkpoint = checkpoints.find((ch) => ch.id === checkpointId)!;
 		prompt
 			.withPositivePrompt(processPrompt(wildcards, positivePrompt))
 			.withNegativePrompt(processPrompt(wildcards, negativePrompt))
@@ -175,7 +178,7 @@
 			.withSteps(steps)
 			.withSize(width, height)
 			.withSeed(seed)
-			.withCheckpoint(checkpoint)
+			.withCheckpoint(checkpoint.name)
 			.withBatching(numberOfGenerations, imagesPerGeneration)
 			.withCfgScale(cfgScale);
 
@@ -199,7 +202,7 @@
 		try {
 			const result = await HttpService.post<{
 				items: { fileName: string; id: number; exif: string; isArchived: boolean }[];
-			}>(`/sd/prompt`, { prompt: prompt.build(), autoTag });
+			}>(`/sd/prompt`, { prompt: prompt.build(), autoTag, checkpointId, loras: usedLoras });
 			generatedImages = result.items;
 			if ($page.url.searchParams.has('inputExif')) {
 				goto('/stablediffusion/generator');
@@ -219,7 +222,7 @@
 		const newPrompt = await HttpService.post<SavedPrompt>('/sd/prompts', {
 			name,
 			cfgScale,
-			checkpoint,
+			checkpoint: checkpointId,
 			positivePrompt,
 			negativePrompt,
 			width,
@@ -243,7 +246,7 @@
 		await HttpService.put(`/sd/prompts/${promptId}`, {
 			name: promptName,
 			cfgScale,
-			checkpoint,
+			checkpoint: checkpointId,
 			positivePrompt,
 			negativePrompt,
 			width,
@@ -267,7 +270,7 @@
 		height = prompt.height;
 		cfgScale = prompt.cfgScale;
 		sampler = prompt.sampler;
-		checkpoint = prompt.checkpoint;
+		checkpointId = prompt.checkpoint;
 		promptName = prompt.name;
 		positivePrompt = prompt.positivePrompt;
 		negativePrompt = prompt.negativePrompt;
@@ -291,7 +294,7 @@
 		promptName = '';
 		positivePrompt = '';
 		negativePrompt = '';
-		checkpoint;
+		checkpointId;
 		width = 512;
 		height = 512;
 		sampler = '';
@@ -325,6 +328,7 @@
 
 	function onLoraClick(lora: SDLora) {
 		positivePrompt += `, <lora:${lora.name}:1>`;
+		usedLoras.push(lora.id);
 	}
 
 	beforeNavigate(async () => {
@@ -472,7 +476,7 @@
 							bind:samplers
 							bind:checkpoints
 							bind:selectedSampler={sampler}
-							bind:selectedCheckpoint={checkpoint}
+							bind:selectedCheckpoint={checkpointId}
 							bind:width
 							bind:height
 							bind:seed

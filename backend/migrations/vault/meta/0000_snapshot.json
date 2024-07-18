@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7303f855-8969-49f3-ba05-2888fa361f91",
+  "id": "c612e10a-76d6-4623-a9e0-a1f828fcd30a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "loras_to_mediaItems": {
@@ -121,6 +121,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "exif": {
           "name": "exif",
@@ -592,14 +599,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "media_count": {
-          "name": "media_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "parent_id": {
           "name": "parent_id",

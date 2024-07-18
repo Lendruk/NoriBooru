@@ -16,6 +16,8 @@ type PromptResponse = {
 
 type RequestBody = {
 	autoTag: boolean;
+	checkpointId: string;
+	loras: string[];
 	prompt: SDPromptRequest;
 }
 
@@ -38,11 +40,11 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}
 
-	const requestBody = request.body as RequestBody;
+	const { autoTag, checkpointId, loras, prompt} = request.body as RequestBody;
 
 	const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/txt2img`, {
 		method: 'POST',
-		body: JSON.stringify(requestBody.prompt),
+		body: JSON.stringify(prompt),
 		headers: {
 			'Content-Type': 'application/json'
 		}
@@ -51,15 +53,15 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 
 	for (const image of body.images) {
-		const { fileName, id, exif } = await mediaService.createImageFromBase64(image, vault);
+		const { fileName, id, exif } = await mediaService.createImageFromBase64(image, vault, checkpointId, loras);
 		items.push({ fileName, id, exif, isArchived: false });
 	}
 
 	// Prompt tags
 	// Can be optimized
-	if (requestBody.autoTag) {
+	if (autoTag) {
 		const tags: number[] = [];
-		for (const token of requestBody.prompt.prompt.split(',')) {
+		for (const token of prompt.prompt.split(',')) {
 			const formattedToken = token.trim();
 
 			if (formattedToken.length === 0) continue;

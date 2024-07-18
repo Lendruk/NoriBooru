@@ -15,6 +15,7 @@ CREATE TABLE `media_items` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`is_archived` integer DEFAULT 0 NOT NULL,
+	`hash` text NOT NULL,
 	`exif` text,
 	`sd_checkpoint` text,
 	FOREIGN KEY (`sd_checkpoint`) REFERENCES `sd_checkpoints`(`id`) ON UPDATE no action ON DELETE no action
@@ -91,7 +92,6 @@ CREATE TABLE `tags` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`color` text NOT NULL,
-	`media_count` integer DEFAULT 0 NOT NULL,
 	`parent_id` integer
 );
 --> statement-breakpoint

@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import ExifReader from 'exifreader';
 import { FastifyReply, RouteOptions } from 'fastify';
 import ffmpeg from 'fluent-ffmpeg';
@@ -37,7 +38,6 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				`${id}.${finalExtension}`
 			);
 
-			console.log(currentFileExtension);
 			if (fileType === 'video' && currentFileExtension !== 'mp4') {
 				const conversionPromise = new Promise((resolve, reject) => {
 					ffmpeg(part.file)
@@ -49,8 +49,11 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			} else {
 				await pump(part.file, createWriteStream(finalPath));
 			}
-
+			
 			const [stats, buffer] = await Promise.all([fs.stat(finalPath), fs.readFile(finalPath)]);
+			const hash = createHash('sha256');
+			hash.update(buffer);
+			const hexHash = hash.digest('hex').toString();
 
 			// Exif
 			const exif = fileType === 'image' ? (await ExifReader.load(buffer)) as Exif : '';
@@ -62,6 +65,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 					exif: JSON.stringify(exif),
 					type: fileType,
 					createdAt: Date.now(),
+					hash: hexHash,
 					fileSize: stats.size / (1024 * 1024)
 				})
 				.returning();

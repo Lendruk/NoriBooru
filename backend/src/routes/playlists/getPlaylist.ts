@@ -34,6 +34,7 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 				createdAt: mediaItems.createdAt,
 				updatedAt: mediaItems.updatedAt,
 				isArchived: mediaItems.isArchived,
+				hash: mediaItems.hash,
 				exif: mediaItems.exif,
 				index: playlists_mediaItems_table.itemIndex
 			}
@@ -69,6 +70,7 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 					sdCheckpoint: item.sdCheckpoint,
 					isArchived: item.isArchived ?? 0,
 					type: item.type!,
+					hash: item.hash!,
 					updatedAt: item.updatedAt,
 					exif: item.exif
 				};
