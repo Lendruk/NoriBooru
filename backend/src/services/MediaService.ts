@@ -3,7 +3,8 @@ import ExifReader from 'exifreader';
 import * as fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-import { mediaItems } from '../db/vault/schema';
+import { mediaItems, tagsToMediaItems } from '../db/vault/schema';
+import { VaultBase } from '../lib/VaultBase';
 import { VaultInstance } from '../lib/VaultInstance';
 import { Exif } from '../types/Exif';
 
@@ -43,6 +44,15 @@ class MediaService {
 			fileName: mediaItem[0].fileName,
 			exif: mediaItem[0].exif!
 		};
+	}
+
+	public async addTagToMediaItem(
+		vault: VaultBase, 
+		mediaItemId: number,
+		tagId: number 
+	): Promise<void> {
+		const { db } = vault;
+		await db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
 	}
 }
 

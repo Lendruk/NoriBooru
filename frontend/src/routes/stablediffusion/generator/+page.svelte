@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import Button from '$lib/Button.svelte';
+	import Checkbox from '$lib/components/Checkbox.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
@@ -52,6 +53,7 @@
 	let isSearchingPrompts = false;
 	let isSavingPrompt = false;
 	let areSaveOptionsExpanded = false;
+	let autoTag = false;
 
 	// Loading flags
 	let isGeneratingImage = false;
@@ -197,7 +199,7 @@
 		try {
 			const result = await HttpService.post<{
 				items: { fileName: string; id: number; exif: string; isArchived: boolean }[];
-			}>(`/sd/prompt`, prompt.build());
+			}>(`/sd/prompt`, { prompt: prompt.build(), autoTag });
 			generatedImages = result.items;
 			if ($page.url.searchParams.has('inputExif')) {
 				goto('/stablediffusion/generator');
@@ -365,6 +367,7 @@
 			</Tooltip>
 		</div>
 		<div class="flex gap-2">
+			<Checkbox bind:checked={autoTag} inlineLabel={'Auto tag'} />
 			<div class="flex relative">
 				<Tooltip>
 					<Button

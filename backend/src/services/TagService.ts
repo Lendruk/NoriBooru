@@ -20,6 +20,18 @@ class TagService {
 		return this.populateTag(vault, dbTag);
 	}
 
+	public async doesTagExist(vault: VaultInstance, tagName: string): Promise<boolean> {
+		const { db } = vault;
+		const dbTag = await db.query.tags.findFirst({ where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase()) });
+		return !!dbTag;
+	}
+
+	public async getTagByName(vault: VaultInstance, tagName: string): Promise<SimpleTag | undefined> {
+		const { db } = vault;
+		const dbTag = await db.query.tags.findFirst({ where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase()) });
+		return dbTag;
+	}
+
 	public async getAllTags(vault: VaultInstance, nameToQuery?: string): Promise<PopulatedTag[]> {
 		const { db } = vault;
 		let foundTags: TagSchema[] = [];
