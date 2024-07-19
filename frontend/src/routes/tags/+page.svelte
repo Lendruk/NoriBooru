@@ -113,7 +113,7 @@
 						tagInEditName = tag.name;
 						tagInEditId = tag.id;
 						tagInEditColor = tag.color;
-						tagInEditAppliedParent = [tag.parent as PopulatedTag]
+						tagInEditAppliedParent = tag.parent ? [tag.parent as PopulatedTag] : []
 					}}
 					{tag}
 					onDelete={() => deleteTag(tag.id)}

@@ -92,13 +92,13 @@ class TagService {
 	public async updateTag(
 		vault: VaultInstance,
 		tagId: number,
-		updatePayload: { name?: string; parentTagId?: number; color: string }
+		updatePayload: { name?: string; parentId?: number; color: string }
 	): Promise<SimpleTag> {
 		const { db } = vault;
 		const updated = (
 			await db
 				.update(tags)
-				.set({ ...updatePayload })
+				.set({ ...updatePayload, parentTagId: updatePayload.parentId ?? null})
 				.where(eq(tags.id, tagId))
 				.returning()
 		)[0];
