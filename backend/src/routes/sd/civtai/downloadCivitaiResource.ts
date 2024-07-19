@@ -1,13 +1,18 @@
 import { randomUUID } from 'crypto';
 import { FastifyReply, RouteOptions } from 'fastify';
-import fs from 'fs';
+import fs, { createWriteStream } from 'fs';
+import util from 'node:util';
+import path from 'path';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
+import { mediaService } from '../../../services/MediaService';
 import { Request } from '../../../types/Request';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { pipeline } = require('node:stream');
+const pump = util.promisify(pipeline);
 
 const downloadCivitaiResource = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -49,27 +54,46 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 			await finished(Readable.fromWeb(body! as any).pipe(stream));
 
 			const { db } = vault;
+
+			// Create a preview image
+			const imageRequest = await fetch(modelVersion.images[0].url);
+			const id = randomUUID();
+			const finalPath = path.join(
+				vault.path,
+				'media',
+				'images',
+				`${id}.png`
+			); 
+			await pump(imageRequest.body, createWriteStream(finalPath));
+			const mediaItem = await mediaService.createMediaItemFromFile(
+				vault, finalPath, 'image', id, null,
+			);
+
 			if (modelInfo.type === 'LORA') {
-				await db.insert(sdLoras).values({
+				const newLora = await db.insert(sdLoras).values({
 					id: randomUUID(),
 					name: modelInfo.name,
 					path: filePath,
 					origin: url,
 					sdVersion: modelVersion.baseModel,
 					description: modelInfo.description,
+					previewImage: mediaItem.fileName,
 					activationWords: '',
 					metadata: ''
-				});
+				}).returning();
+				await mediaService.addLoraToMediaItem(vault, mediaItem.id, newLora[0].id);
 			} else if (modelInfo.type === 'Checkpoint') {
-				await db.insert(sdCheckpoints).values({
+				const newCheckpoint = await db.insert(sdCheckpoints).values({
 					id: randomUUID(),
 					name: modelInfo.name,
 					description: modelInfo.description,
 					path: filePath,
 					origin: url,
 					sdVersion: modelVersion.baseModel,
+					previewImage: mediaItem.fileName,
 					sha256: '',
-				});
+				}).returning();
+				await mediaService.setMediaItemSDCheckpoint(vault, mediaItem.id, newCheckpoint[0].id);
 			}
 
 			if (vault.isSDUiRunning()) {

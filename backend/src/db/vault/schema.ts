@@ -159,9 +159,9 @@ export const sdLoras = sqliteTable('sd_loras', {
 	path: text('path').notNull(),
 	description: text('description'),
 	metadata: text('metadata'),
-	previewImage: text('preview_image'),
 	origin: text('origin').notNull(),
 	sdVersion: text('sd_version').notNull(),
+	previewImage: text('preview_image'),
 	activationWords: text('activation_words').notNull()
 });
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
