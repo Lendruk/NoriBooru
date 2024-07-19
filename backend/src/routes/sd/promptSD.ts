@@ -60,6 +60,7 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	// Prompt tags
 	// Can be optimized
 	if (autoTag) {
+		const aiTag = await TagService.getTagByName(vault, 'ai');
 		const tags: number[] = [];
 		for (const token of prompt.prompt.split(',')) {
 			const formattedToken = token.trim();
@@ -79,6 +80,10 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 		for (const item of items) {
 			for(const tag of tags)  {
 				await mediaService.addTagToMediaItem(vault, item.id, tag);
+			}
+
+			if (aiTag) {
+				await mediaService.addTagToMediaItem(vault, item.id, aiTag.id);
 			}
 		}
 	}

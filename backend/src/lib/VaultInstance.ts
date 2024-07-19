@@ -9,6 +9,7 @@ import { promisify } from 'util';
 import { masterDb } from '../db/master/db';
 import { Vault, vaults } from '../db/master/schema';
 import { sdCheckpoints, sdLoras } from '../db/vault/schema';
+import TagService from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
 import { VaultBase } from './VaultBase';
@@ -58,6 +59,11 @@ export class VaultInstance extends VaultBase {
 		);
 
 		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, this.id));
+
+		if (!await TagService.doesTagExist(this, 'AI')) {
+			await TagService.createTag(this, 'AI', '#3264a8');
+		}
+
 		await this.startSDUi();
 
 		console.log(stderr);

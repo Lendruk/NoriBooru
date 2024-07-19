@@ -17,8 +17,8 @@
 	</div>
 
 	<Select class={'h-[40px]'} bind:value={currentRefinerCheckpoint}>
-		{#each checkpoints.filter((check) => check.model_name !== currentCheckpoint) as checkpoint}
-			<option value={checkpoint.model_name}>{checkpoint.model_name}</option>
+		{#each checkpoints.filter((check) => check.name !== currentCheckpoint) as checkpoint}
+			<option value={checkpoint.name}>{checkpoint.name}</option>
 		{/each}
 	</Select>
 
