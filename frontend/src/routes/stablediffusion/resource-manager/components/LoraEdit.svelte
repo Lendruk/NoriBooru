@@ -117,6 +117,16 @@
 			/>
 		</div>
 	</LabeledComponent>
+	{#if sdLora.activationWords.length > 0}
+		<LabeledComponent>
+			<div slot="label">Activation Words</div>
+			<div slot="content">
+				{#each sdLora.activationWords as word}
+					{word},
+				{/each}
+			</div>
+		</LabeledComponent>
+	{/if}
 
 	<Button onClick={updateLora} class="h-[40px] mt-4">Update</Button>
 </div>

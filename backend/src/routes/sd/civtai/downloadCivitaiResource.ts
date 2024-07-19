@@ -78,7 +78,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 					sdVersion: modelVersion.baseModel,
 					description: modelInfo.description,
 					previewImage: mediaItem.fileName,
-					activationWords: '',
+					activationWords: JSON.stringify(modelVersion.trainedWords),
 					metadata: ''
 				}).returning();
 				await mediaService.addLoraToMediaItem(vault, mediaItem.id, newLora[0].id);

@@ -13,6 +13,7 @@ export type SDLora = {
 			['1_cate']: Record<string, number>;
 		};
 	};
+	activationWords: string[];
 	description: string | null;
 	origin: string;
 	sdVersion: string;

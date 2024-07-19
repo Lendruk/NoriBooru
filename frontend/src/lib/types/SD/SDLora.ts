@@ -9,6 +9,7 @@ export type SDLora = {
 	sdVersion: string;
 	origin: string;
 	tags: PopulatedTag[];
+	activationWords: string[];
 	metadata: {
 		ss_sd_model_name: string;
 		ss_resolution: string;
