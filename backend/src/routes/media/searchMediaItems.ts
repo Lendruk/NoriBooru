@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { TagSchema, mediaItems, tagsToMediaItems } from '../../db/vault/schema';
 import { asc, desc, eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { MediaItemMetadataSchema, TagSchema, mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 type BaseMediaItem = {
 	id: number;
@@ -13,7 +13,7 @@ type BaseMediaItem = {
 	createdAt: number;
 	updatedAt: number | null;
 	isArchived: boolean;
-	exif: string;
+	metadata?: MediaItemMetadataSchema
 };
 
 type QueryType = 'AND' | 'OR';
@@ -32,7 +32,6 @@ export type MediaSearchQuery = {
 	archived: string;
 	positiveQueryType: QueryType;
 	negativeQueryType: QueryType;
-	exif: string;
 };
 
 const PAGE_SIZE = 30;
@@ -72,17 +71,19 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			tagArr.push(tagPair.tagId);
 		}
 
+		const metadata = await db.query.mediaItemsMetadata.findFirst({ where: eq(mediaItemsMetadata.mediaItem, row.id) });
+
 		finalMedia.push({
 			createdAt: row.createdAt,
 			extension: row.extension,
 			fileName: row.fileName,
 			fileSize: row.fileSize,
-			exif: row.exif ?? '',
 			id: row.id,
 			isArchived: row.isArchived === 1 ? true : false,
 			type: row.type,
 			updatedAt: row.updatedAt,
-			tags: tagArr
+			tags: tagArr,
+			metadata,
 		});
 	}
 

@@ -11,6 +11,7 @@
 	import SearchIcon from '$lib/icons/SearchIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import Tooltip from '$lib/Tooltip.svelte';
+	import type { MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
@@ -45,7 +46,7 @@
 	let allTags: PopulatedTag[] = [];
 
 	let generatedImages:
-		| { fileName: string; id: number; isArchived: boolean; exif: string }[]
+		| { fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[]
 		| undefined = undefined;
 
 	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
@@ -125,44 +126,66 @@
 			refinerCheckpoint = checkpoints[1].name;
 		}
 
-		if ($page.url.searchParams.has('inputExif')) {
-			const rawExif = $page.url.searchParams.get('inputExif')!;
-			const parsedExif = JSON.parse(rawExif);
-			width = parsedExif['Image Width'].value;
-			height = parsedExif['Image Height'].value;
-			const splitPrompt = parsedExif.parameters.value.split('\n');
-			positivePrompt = splitPrompt[0];
+		if ($page.url.searchParams.has('inputMetadata')) {
+			const rawMetadata = $page.url.searchParams.get('inputMetadata')!;
+			const parsedMetadata = JSON.parse(decodeURIComponent(rawMetadata)) as MediaItemMetadata;
+			width = parsedMetadata.width;
+			height = parsedMetadata.height;
+			positivePrompt = parsedMetadata.positivePrompt;
+			negativePrompt = parsedMetadata.negativePrompt;
+			seed = parsedMetadata.seed;
+			sampler = parsedMetadata.sampler;
+			console.log(sampler);
+			cfgScale = parsedMetadata.cfgScale;
+			steps = parsedMetadata.steps;
 
-			for (let i = 1; i < splitPrompt.length; i++) {
-				const value = splitPrompt[i];
-				if (value.includes('Negative prompt:')) {
-					negativePrompt = value.split(': ')[1];
-				} else {
-					const settingsObject: Record<string, string> = {};
-					for (const part of value.split(',')) {
-						const splitPart = part.split(': ');
-						settingsObject[splitPart[0].trim()] = splitPart[1];
-					}
-					seed = Number.parseInt(settingsObject.Seed);
-					checkpointId = settingsObject.Model;
-					sampler = settingsObject.Sampler;
-					steps = Number.parseInt(settingsObject.Steps);
-					cfgScale = Number.parseInt(settingsObject['CFG scale']);
+			const installedSDCheckpointId = checkpoints.find(
+				(chk) => chk.name === parsedMetadata.model
+			)?.id;
 
-					if (settingsObject['Hires upscaler']) {
-						highResUpscaler = settingsObject['Hires upscaler'];
-						isHighResEnabled = true;
-						highResDenoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
-						upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
-					}
-
-					if (settingsObject.Refiner) {
-						isRefinerEnabled = true;
-						refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
-						refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
-					}
-				}
+			if (installedSDCheckpointId) {
+				checkpointId = installedSDCheckpointId;
+			} else {
+				checkpointId = checkpoints[0].id;
+				createToast(`Cannot apply checkpoint ${parsedMetadata.model}: it is not installed`);
 			}
+			if (parsedMetadata.upscaler) {
+				highResUpscaler = parsedMetadata.upscaler;
+				upscaleBy = parsedMetadata.upscaleBy;
+				highResDenoisingStrength = parsedMetadata.denoisingStrength;
+				isHighResEnabled = true;
+			}
+
+			// for (let i = 1; i < splitPrompt.length; i++) {
+			// 	const value = splitPrompt[i];
+			// 	if (value.includes('Negative prompt:')) {
+			// 		negativePrompt = value.split(': ')[1];
+			// 	} else {
+			// 		const settingsObject: Record<string, string> = {};
+			// 		for (const part of value.split(',')) {
+			// 			const splitPart = part.split(': ');
+			// 			settingsObject[splitPart[0].trim()] = splitPart[1];
+			// 		}
+			// 		seed = Number.parseInt(settingsObject.Seed);
+			// 		checkpointId = settingsObject.Model;
+			// 		sampler = settingsObject.Sampler;
+			// 		steps = Number.parseInt(settingsObject.Steps);
+			// 		cfgScale = Number.parseInt(settingsObject['CFG scale']);
+
+			// 		if (settingsObject['Hires upscaler']) {
+			// 			highResUpscaler = settingsObject['Hires upscaler'];
+			// 			isHighResEnabled = true;
+			// 			highResDenoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+			// 			upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
+			// 		}
+
+			// 		if (settingsObject.Refiner) {
+			// 			isRefinerEnabled = true;
+			// 			refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
+			// 			refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
+			// 		}
+			// 	}
+			// }
 		}
 
 		$isSdStarting = false;
@@ -201,10 +224,10 @@
 		isGeneratingImage = true;
 		try {
 			const result = await HttpService.post<{
-				items: { fileName: string; id: number; exif: string; isArchived: boolean }[];
+				items: { fileName: string; id: number; metadata: MediaItemMetadata; isArchived: boolean }[];
 			}>(`/sd/prompt`, { prompt: prompt.build(), autoTag, checkpointId, loras: usedLoras });
 			generatedImages = result.items;
-			if ($page.url.searchParams.has('inputExif')) {
+			if ($page.url.searchParams.has('inputMetadata')) {
 				goto('/stablediffusion/generator');
 			}
 		} catch {
@@ -314,16 +337,8 @@
 		}
 	}
 
-	function setSeedFromLastGen(exif: string) {
-		const parsedExif = JSON.parse(exif);
-		if (!parsedExif) return;
-		const value = parsedExif.parameters.value;
-		// Bad performance
-		for (const entry of value.split(',')) {
-			if (entry.includes('Seed:')) {
-				seed = Number.parseInt(entry.split(' ')[2]);
-			}
-		}
+	function setSeedFromLastGen(lastGenSeed: number) {
+		seed = lastGenSeed;
 	}
 
 	function onLoraClick(lora: SDLora) {

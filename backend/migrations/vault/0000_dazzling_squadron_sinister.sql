@@ -16,9 +16,28 @@ CREATE TABLE `media_items` (
 	`updated_at` integer,
 	`is_archived` integer DEFAULT 0 NOT NULL,
 	`hash` text NOT NULL,
-	`exif` text,
 	`sd_checkpoint` text,
 	FOREIGN KEY (`sd_checkpoint`) REFERENCES `sd_checkpoints`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `media_items_metadata` (
+	`id` text PRIMARY KEY NOT NULL,
+	`media_item` integer,
+	`width` integer NOT NULL,
+	`height` integer NOT NULL,
+	`positive_prompt` text,
+	`negative_prompt` text,
+	`steps` integer,
+	`seed` integer,
+	`sampler` text,
+	`model` text,
+	`upscaler` text,
+	`upscale_by` real,
+	`cfg_scale` integer,
+	`vae` text,
+	`loras` text,
+	`denoising_strength` real,
+	FOREIGN KEY (`media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `playlists` (
@@ -35,7 +54,7 @@ CREATE TABLE `playlists_media_items` (
 	`media_item_id` integer NOT NULL,
 	`item_index` integer NOT NULL,
 	PRIMARY KEY(`media_item_id`, `playlist_id`),
-	FOREIGN KEY (`playlist_id`) REFERENCES `playlists`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`playlist_id`) REFERENCES `playlists`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -56,9 +75,9 @@ CREATE TABLE `sd_loras` (
 	`path` text NOT NULL,
 	`description` text,
 	`metadata` text,
-	`preview_image` text,
 	`origin` text NOT NULL,
 	`sd_version` text NOT NULL,
+	`preview_image` text,
 	`activation_words` text NOT NULL
 );
 --> statement-breakpoint
@@ -77,8 +96,8 @@ CREATE TABLE `sd_prompts` (
 	`is_high_res_enabled` integer NOT NULL,
 	`high_res_upscaler` text,
 	`high_res_steps` integer,
-	`high_res_denoising_strength` integer,
-	`high_res_upscale_by` integer,
+	`high_res_denoising_strength` real,
+	`high_res_upscale_by` real,
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint

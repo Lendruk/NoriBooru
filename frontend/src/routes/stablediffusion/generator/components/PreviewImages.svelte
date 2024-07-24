@@ -9,12 +9,18 @@
 	import SeedIcon from '$lib/icons/SeedIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import type { MediaItemMetadata } from '$lib/types/MediaItem';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	// export let imageName: string;
 	// export let imageId: number;
 
-	export let images: { fileName: string; id: number; isArchived: boolean; exif: string }[];
-	export let onSetSeed: (exif: string) => void;
+	export let images: {
+		fileName: string;
+		id: number;
+		isArchived: boolean;
+		metadata: MediaItemMetadata;
+	}[];
+	export let onSetSeed: (seed: number) => void;
 
 	let currentIndex = 0;
 	let isFullscreen = false;
@@ -81,7 +87,7 @@
 					<Tooltip>
 						<div slot="toolTipContent">Use seed</div>
 						<span slot="target">
-							<GalleryItemButton onClick={() => onSetSeed(images[currentIndex].exif)}>
+							<GalleryItemButton onClick={() => onSetSeed(images[currentIndex].metadata.seed)}>
 								<SeedIcon />
 							</GalleryItemButton>
 						</span>

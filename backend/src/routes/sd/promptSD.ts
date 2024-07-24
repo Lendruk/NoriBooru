@@ -1,5 +1,6 @@
 import { randomInt } from 'crypto';
 import { FastifyReply, RouteOptions } from 'fastify';
+import { MediaItemMetadataSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { mediaService } from '../../services/MediaService';
 import TagService from '../../services/TagService';
@@ -10,7 +11,7 @@ import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
 type PromptResponse = {
 	fileName: string;
 	id: number;
-	exif: string;
+	metadata: MediaItemMetadataSchema;
 	isArchived: boolean;
 };
 
@@ -53,8 +54,8 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 
 	for (const image of body.images) {
-		const { fileName, id, exif } = await mediaService.createImageFromBase64(image, vault, checkpointId, loras);
-		items.push({ fileName, id, exif, isArchived: false });
+		const { fileName, id, metadata } = await mediaService.createImageFromBase64(image, vault, checkpointId, loras);
+		items.push({ fileName, id, metadata, isArchived: false });
 	}
 
 	// Prompt tags

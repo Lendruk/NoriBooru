@@ -12,7 +12,7 @@
 	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
-	import type { MediaItem } from '$lib/types/MediaItem';
+	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import { pause } from '$lib/utils/time';
 	import Video from '$lib/Video.svelte';
@@ -225,8 +225,10 @@
 		}
 	}
 
-	function goToGenerator(inputExif: string) {
-		goto(`/stablediffusion/generator?inputExif=${inputExif}`);
+	function goToGenerator(metadata?: MediaItemMetadata) {
+		goto(
+			`/stablediffusion/generator?inputMetadata=${encodeURIComponent(JSON.stringify(metadata ?? {}))}`
+		);
 	}
 </script>
 
@@ -369,14 +371,14 @@
 		>
 			{#each mediaItems as mediaItem}
 				<GalleryItem
-					isAiGen={mediaItem.exif.includes('Model hash')}
+					isAiGen={!!mediaItem.metadata?.model}
 					isArchived={mediaItem.isArchived}
 					onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}
 					onMoveToInbox={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}
 					onConfirmDelete={() => deleteItems([mediaItem.id])}
 					onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
 					onSelectClick={() => onMediaItemSelect(mediaItem)}
-					onGotoGeneratorClick={() => goToGenerator(mediaItem.exif)}
+					onGotoGeneratorClick={() => goToGenerator(mediaItem.metadata)}
 					isSelected={selectedItems.has(mediaItem.id)}
 					{isSelectionModeActive}
 					href={`/gallery/${mediaItem.id}`}

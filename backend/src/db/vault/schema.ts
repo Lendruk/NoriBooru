@@ -1,5 +1,5 @@
 import { relations, type InferSelectModel } from 'drizzle-orm';
-import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
@@ -26,9 +26,30 @@ export const mediaItems = sqliteTable('media_items', {
 	updatedAt: integer('updated_at'),
 	isArchived: integer('is_archived').notNull().default(0),
 	hash: text('hash').notNull(),
-	exif: text('exif'),
+	// metadata: text('metadata').references(() => mediaItemsMetadata.id),
 	sdCheckpoint: text('sd_checkpoint').references(() => sdCheckpoints.id)
 });
+
+export const mediaItemsMetadata = sqliteTable('media_items_metadata', {
+	id: text('id').primaryKey(),
+	mediaItem: integer('media_item').references(() => mediaItems.id, { onDelete: 'cascade' }),
+	width: integer('width').notNull(),
+	height: integer('height').notNull(),
+	// Ai stuff
+	positivePrompt: text('positive_prompt'),
+	negativePrompt: text('negative_prompt'),
+	steps: integer('steps'),
+	seed: integer('seed'),
+	sampler: text('sampler'),
+	model: text('model'),
+	upscaler: text('upscaler'),
+	upscaleBy: real('upscale_by'),
+	cfgScale: integer('cfg_scale'),
+	vae: text('vae'),
+	loras: text('loras'),
+	denoisingStrength: real('denoising_strength'),
+});
+export type MediaItemMetadataSchema = InferSelectModel<typeof mediaItemsMetadata>;
 
 export const tags_mediaItems_relation = relations(mediaItems, ({ many }) => ({
 	tagsToMediaItems: many(tagsToMediaItems)
@@ -80,7 +101,7 @@ export const playlists_mediaItems_table = sqliteTable(
 	{
 		playlistId: integer('playlist_id')
 			.notNull()
-			.references(() => playlists.id),
+			.references(() => playlists.id, { onDelete: 'cascade' }),
 		mediaItemId: integer('media_item_id')
 			.notNull()
 			.references(() => mediaItems.id, { onDelete: 'cascade' }),
@@ -110,8 +131,8 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	isHighResEnabled: integer('is_high_res_enabled').notNull(),
 	highResUpscaler: text('high_res_upscaler'),
 	highResSteps: integer('high_res_steps'),
-	highResDenoisingStrength: integer('high_res_denoising_strength'),
-	highResUpscaleBy: integer('high_res_upscale_by'),
+	highResDenoisingStrength: real('high_res_denoising_strength'),
+	highResUpscaleBy: real('high_res_upscale_by'),
 	createdAt: integer('created_at').notNull()
 });
 

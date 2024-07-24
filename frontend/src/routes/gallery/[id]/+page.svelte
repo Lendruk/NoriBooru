@@ -5,7 +5,7 @@
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import type { MediaItemWithTags } from '$lib/types/MediaItem';
+	import type { MediaItemMetadata, MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 
 	let foundTags: PopulatedTag[] = $state([]);
@@ -15,7 +15,7 @@
 	let next: string | undefined = $state(undefined);
 	let previous: string | undefined = $state(undefined);
 
-	let parsedExif: object | null = $state(null);
+	let parsedMetadata: MediaItemMetadata | undefined = $state(undefined);
 
 	function onKeyDown(e: KeyboardEvent) {
 		switch (e.keyCode) {
@@ -45,7 +45,7 @@
 			tags = res.tags;
 			next = res.next;
 			previous = res.previous;
-			parsedExif = JSON.parse(mediaItem.exif);
+			parsedMetadata = mediaItem.metadata;
 		});
 	});
 
@@ -101,7 +101,7 @@
 		</div>
 		<div>
 			<!-- TODO prettify the exif output -->
-			{JSON.stringify(parsedExif)}
+			{JSON.stringify(parsedMetadata)}
 		</div>
 	</div>
 	<a

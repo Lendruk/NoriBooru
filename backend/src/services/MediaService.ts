@@ -4,10 +4,10 @@ import ExifReader from 'exifreader';
 import * as fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-import { lorasToMediaItems, MediaItem, mediaItems, tagsToMediaItems } from '../db/vault/schema';
+import { lorasToMediaItems, MediaItem, MediaItemMetadataSchema, mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../db/vault/schema';
 import { VaultBase } from '../lib/VaultBase';
 import { VaultInstance } from '../lib/VaultInstance';
-import { Exif } from '../types/Exif';
+import { ParsedExif } from '../types/Exif';
 
 class MediaService {
 	public async createMediaItemFromFile(
@@ -25,13 +25,13 @@ class MediaService {
 		const hexHash = hash.digest('hex').toString();
 		const id = preCalculatedId ?? randomUUID();
 		// Exif
-		const exif = fileType === 'image' ? (await ExifReader.load(buffer)) as Exif : '';
-		const newMediaItem = await db
+		const exif = fileType === 'image' ? (await ExifReader.load(buffer)) as ParsedExif : null;
+		const [newMediaItem] = await db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
 				extension: fileType === 'image' ? 'png' : 'mp4',
-				exif: JSON.stringify(exif),
+				// exif: JSON.stringify(exif),
 				type: fileType,
 				createdAt: Date.now(),
 				hash: hexHash,
@@ -39,6 +39,10 @@ class MediaService {
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();
+		
+		if (exif) {
+			await this.processMediaItemExif(vault, newMediaItem.id, exif);
+		}
 
 		// Create thumbnail in case of images
 		if (fileType === 'image') {
@@ -48,10 +52,10 @@ class MediaService {
 		}
 
 		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem[0].id, lora);
+			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
 		}
 
-		return newMediaItem[0];
+		return newMediaItem;
 	}
 
 	public async createImageFromBase64(
@@ -59,7 +63,7 @@ class MediaService {
 		vault: VaultInstance,
 		sdCheckPointId: string | null = null,
 		loras: string[] = [],
-	): Promise<{ id: number; fileName: string; exif: string }> {
+	): Promise<{ id: number; fileName: string; metadata: MediaItemMetadataSchema }> {
 		const { db } = vault;
 		const id = randomUUID();
 		const imageBuffer = Buffer.from(
@@ -76,8 +80,8 @@ class MediaService {
 			.toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
 
 		const fileSize = imageBuffer.byteLength;
-		const exif = (await ExifReader.load(imageBuffer)) as Exif;
-		const mediaItem = await db
+		const exif = (await ExifReader.load(imageBuffer)) as ParsedExif;
+		const [newMediaItem] = await db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
@@ -87,17 +91,17 @@ class MediaService {
 				createdAt: Date.now(),
 				sdCheckpoint: sdCheckPointId,
 				hash,
-				exif: JSON.stringify(exif)
 			})
 			.returning();
+		const metadata = await this.processMediaItemExif(vault, newMediaItem.id, exif);
 
 		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, mediaItem[0].id, lora);
+			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
 		}
 		return {
-			id: mediaItem[0].id,
-			fileName: mediaItem[0].fileName,
-			exif: mediaItem[0].exif!
+			id: newMediaItem.id,
+			fileName: newMediaItem.fileName,
+			metadata,
 		};
 	}
 
@@ -126,6 +130,78 @@ class MediaService {
 	): Promise<void> {
 		const { db } = vault;
 		await db.update(mediaItems).set({ sdCheckpoint: sdCheckpointId }).where(eq(mediaItems.id, mediaItemId));
+	}
+
+	private async processMediaItemExif(vault: VaultInstance, mediaItemId: number, exif: ParsedExif): Promise<MediaItemMetadataSchema> {
+		let parsedPrompt: string = '';
+		if (exif.UserComment) {
+			parsedPrompt = String.fromCharCode(...(exif.UserComment.value.filter(v => v))).replace('UNICODE', '');
+		} else if (exif.parameters) {
+			parsedPrompt = exif.parameters.value;
+		}
+		const metadataPayload: MediaItemMetadataSchema = {
+			id: randomUUID(),
+			mediaItem: mediaItemId,
+			width: exif['Image Width'].value,
+			height: exif['Image Height'].value,
+			cfgScale: null,
+			denoisingStrength: null,
+			loras: null,
+			model: null,
+			negativePrompt: null,
+			positivePrompt: null,
+			sampler: null,
+			seed: null,
+			steps: null,
+			upscaleBy: null,
+			upscaler: null,
+			vae: null
+		};
+		
+		
+		const splitPrompt = parsedPrompt.split('\n');
+		if (splitPrompt.length > 0) {
+			metadataPayload.positivePrompt = splitPrompt[0];
+			for (let i = 1; i < splitPrompt.length; i++) {
+				const value = splitPrompt[i];
+				if (value.includes('Negative prompt:')) {
+					metadataPayload.negativePrompt = value.split(': ')[1];
+				} else {
+					const settingsObject: Record<string, string> = {};
+					for (const part of value.split(',')) {
+						const splitPart = part.split(': ');
+						settingsObject[splitPart[0].trim()] = splitPart[1];
+					}
+					metadataPayload.seed = Number.parseInt(settingsObject.Seed);
+					metadataPayload.model = settingsObject.Model;
+					metadataPayload.sampler = settingsObject.Sampler;
+					metadataPayload.steps = Number.parseInt(settingsObject.Steps);
+					metadataPayload.cfgScale = Number.parseInt(settingsObject['CFG scale']);
+					metadataPayload.vae = settingsObject.VAE ? settingsObject.VAE.split('.')[0] : null;
+	
+					if (settingsObject['Hires upscaler']) {
+						metadataPayload.upscaler = settingsObject['Hires upscaler'];
+						// isHighResEnabled = true;
+						metadataPayload.denoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+						metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
+					} else if (settingsObject['Tiled Diffusion upscaler']) {
+						metadataPayload.upscaler = settingsObject['Tiled Diffusion upscaler'];
+						metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Tiled Diffusion scale factor']);
+						metadataPayload.denoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+					}
+	
+					// if (settingsObject.Refiner) {
+					// 	isRefinerEnabled = true;
+					// 	refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
+					// 	refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
+					// }
+				}
+			}
+		}
+
+		const { db } = vault;
+		const [newMetadata] = await db.insert(mediaItemsMetadata).values(metadataPayload).returning();
+		return newMetadata;
 	}
 }
 
