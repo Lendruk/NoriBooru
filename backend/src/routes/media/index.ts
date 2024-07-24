@@ -6,6 +6,7 @@ import getMediaItemTags from './getMediaItemTags';
 import getMediaToReview from './getMediaToReview';
 import removeTagFromMediaItem from './removeTagFromMediaItem';
 import searchMediaItems from './searchMediaItems';
+import tagFromPrompt from './tagFromPrompt';
 import toggleMediaItemArchival from './toggleMediaItemArchival';
 
 export default [
@@ -17,5 +18,6 @@ export default [
 	searchMediaItems,
 	toggleMediaItemArchival,
 	createMediaItems,
-	getMediaItemTags
+	getMediaItemTags,
+	tagFromPrompt
 ];

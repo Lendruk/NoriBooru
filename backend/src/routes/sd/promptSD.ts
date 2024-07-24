@@ -1,9 +1,7 @@
-import { randomInt } from 'crypto';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { MediaItemMetadataSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { mediaService } from '../../services/MediaService';
-import TagService from '../../services/TagService';
 import { Request } from '../../types/Request';
 import { SDPromptRequest } from '../../types/sd/SDPromptRequest';
 import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
@@ -20,15 +18,6 @@ type RequestBody = {
 	checkpointId: string;
 	loras: string[];
 	prompt: SDPromptRequest;
-}
-
-const generateRandomColor = (): string => {
-	const numbers: number[] = [];
-
-	for (let i = 0; i < 6; i++) {
-		numbers.push(randomInt(10));
-	}
-	return `#${numbers.join('')}`;
 };
 
 const promptSD = async (request: Request, reply: FastifyReply) => {
@@ -41,7 +30,7 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}
 
-	const { autoTag, checkpointId, loras, prompt} = request.body as RequestBody;
+	const { autoTag, checkpointId, loras, prompt } = request.body as RequestBody;
 
 	const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/txt2img`, {
 		method: 'POST',
@@ -54,39 +43,23 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 
 	for (const image of body.images) {
-		const { fileName, id, metadata } = await mediaService.createImageFromBase64(image, vault, checkpointId, loras);
+		const { fileName, id, metadata } = await mediaService.createImageFromBase64(
+			image,
+			vault,
+			checkpointId,
+			loras
+		);
 		items.push({ fileName, id, metadata, isArchived: false });
 	}
 
 	// Prompt tags
 	// Can be optimized
 	if (autoTag) {
-		const aiTag = await TagService.getTagByName(vault, 'ai');
-		const tags: number[] = [];
-		for (const token of prompt.prompt.split(',')) {
-			const formattedToken = token.trim();
-
-			if (formattedToken.length === 0) continue;
-			if (formattedToken.startsWith('<lora:')) continue;
-			// Only allow creating tags with one space between words
-			if (formattedToken.split(' ').length > 2) continue;
-
-			let tag = await TagService.getTagByName(vault, token);
-			if (!tag) {
-				tag = await TagService.createTag(vault, token, generateRandomColor());
-			}
-			tags.push(tag.id);
-		}
-
-		for (const item of items) {
-			for(const tag of tags)  {
-				await mediaService.addTagToMediaItem(vault, item.id, tag);
-			}
-
-			if (aiTag) {
-				await mediaService.addTagToMediaItem(vault, item.id, aiTag.id);
-			}
-		}
+		await mediaService.tagMediaItemFromPrompt(
+			vault,
+			items.map((item) => item.id),
+			prompt.prompt
+		);
 	}
 
 	reply.send({ items });

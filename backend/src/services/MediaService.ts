@@ -4,10 +4,19 @@ import ExifReader from 'exifreader';
 import * as fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-import { lorasToMediaItems, MediaItem, MediaItemMetadataSchema, mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../db/vault/schema';
+import {
+	lorasToMediaItems,
+	MediaItem,
+	MediaItemMetadataSchema,
+	mediaItems,
+	mediaItemsMetadata,
+	tagsToMediaItems
+} from '../db/vault/schema';
 import { VaultBase } from '../lib/VaultBase';
 import { VaultInstance } from '../lib/VaultInstance';
 import { ParsedExif } from '../types/Exif';
+import { generateRandomColor } from '../utils/generateRandomColor';
+import TagService from './TagService';
 
 class MediaService {
 	public async createMediaItemFromFile(
@@ -16,7 +25,7 @@ class MediaService {
 		fileType: 'image' | 'video',
 		preCalculatedId: string | undefined = undefined,
 		sdCheckPointId: string | null = null,
-		loras: string[] = [],
+		loras: string[] = []
 	): Promise<MediaItem> {
 		const { db } = vault;
 		const [stats, buffer] = await Promise.all([fs.stat(filePath), fs.readFile(filePath)]);
@@ -25,7 +34,7 @@ class MediaService {
 		const hexHash = hash.digest('hex').toString();
 		const id = preCalculatedId ?? randomUUID();
 		// Exif
-		const exif = fileType === 'image' ? (await ExifReader.load(buffer)) as ParsedExif : null;
+		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
 		const [newMediaItem] = await db
 			.insert(mediaItems)
 			.values({
@@ -39,7 +48,7 @@ class MediaService {
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();
-		
+
 		if (exif) {
 			await this.processMediaItemExif(vault, newMediaItem.id, exif);
 		}
@@ -62,7 +71,7 @@ class MediaService {
 		base64EncodedImage: string,
 		vault: VaultInstance,
 		sdCheckPointId: string | null = null,
-		loras: string[] = [],
+		loras: string[] = []
 	): Promise<{ id: number; fileName: string; metadata: MediaItemMetadataSchema }> {
 		const { db } = vault;
 		const id = randomUUID();
@@ -90,7 +99,7 @@ class MediaService {
 				fileSize,
 				createdAt: Date.now(),
 				sdCheckpoint: sdCheckPointId,
-				hash,
+				hash
 			})
 			.returning();
 		const metadata = await this.processMediaItemExif(vault, newMediaItem.id, exif);
@@ -101,7 +110,7 @@ class MediaService {
 		return {
 			id: newMediaItem.id,
 			fileName: newMediaItem.fileName,
-			metadata,
+			metadata
 		};
 	}
 
@@ -115,9 +124,9 @@ class MediaService {
 	}
 
 	public async addTagToMediaItem(
-		vault: VaultBase, 
+		vault: VaultBase,
 		mediaItemId: number,
-		tagId: number 
+		tagId: number
 	): Promise<void> {
 		const { db } = vault;
 		await db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
@@ -129,13 +138,23 @@ class MediaService {
 		sdCheckpointId: string
 	): Promise<void> {
 		const { db } = vault;
-		await db.update(mediaItems).set({ sdCheckpoint: sdCheckpointId }).where(eq(mediaItems.id, mediaItemId));
+		await db
+			.update(mediaItems)
+			.set({ sdCheckpoint: sdCheckpointId })
+			.where(eq(mediaItems.id, mediaItemId));
 	}
 
-	private async processMediaItemExif(vault: VaultInstance, mediaItemId: number, exif: ParsedExif): Promise<MediaItemMetadataSchema> {
+	private async processMediaItemExif(
+		vault: VaultInstance,
+		mediaItemId: number,
+		exif: ParsedExif
+	): Promise<MediaItemMetadataSchema> {
 		let parsedPrompt: string = '';
 		if (exif.UserComment) {
-			parsedPrompt = String.fromCharCode(...(exif.UserComment.value.filter(v => v))).replace('UNICODE', '');
+			parsedPrompt = String.fromCharCode(...exif.UserComment.value.filter((v) => v)).replace(
+				'UNICODE',
+				''
+			);
 		} else if (exif.parameters) {
 			parsedPrompt = exif.parameters.value;
 		}
@@ -157,8 +176,7 @@ class MediaService {
 			upscaler: null,
 			vae: null
 		};
-		
-		
+
 		const splitPrompt = parsedPrompt.split('\n');
 		if (splitPrompt.length > 0) {
 			metadataPayload.positivePrompt = splitPrompt[0];
@@ -178,18 +196,24 @@ class MediaService {
 					metadataPayload.steps = Number.parseInt(settingsObject.Steps);
 					metadataPayload.cfgScale = Number.parseInt(settingsObject['CFG scale']);
 					metadataPayload.vae = settingsObject.VAE ? settingsObject.VAE.split('.')[0] : null;
-	
+
 					if (settingsObject['Hires upscaler']) {
 						metadataPayload.upscaler = settingsObject['Hires upscaler'];
 						// isHighResEnabled = true;
-						metadataPayload.denoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+						metadataPayload.denoisingStrength = Number.parseFloat(
+							settingsObject['Denoising strength']
+						);
 						metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
 					} else if (settingsObject['Tiled Diffusion upscaler']) {
 						metadataPayload.upscaler = settingsObject['Tiled Diffusion upscaler'];
-						metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Tiled Diffusion scale factor']);
-						metadataPayload.denoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
+						metadataPayload.upscaleBy = Number.parseFloat(
+							settingsObject['Tiled Diffusion scale factor']
+						);
+						metadataPayload.denoisingStrength = Number.parseFloat(
+							settingsObject['Denoising strength']
+						);
 					}
-	
+
 					// if (settingsObject.Refiner) {
 					// 	isRefinerEnabled = true;
 					// 	refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
@@ -202,6 +226,51 @@ class MediaService {
 		const { db } = vault;
 		const [newMetadata] = await db.insert(mediaItemsMetadata).values(metadataPayload).returning();
 		return newMetadata;
+	}
+
+	public async tagMediaItemFromPrompt(
+		vault: VaultInstance,
+		mediaItemIds: number[],
+		prompt: string
+	): Promise<void> {
+		const aiTag = await TagService.getTagByName(vault, 'ai');
+		const tags: number[] = [];
+		for (const token of prompt.split(',')) {
+			let formattedToken = token.trim().replaceAll('(', '').replaceAll(')', '');
+
+			if (formattedToken.length === 0) continue;
+			if (formattedToken.startsWith('<lora:')) continue;
+			if (formattedToken === 'BREAK') continue;
+			// Only allow creating tags with one space between words
+			if (formattedToken.split(' ').length > 2) continue;
+
+			// If this happens a comma was probably forgotten between tokens
+			if (formattedToken.includes('<lora:')) {
+				for (const partialToken of formattedToken.split('<')) {
+					if (!partialToken.includes('lora:')) {
+						formattedToken = partialToken;
+						break;
+					}
+				}
+			}
+
+			formattedToken = formattedToken.split(':')[0];
+			let tag = await TagService.getTagByName(vault, formattedToken);
+			if (!tag) {
+				tag = await TagService.createTag(vault, formattedToken, generateRandomColor());
+			}
+			tags.push(tag.id);
+		}
+
+		for (const id of mediaItemIds) {
+			for (const tag of tags) {
+				await mediaService.addTagToMediaItem(vault, id, tag);
+			}
+
+			if (aiTag) {
+				await mediaService.addTagToMediaItem(vault, id, aiTag.id);
+			}
+		}
 	}
 }
 

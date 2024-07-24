@@ -47,7 +47,7 @@ export const mediaItemsMetadata = sqliteTable('media_items_metadata', {
 	cfgScale: integer('cfg_scale'),
 	vae: text('vae'),
 	loras: text('loras'),
-	denoisingStrength: real('denoising_strength'),
+	denoisingStrength: real('denoising_strength')
 });
 export type MediaItemMetadataSchema = InferSelectModel<typeof mediaItemsMetadata>;
 
@@ -64,10 +64,10 @@ export const tagsToMediaItems = sqliteTable(
 	{
 		tagId: integer('tag_id')
 			.notNull()
-			.references(() => tags.id),
+			.references(() => tags.id, { onDelete: 'cascade' }),
 		mediaItemId: integer('media_item_id')
 			.notNull()
-			.references(() => mediaItems.id)
+			.references(() => mediaItems.id, { onDelete: 'cascade' })
 	},
 	(t) => ({ pk: primaryKey({ columns: [t.tagId, t.mediaItemId] }) })
 );
@@ -154,7 +154,7 @@ export const tagsToLoras = sqliteTable(
 	{
 		tagId: integer('tag_id')
 			.notNull()
-			.references(() => tags.id, { onDelete: 'cascade'}),
+			.references(() => tags.id, { onDelete: 'cascade' }),
 		loraId: text('lora_id')
 			.notNull()
 			.references(() => sdLoras.id, { onDelete: 'cascade' })
@@ -190,6 +190,6 @@ export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
 export const sdWildcards = sqliteTable('sd_wildcards', {
 	id: text('id').primaryKey(),
 	listName: text('list_name').notNull(),
-	values: text('text').notNull(),
+	values: text('text').notNull()
 });
 export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;

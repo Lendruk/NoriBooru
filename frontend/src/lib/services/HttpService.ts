@@ -99,14 +99,14 @@ export class HttpService {
 		return response.json() as Promise<T>;
 	}
 
-	public static async patch<T>(url: string, body: Record<string, unknown>): Promise<T> {
+	public static async patch<T>(url: string, body?: Record<string, unknown>): Promise<T> {
 		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
 				vault: this.getVaultId() || ''
 			},
-			body: JSON.stringify(body)
+			body: JSON.stringify(body ?? {})
 		});
 
 		if (response.status >= 400) {
