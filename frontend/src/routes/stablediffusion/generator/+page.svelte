@@ -156,29 +156,6 @@
 				isHighResEnabled = true;
 			}
 
-			// for (let i = 1; i < splitPrompt.length; i++) {
-			// 	const value = splitPrompt[i];
-			// 	if (value.includes('Negative prompt:')) {
-			// 		negativePrompt = value.split(': ')[1];
-			// 	} else {
-			// 		const settingsObject: Record<string, string> = {};
-			// 		for (const part of value.split(',')) {
-			// 			const splitPart = part.split(': ');
-			// 			settingsObject[splitPart[0].trim()] = splitPart[1];
-			// 		}
-			// 		seed = Number.parseInt(settingsObject.Seed);
-			// 		checkpointId = settingsObject.Model;
-			// 		sampler = settingsObject.Sampler;
-			// 		steps = Number.parseInt(settingsObject.Steps);
-			// 		cfgScale = Number.parseInt(settingsObject['CFG scale']);
-
-			// 		if (settingsObject['Hires upscaler']) {
-			// 			highResUpscaler = settingsObject['Hires upscaler'];
-			// 			isHighResEnabled = true;
-			// 			highResDenoisingStrength = Number.parseFloat(settingsObject['Denoising strength']);
-			// 			upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
-			// 		}
-
 			// 		if (settingsObject.Refiner) {
 			// 			isRefinerEnabled = true;
 			// 			refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
