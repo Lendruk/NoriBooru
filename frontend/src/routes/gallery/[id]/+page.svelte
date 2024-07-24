@@ -2,11 +2,15 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
+	import TagIcon from '$lib/icons/TagIcon.svelte';
+	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemMetadata, MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import GalleryItemButton from '../GalleryItemButton.svelte';
 
 	let foundTags: PopulatedTag[] = $state([]);
 	let tags: PopulatedTag[] = $state([]);
@@ -60,6 +64,47 @@
 		await HttpService.delete(`/mediaItems/${mediaItem?.id}/tags`, tag);
 		mediaItem!.tags = mediaItem!.tags.filter((t) => t.id !== tag.id);
 	}
+
+	async function attemptAutoTag() {
+		if (mediaItem) {
+			await HttpService.patch(`/mediaItems/${mediaItem.id}/auto-tag`);
+			const updatedItem = await HttpService.get<{
+				mediaItem: MediaItemWithTags;
+				next?: string;
+				previous?: string;
+				tags: PopulatedTag[];
+			}>(`/mediaItems/${$page.params.id}`);
+
+			mediaItem = updatedItem.mediaItem;
+			tags = updatedItem.tags;
+			next = updatedItem.next;
+			previous = updatedItem.previous;
+			parsedMetadata = updatedItem.mediaItem?.metadata;
+		}
+	}
+
+	async function deleteMediaItem() {
+		if (mediaItem) {
+			await HttpService.delete(`/mediaItems/${JSON.stringify([mediaItem.id])}`);
+			let idToFetch: string = '';
+			if (previous) {
+				idToFetch = previous;
+			} else if (next) {
+				idToFetch = next;
+			}
+
+			if (idToFetch) {
+				goto(`/gallery/${idToFetch}`);
+			} else {
+				goto('/gallery');
+			}
+			createToast('Item deleted successfully');
+		}
+	}
+
+	function isItemAiGen(): boolean {
+		return !!mediaItem?.metadata?.model;
+	}
 </script>
 
 <div class="flex flex-row min-h-full">
@@ -68,7 +113,17 @@
 		class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!previous && 'cursor-not-allowed'}`}
 		><ArrowLeft class="fill-white" /></a
 	>
-	<div class="flex flex-col items-center gap-8 flex-1">
+	<div class="flex flex-col items-center gap-8 flex-1 relative">
+		<div class="absolute z-10 right-2 flex flex-col gap-4">
+			{#if isItemAiGen() && mediaItem?.tags.length === 0}
+				<GalleryItemButton onClick={attemptAutoTag}>
+					<TagIcon />
+				</GalleryItemButton>
+			{/if}
+			<GalleryItemButton onClick={deleteMediaItem}>
+				<TrashIcon />
+			</GalleryItemButton>
+		</div>
 		<div>
 			{#if mediaItem?.type === 'image'}
 				<img
