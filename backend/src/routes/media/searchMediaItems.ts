@@ -1,6 +1,12 @@
-import { asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, or } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { MediaItemMetadataSchema, TagSchema, mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../../db/vault/schema';
+import {
+	MediaItemMetadataSchema,
+	TagSchema,
+	mediaItems,
+	mediaItemsMetadata,
+	tagsToMediaItems
+} from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { Request } from '../../types/Request';
 
@@ -13,7 +19,7 @@ type BaseMediaItem = {
 	createdAt: number;
 	updatedAt: number | null;
 	isArchived: boolean;
-	metadata?: MediaItemMetadataSchema
+	metadata?: MediaItemMetadataSchema;
 };
 
 type QueryType = 'AND' | 'OR';
@@ -24,6 +30,8 @@ export type MediaItem = BaseMediaItem & {
 
 export type MediaItemWithTags = BaseMediaItem & { tags: TagSchema[] };
 
+type MediaTypes = 'ALL' | 'IMAGES' | 'VIDEOS';
+
 export type MediaSearchQuery = {
 	positiveTags: string;
 	negativeTags: string;
@@ -32,6 +40,7 @@ export type MediaSearchQuery = {
 	archived: string;
 	positiveQueryType: QueryType;
 	negativeQueryType: QueryType;
+	mediaType: MediaTypes;
 };
 
 const PAGE_SIZE = 30;
@@ -51,12 +60,24 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 	const negativeTags = JSON.parse(query.negativeTags ?? '[]') as number[];
 	const negativeQueryType = query.negativeQueryType ?? 'AND';
 	const sortMethod: SortMethods = query.sortMethod ?? 'newest';
+	const mediaType: MediaTypes = query.mediaType ?? 'ALL';
+
 	const hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
 	const page = parseInt(query.page ?? '0');
+
+	let mediaTypeQuery;
+	if (mediaType === 'ALL') {
+		mediaTypeQuery = or(eq(mediaItems.type, 'image'), eq(mediaItems.type, 'video'));
+	} else if (mediaType === 'IMAGES') {
+		mediaTypeQuery = eq(mediaItems.type, 'image');
+	} else {
+		mediaTypeQuery = eq(mediaItems.type, 'video');
+	}
+
 	const rows = await db
 		.select()
 		.from(mediaItems)
-		.where(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0))
+		.where(and(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0), mediaTypeQuery))
 		.orderBy(sortMethod === 'newest' ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt));
 
 	let finalMedia: MediaItem[] = [];
@@ -71,7 +92,15 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			tagArr.push(tagPair.tagId);
 		}
 
-		const metadata = await db.query.mediaItemsMetadata.findFirst({ where: eq(mediaItemsMetadata.mediaItem, row.id) });
+		let metadata: MediaItemMetadataSchema | undefined = undefined;
+
+		try {
+			metadata = await db.query.mediaItemsMetadata.findFirst({
+				where: eq(mediaItemsMetadata.mediaItem, row.id)
+			});
+		} catch {
+			// Nothing
+		}
 
 		finalMedia.push({
 			createdAt: row.createdAt,
@@ -83,7 +112,7 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			type: row.type,
 			updatedAt: row.updatedAt,
 			tags: tagArr,
-			metadata,
+			metadata
 		});
 	}
 

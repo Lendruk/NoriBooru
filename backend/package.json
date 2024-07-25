@@ -7,6 +7,7 @@
 		"generate:drizzle:master": "drizzle-kit generate --config=./master.drizzle.config.ts",
 		"generate:drizzle:vault": "drizzle-kit generate --config=./vault.drizzle.config.ts",
 		"generate:drizzle": "npm run generate:drizzle:master && npm run generate:drizzle:vault",
+		"drizzle:drop:migration": "drizzle-kit drop --config=./vault.drizzle.config.ts",
 		"build": "tsc",
 		"dev": "nodemon ./src/main.ts",
 		"lint": "prettier --check . && eslint .",

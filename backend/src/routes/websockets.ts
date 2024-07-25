@@ -4,9 +4,9 @@ import { VaultController } from '../db/VaultController';
 import { VaultInstance } from '../lib/VaultInstance';
 
 type WebSocketRegisterEvent = {
-	type: 'register',
-	data: { vault: string }
-}
+	type: 'register';
+	data: { vault: string };
+};
 
 const websocketHandler = (connection: WebSocket) => {
 	connection.on('message', async (message) => {
@@ -27,7 +27,6 @@ const websocketHandler = (connection: WebSocket) => {
 			console.error('There was an error establishing the websocket connection');
 		}
 	});
-
 };
 
 export default {
@@ -36,5 +35,5 @@ export default {
 	handler: (_, reply: FastifyReply) => {
 		reply.status(501).send('Websocket endpoint only');
 	},
-	wsHandler: websocketHandler,
+	wsHandler: websocketHandler
 } satisfies RouteOptions;

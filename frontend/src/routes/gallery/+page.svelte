@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import Select from '$lib/components/Select.svelte';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 	import FilterIcon from '$lib/icons/FilterIcon.svelte';
@@ -17,6 +18,7 @@
 	import { pause } from '$lib/utils/time';
 	import Video from '$lib/Video.svelte';
 	import { onMount } from 'svelte';
+	import LabeledComponent from '../components/LabeledComponent.svelte';
 	import MassTagEditModal from '../components/MassTagEditModal.svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
@@ -27,6 +29,7 @@
 	let negativeQueryType: 'AND' | 'OR' = 'AND';
 	let tags: PopulatedTag[] = [];
 	let sortMethod: 'newest' | 'oldest' = 'newest';
+	let mediaType: 'ALL' | 'VIDEOS' | 'IMAGES' = 'ALL';
 	let showMediaTagEditModal = false;
 	let showMassTagEditModal = false;
 	let currentPage = 0;
@@ -100,6 +103,12 @@
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
 
+	async function cleanSearch(appendResults = false): Promise<MediaItem[]> {
+		currentPage = 0;
+		hasMoreItems = true;
+		return await search(appendResults);
+	}
+
 	async function search(appendResults: boolean = false): Promise<MediaItem[]> {
 		fetchingItems = true;
 		const res = await HttpService.get<{ mediaItems: MediaItem[] }>(
@@ -109,6 +118,7 @@
 					positiveTags: JSON.stringify(appliedPositiveTags.map((tag) => tag.id)),
 					positiveQueryType,
 					negativeQueryType,
+					mediaType,
 					sortMethod,
 					archived: isInbox ? 'false' : 'true',
 					page: currentPage.toString()
@@ -357,11 +367,27 @@
 				</div>
 				<div>
 					Sort by:
-					<select bind:value={sortMethod} on:change={() => search()} class="text-black">
+					<select bind:value={sortMethod} on:change={() => cleanSearch()} class="text-black">
 						<option value="newest">Newest</option>
 						<option value="oldest">Oldest</option>
 					</select>
 				</div>
+				<LabeledComponent>
+					<div slot="label">Media Type</div>
+					<Select
+						bind:value={mediaType}
+						on:change={() =>
+							setTimeout(() => {
+								cleanSearch();
+							}, 10)}
+						class="h-[40px]"
+						slot="content"
+					>
+						<option value="ALL">All</option>
+						<option value="IMAGES">Images</option>
+						<option value="VIDEOS">Videos</option>
+					</Select>
+				</LabeledComponent>
 			</div>
 		{/if}
 		<div
