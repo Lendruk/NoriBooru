@@ -104,12 +104,21 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 
 			let nextItemOrderBy;
 			let previousItemOrderBy;
+
+			let nextIdSortBy;
+			let previousIdSortBy;
 			if (query.sortMethod === 'oldest') {
-				previousItemOrderBy = asc(mediaItems.id);
-				nextItemOrderBy = desc(mediaItems.id);
+				previousItemOrderBy = asc(tagsToMediaItems.mediaItemId);
+				nextItemOrderBy = desc(tagsToMediaItems.mediaItemId);
+
+				nextIdSortBy = lt(tagsToMediaItems.mediaItemId, parsedId);
+				previousIdSortBy = gt(tagsToMediaItems.mediaItemId, parsedId);
 			} else {
-				previousItemOrderBy = desc(mediaItems.id);
-				nextItemOrderBy = asc(mediaItems.id);
+				previousItemOrderBy = desc(tagsToMediaItems.mediaItemId);
+				nextItemOrderBy = asc(tagsToMediaItems.mediaItemId);
+
+				nextIdSortBy = gt(tagsToMediaItems.mediaItemId, parsedId);
+				previousIdSortBy = lt(tagsToMediaItems.mediaItemId, parsedId);
 			}
 
 			let rawNextMediaItem: MediaItem[] = [];
@@ -120,7 +129,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 						.from(tagsToMediaItems)
 						.innerJoin(tags, eq(tagsToMediaItems.tagId, tags.id))
 						.innerJoin(mediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
-						.where(and(...tagQueryArr, ...queryArr, gt(tagsToMediaItems.mediaItemId, parsedId)))
+						.where(and(...tagQueryArr, ...queryArr, nextIdSortBy))
 						.groupBy(tagsToMediaItems.mediaItemId)
 						.having(sql`COUNT(DISTINCT "tags"."id") = ${positiveTags.length}`)
 						.orderBy(nextItemOrderBy)
@@ -137,7 +146,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 						.from(tagsToMediaItems)
 						.innerJoin(tags, eq(tagsToMediaItems.tagId, tags.id))
 						.innerJoin(mediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
-						.where(and(...tagQueryArr, ...queryArr, gt(tagsToMediaItems.mediaItemId, parsedId)))
+						.where(and(...tagQueryArr, ...queryArr, nextIdSortBy))
 						.groupBy(tagsToMediaItems.mediaItemId)
 						.orderBy(nextItemOrderBy)
 						.limit(1);
@@ -147,12 +156,18 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 					rawNextMediaItem = await db
 						.select()
 						.from(mediaItems)
-						.where(and(gt(mediaItems.id, parsedId), ...queryArr))
+						.where(
+							and(
+								query.sortMethod === 'newest'
+									? gt(mediaItems.id, parsedId)
+									: lt(mediaItems.id, parsedId),
+								...queryArr
+							)
+						)
 						.groupBy(mediaItems.id)
 						.orderBy(nextItemOrderBy)
 						.limit(1);
 				}
-				console.log(rawNextMediaItem);
 			} catch (error) {
 				console.log(error);
 			}
@@ -169,7 +184,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 						.from(tagsToMediaItems)
 						.innerJoin(tags, eq(tagsToMediaItems.tagId, tags.id))
 						.innerJoin(mediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
-						.where(and(...tagQueryArr, ...queryArr, lt(tagsToMediaItems.mediaItemId, parsedId)))
+						.where(and(...tagQueryArr, ...queryArr, previousIdSortBy))
 						.groupBy(tagsToMediaItems.mediaItemId)
 						.having(sql`COUNT(DISTINCT "tags"."id") = ${positiveTags.length}`)
 						.orderBy(previousItemOrderBy)
@@ -185,7 +200,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 						.from(tagsToMediaItems)
 						.innerJoin(tags, eq(tagsToMediaItems.tagId, tags.id))
 						.innerJoin(mediaItems, eq(tagsToMediaItems.mediaItemId, mediaItems.id))
-						.where(and(...tagQueryArr, ...queryArr, lt(tagsToMediaItems.mediaItemId, parsedId)))
+						.where(and(...tagQueryArr, ...queryArr, previousIdSortBy))
 						.groupBy(tagsToMediaItems.mediaItemId)
 						.orderBy(previousItemOrderBy)
 						.limit(1);
@@ -198,13 +213,15 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 					rawPreviousMediaItem = await db
 						.select()
 						.from(mediaItems)
-						.where(lt(mediaItems.id, parsedId))
+						.where(
+							query.sortMethod === 'newest'
+								? lt(mediaItems.id, parsedId)
+								: gt(mediaItems.id, parsedId)
+						)
 						.groupBy(mediaItems.id)
 						.orderBy(previousItemOrderBy)
 						.limit(1);
 				}
-
-				console.log(rawPreviousMediaItem);
 			} catch (error) {
 				console.log(error);
 			}
@@ -236,8 +253,6 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 			previous: previousMediaItem?.id,
 			tags: allTags
 		});
-	} else {
-		return reply.status(404).send({ message: 'Media Item not found' });
 	}
 };
 

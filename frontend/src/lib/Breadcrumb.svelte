@@ -11,7 +11,10 @@
 	<a class="flex flex-row fill-white hover:fill-slate-400" href="/"><House /></a>
 	{#each path as p, i}
 		<span class="text-slate-500 pr-1 pl-1">/</span>
-		<a href="/{path.slice(0, i + 1).join('/')}" class="text-white hover:text-slate-400">
+		<a
+			href="/{path.slice(0, i + 1).join('/')}{$page.url.search}"
+			class="text-white hover:text-slate-400"
+		>
 			{p}
 		</a>
 	{/each}

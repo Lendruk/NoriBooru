@@ -109,7 +109,7 @@
 
 <div class="flex flex-row min-h-full">
 	<a
-		href={previous ? `/gallery/${previous}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
+		href={next ? `/gallery/${next}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
 		class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!previous && 'cursor-not-allowed'}`}
 		><ArrowLeft class="fill-white" /></a
 	>
@@ -160,7 +160,7 @@
 		</div>
 	</div>
 	<a
-		href={next ? `/gallery/${next}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
+		href={previous ? `/gallery/${previous}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
 		class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition fill-white ${!next && 'cursor-not-allowed'}`}
 		><ArrowRight /></a
 	>
