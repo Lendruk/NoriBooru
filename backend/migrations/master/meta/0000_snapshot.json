@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "28aafda2-760a-4e24-8874-5b223a6d6bf3",
+  "id": "1cfceaec-8df8-4282-ae9f-366e20267f8b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "vaults": {
@@ -34,7 +34,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1721814451505
+          "default": 1722197779505
         },
         "has_installed_sd": {
           "name": "has_installed_sd",

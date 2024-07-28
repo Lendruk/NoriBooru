@@ -3,6 +3,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import {
 	MediaItem,
 	TagSchema,
+	TagsToMediaItemsSchema,
 	mediaItems,
 	mediaItemsMetadata,
 	tags,
@@ -46,9 +47,14 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 		const metadata = await db.query.mediaItemsMetadata.findFirst({
 			where: eq(mediaItemsMetadata.mediaItem, mediaItem.id)
 		});
-		const mediaTags = await db.query.tagsToMediaItems.findMany({
-			where: eq(tagsToMediaItems.mediaItemId, parsedId)
-		});
+		let mediaTags: TagsToMediaItemsSchema[] = [];
+		try {
+			mediaTags = await db.query.tagsToMediaItems.findMany({
+				where: eq(tagsToMediaItems.mediaItemId, parsedId)
+			});
+		} catch {
+			// No tags
+		}
 		const allTags = (await db.query.tags.findMany()) as TagSchema[];
 		const finalTags = [];
 
@@ -108,17 +114,17 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 			let nextIdSortBy;
 			let previousIdSortBy;
 			if (query.sortMethod === 'oldest') {
-				previousItemOrderBy = asc(tagsToMediaItems.mediaItemId);
-				nextItemOrderBy = desc(tagsToMediaItems.mediaItemId);
+				previousItemOrderBy = asc(mediaItems.id);
+				nextItemOrderBy = desc(mediaItems.id);
 
-				nextIdSortBy = lt(tagsToMediaItems.mediaItemId, parsedId);
-				previousIdSortBy = gt(tagsToMediaItems.mediaItemId, parsedId);
+				nextIdSortBy = lt(mediaItems.id, parsedId);
+				previousIdSortBy = gt(mediaItems.id, parsedId);
 			} else {
-				previousItemOrderBy = desc(tagsToMediaItems.mediaItemId);
-				nextItemOrderBy = asc(tagsToMediaItems.mediaItemId);
+				previousItemOrderBy = desc(mediaItems.id);
+				nextItemOrderBy = asc(mediaItems.id);
 
-				nextIdSortBy = gt(tagsToMediaItems.mediaItemId, parsedId);
-				previousIdSortBy = lt(tagsToMediaItems.mediaItemId, parsedId);
+				nextIdSortBy = gt(mediaItems.id, parsedId);
+				previousIdSortBy = lt(mediaItems.id, parsedId);
 			}
 
 			let rawNextMediaItem: MediaItem[] = [];

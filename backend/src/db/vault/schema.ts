@@ -71,6 +71,7 @@ export const tagsToMediaItems = sqliteTable(
 	},
 	(t) => ({ pk: primaryKey({ columns: [t.tagId, t.mediaItemId] }) })
 );
+export type TagsToMediaItemsSchema = InferSelectModel<typeof tagsToMediaItems>;
 
 export const tagsToMediaItemsRelation = relations(tagsToMediaItems, ({ one }) => ({
 	tag: one(tags, {
