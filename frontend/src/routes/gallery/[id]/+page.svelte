@@ -26,13 +26,13 @@
 			// Left
 			case 37:
 				if (next) {
-					goto(`/gallery/${next}`);
+					goto(`/gallery/${next}${$page.url.search ? `${$page.url.search}` : ''}`);
 				}
 				break;
 			// Right
 			case 39:
 				if (previous) {
-					goto(`/gallery/${previous}`);
+					goto(`/gallery/${previous}${$page.url.search ? `${$page.url.search}` : ''}`);
 				}
 				break;
 		}
@@ -44,7 +44,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/mediaItems/${$page.params.id}`).then((res) => {
+		}>(`/mediaItems/${$page.params.id}?${$page.url.search}`).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
@@ -109,7 +109,7 @@
 
 <div class="flex flex-row min-h-full">
 	<a
-		href={previous ? `/gallery/${previous}` : '#'}
+		href={previous ? `/gallery/${previous}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
 		class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition ${!previous && 'cursor-not-allowed'}`}
 		><ArrowLeft class="fill-white" /></a
 	>
@@ -160,7 +160,7 @@
 		</div>
 	</div>
 	<a
-		href={next ? `/gallery/${next}` : '#'}
+		href={next ? `/gallery/${next}${$page.url.search ? `?${$page.url.search}` : ''}` : '#'}
 		class={`flex justify-center items-center w-1/12 hover:bg-slate-400 hover:bg-opacity-10 hover:transition fill-white ${!next && 'cursor-not-allowed'}`}
 		><ArrowRight /></a
 	>

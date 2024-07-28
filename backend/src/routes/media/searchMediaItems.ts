@@ -33,14 +33,16 @@ export type MediaItemWithTags = BaseMediaItem & { tags: TagSchema[] };
 type MediaTypes = 'ALL' | 'IMAGES' | 'VIDEOS';
 
 export type MediaSearchQuery = {
-	positiveTags: string;
-	negativeTags: string;
-	sortMethod: SortMethods;
-	page: string;
-	archived: string;
-	positiveQueryType: QueryType;
-	negativeQueryType: QueryType;
-	mediaType: MediaTypes;
+	[index: string]: unknown;
+	positiveTags?: string;
+	negativeTags?: string;
+	sortMethod?: SortMethods;
+	page?: string;
+	archived?: string;
+	inbox?: string;
+	positiveQueryType?: QueryType;
+	negativeQueryType?: QueryType;
+	mediaType?: MediaTypes;
 };
 
 const PAGE_SIZE = 30;

@@ -107,6 +107,7 @@
 				on:keydown={onKeyDown}
 				on:keyup={onKeyUp}
 				on:keypress={(e) => {
+					e.stopPropagation();
 					onSubmit(e.key, tagSearchInputText);
 				}}
 				on:input={(e) => onTagSearch(e.currentTarget)}

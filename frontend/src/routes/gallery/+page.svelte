@@ -64,11 +64,11 @@
 				(searchParams.get('positiveQueryType') as CombinationalLogicType) ?? 'AND';
 			negativeQueryType =
 				(searchParams.get('negativeQueryType') as CombinationalLogicType) ?? 'AND';
-			appliedPositiveTags = searchParams.has('appliedPositiveTags')
-				? JSON.parse(searchParams.get('appliedPositiveTags')!)
+			appliedPositiveTags = searchParams.has('positiveTags')
+				? JSON.parse(searchParams.get('positiveTags')!)
 				: [];
-			appliedNegativeTags = searchParams.has('appliedNegativeTags')
-				? JSON.parse(searchParams.get('appliedNegativeTags')!)
+			appliedNegativeTags = searchParams.has('negativeTags')
+				? JSON.parse(searchParams.get('negativeTags')!)
 				: [];
 		}
 		page.subscribe(async (val) => {
@@ -102,8 +102,7 @@
 		appliedPositiveTags = [...appliedPositiveTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-
-		searchParams.set('appliedPositiveTags', JSON.stringify(appliedPositiveTags));
+		searchParams.set('positiveTags', JSON.stringify(appliedPositiveTags));
 		goto(`?${searchParams.toString()}`);
 	}
 
@@ -111,7 +110,7 @@
 		appliedNegativeTags = [...appliedNegativeTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-		searchParams.set('appliedNegativeTags', JSON.stringify(appliedNegativeTags));
+		searchParams.set('negativeTags', JSON.stringify(appliedNegativeTags));
 		goto(`?${searchParams.toString()}`);
 	}
 
@@ -446,7 +445,7 @@
 					onGotoGeneratorClick={() => goToGenerator(mediaItem.metadata)}
 					isSelected={selectedItems.has(mediaItem.id)}
 					{isSelectionModeActive}
-					href={`/gallery/${mediaItem.id}`}
+					href={`/gallery/${mediaItem.id}${searchParams.size > 0 ? `?${searchParams.toString()}` : ''}`}
 				>
 					{#if mediaItem.type === 'image'}
 						<img
