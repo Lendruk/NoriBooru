@@ -7,7 +7,6 @@
 
 	let key: string;
 	let isLoading: boolean = false;
-	let onSubmitDone: () => void;
 
 	async function registerAPIKey() {
 		isLoading = true;
@@ -15,7 +14,6 @@
 			key
 		});
 		isLoading = false;
-		onSubmitDone();
 		createToast('Civitai api key registered successfully!');
 	}
 </script>
