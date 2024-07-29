@@ -25,6 +25,8 @@
 	let tagsToApply = $state<Map<number, PopulatedTag[]>>(new Map());
 	let showConfirmationModal = $state(false);
 	let showTagModal = $state(false);
+	let hasUnsavedChanges = $state(false);
+	let showUnsavedChangesModal = $state(false);
 
 	const inboxUrl = '/gallery?inbox=true';
 	$effect(() => {
@@ -38,6 +40,11 @@
 		HttpService.get<PopulatedTag[]>('/tags').then((fetchedTags) => {
 			tags = fetchedTags;
 		});
+	});
+
+	// Listen to action map changes
+	$effect(() => {
+		hasUnsavedChanges = actionMap.size > 0;
 	});
 
 	async function fetchMediaItem(id: number): Promise<MediaItemWithTags> {
@@ -108,7 +115,11 @@
 				markItemForDeletion(currentMediaItem!.id);
 				break;
 			case 'Escape':
-				goto(inboxUrl);
+				if (hasUnsavedChanges) {
+					showUnsavedChangesModal = true;
+				} else {
+					goto(inboxUrl);
+				}
 				break;
 		}
 	}
@@ -269,6 +280,19 @@
 		<Button class="bg-red-950 hover:bg-red-800 h-[40px]" onClick={onReviewFinishConfirmation}
 			>Confirm</Button
 		>
+	</div>
+</Modal>
+
+<Modal bind:showModal={showUnsavedChangesModal}>
+	<div class="flex flex-1 flex-col m-4 gap-4">
+		<div>Unsaved Changes</div>
+		<div>You have unsaved changes, are you sure you want to leave?</div>
+		<Button
+			onClick={() => {
+				goto(inboxUrl);
+			}}>Yes</Button
+		>
+		<Button onClick={() => (showUnsavedChangesModal = false)}>No</Button>
 	</div>
 </Modal>
 
