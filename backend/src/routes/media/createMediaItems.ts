@@ -32,19 +32,24 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				`${id}.${finalExtension}`
 			);
 
-			if (fileType === 'video' && currentFileExtension !== 'mp4') {
-				const conversionPromise = new Promise((resolve, reject) => {
-					ffmpeg(part.file)
-						.saveToFile(finalPath)
-						.on('end', () => resolve(undefined))
-						.on('error', (err) => reject(err));
-				});
-				await conversionPromise;
-			} else {
-				await pump(part.file, createWriteStream(finalPath));
+			try {
+				if (fileType === 'video' && currentFileExtension !== 'mp4') {
+					const conversionPromise = new Promise((resolve, reject) => {
+						ffmpeg(part.file)
+							.saveToFile(finalPath)
+							.on('end', () => resolve(undefined))
+							.on('error', (err) => reject(err));
+					});
+					await conversionPromise;
+				} else {
+					await pump(part.file, createWriteStream(finalPath));
+				}
+
+				await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
+			} catch (error) {
+				console.log(`Failed to upload file - ${part.filename}`);
+				console.log(error);
 			}
-			
-			await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
 		} else {
 			console.log(part);
 		}

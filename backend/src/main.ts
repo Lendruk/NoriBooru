@@ -5,7 +5,7 @@ import Fastify from 'fastify';
 import routes from './routes';
 
 const app = Fastify({
-	logger: false,
+	logger: true,
 	bodyLimit: 100000000 // ~100mb
 });
 
