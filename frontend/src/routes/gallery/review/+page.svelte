@@ -101,6 +101,9 @@
 	}
 
 	function onKeyDown(e: KeyboardEvent) {
+		if (showTagModal || showConfirmationModal) {
+			return;
+		}
 		switch (e.key) {
 			case 'ArrowLeft':
 				handleClickLeft();
@@ -115,7 +118,9 @@
 				markItemForDeletion(currentMediaItem!.id);
 				break;
 			case 'Escape':
-				if (hasUnsavedChanges) {
+				if (showTagModal) {
+					showTagModal = false;
+				} else if (hasUnsavedChanges) {
 					showUnsavedChangesModal = true;
 				} else {
 					goto(inboxUrl);

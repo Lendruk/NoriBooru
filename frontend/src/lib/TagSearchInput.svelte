@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { HttpService } from './services/HttpService';
 	import Tag from './Tag.svelte';
 	import type { PopulatedTag } from './types/PopulatedTag';
 
@@ -16,14 +17,31 @@
 
 	let input: HTMLInputElement;
 
-	function onSubmit(keyCode: string, value: string) {
+	async function onSubmit(keyCode: string, value: string) {
 		if (keyCode === 'Enter') {
 			const tag = availableTags.find(
 				(tag) =>
-					tag.name.toLowerCase().startsWith(value) && !ignoredTags.find((at) => at.id === tag.id)
+					tag.name.toLowerCase() === value.toLowerCase() &&
+					!ignoredTags.find((at) => at.id === tag.id)
 			);
 			if (tag) {
 				onTagSearchSubmit(tag);
+				tagSuggestion = '';
+				tagSearchInputText = '';
+				input.style.width = '100%';
+			} else {
+				if (value.length === 0) {
+					return;
+				}
+
+				// Create new tag
+				const newTag = await HttpService.post<PopulatedTag>('/tags', {
+					name: value,
+					color: '#ffffff',
+					parentId: undefined
+				});
+				onTagSearchSubmit(newTag);
+				availableTags = [newTag, ...availableTags];
 				tagSuggestion = '';
 				tagSearchInputText = '';
 				input.style.width = '100%';
@@ -112,7 +130,7 @@
 				}}
 				on:input={(e) => onTagSearch(e.currentTarget)}
 				class="bg-transparent ml-2 flex focus:outline-none w-full"
-				placeholder="Search tags"
+				placeholder="Search tags (tab to autocomplete, enter to create new)"
 				type="text"
 			/>
 			<span class="text-gray-400">{tagSuggestion}</span>

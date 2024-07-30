@@ -1,6 +1,7 @@
 import { eq, like, sql } from 'drizzle-orm';
 import { TagSchema, tags } from '../db/vault/schema';
 import { VaultInstance } from '../lib/VaultInstance';
+import { generateRandomColor } from '../utils/generateRandomColor';
 
 export type SimpleTag = Omit<TagSchema, 'parentTagId'>;
 export type PopulatedTag = SimpleTag & {
@@ -22,13 +23,17 @@ class TagService {
 
 	public async doesTagExist(vault: VaultInstance, tagName: string): Promise<boolean> {
 		const { db } = vault;
-		const dbTag = await db.query.tags.findFirst({ where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase()) });
+		const dbTag = await db.query.tags.findFirst({
+			where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase())
+		});
 		return !!dbTag;
 	}
 
 	public async getTagByName(vault: VaultInstance, tagName: string): Promise<SimpleTag | undefined> {
 		const { db } = vault;
-		const dbTag = await db.query.tags.findFirst({ where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase()) });
+		const dbTag = await db.query.tags.findFirst({
+			where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase())
+		});
 		return dbTag;
 	}
 
@@ -78,8 +83,20 @@ class TagService {
 	): Promise<SimpleTag> {
 		const { db } = vault;
 		const formattedTagName = name.trim().replaceAll(' ', '_').toLowerCase();
+
+		if (formattedTagName.length === 0) {
+			throw new Error('Tag name cannot be empty');
+		}
+
 		const newTag = (
-			await db.insert(tags).values({ name: formattedTagName, color: color, parentTagId: parentId }).returning()
+			await db
+				.insert(tags)
+				.values({
+					name: formattedTagName,
+					color: color === '#ffffff' ? generateRandomColor() : color,
+					parentTagId: parentId
+				})
+				.returning()
 		)[0];
 		return this.populateTag(vault, newTag);
 	}
@@ -98,7 +115,7 @@ class TagService {
 		const updated = (
 			await db
 				.update(tags)
-				.set({ ...updatePayload, parentTagId: updatePayload.parentId ?? null})
+				.set({ ...updatePayload, parentTagId: updatePayload.parentId ?? null })
 				.where(eq(tags.id, tagId))
 				.returning()
 		)[0];
