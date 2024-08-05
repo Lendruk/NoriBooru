@@ -50,7 +50,6 @@ export class JobService {
 			if (!job.isRunning) {
 				job.isRunning = true;
 				void this.runWrappedJob(job);
-				job.isRunning = false;
 			}
 		}
 	}
@@ -67,11 +66,17 @@ export class JobService {
 
 	private async runWrappedJob(job: Job): Promise<void> {
 		job.isRunning = true;
-		const result = await job.action(job);
 
-		// If the job was cancelled in the meantime, we won't emit a job complete event
-		if (job.isRunning) {
-			job.emit('jobDone', result);
+		try {
+			const result = await job.action(job);
+			console.log(job.isRunning);
+			// If the job was cancelled in the meantime, we won't emit a job complete event
+			if (job.isRunning) {
+				job.emit('job-done', { id: job.id, result });
+				this.unregisterJob(job.id);
+			}
+		} catch (error) {
+			job.emit('job-execution-error', { id: job.id, error: (error as Error).message });
 		}
 
 		job.isRunning = false;

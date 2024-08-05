@@ -19,9 +19,9 @@
 				formData.append(`image-${i}`, previewFiles[i].originalFile);
 			}
 
-			const result = await HttpService.post('/mediaItems', formData);
+			await HttpService.post('/mediaItems', formData);
+			createToast('Request created successfully!');
 			previewFiles = [];
-			createToast('Media uploaded successfully!');
 		}
 	}
 

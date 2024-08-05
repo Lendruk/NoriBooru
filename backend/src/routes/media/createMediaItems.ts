@@ -8,6 +8,7 @@ import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../services/JobService';
 import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
+import { pause } from '../../utils/pause';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { pipeline } = require('node:stream');
 const pump = util.promisify(pipeline);
@@ -32,10 +33,12 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			currentFileIndex: 0,
 			currentFileName: ''
 		};
+		emitter.emit('update', updatePayload);
 		for await (const part of parts) {
 			if (part.type === 'file') {
 				updatePayload.currentFileIndex++;
 				updatePayload.currentFileName = part.filename;
+				await pause(3500);
 				emitter.emit('update', updatePayload);
 				const id = randomUUID();
 				const fileType = part.mimetype.includes('image') ? 'image' : 'video';
@@ -82,6 +85,17 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				jobName: mediaImportJob.name,
 				jobTag: mediaImportJob.tag,
 				payload
+			}
+		});
+	});
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	mediaImportJob.on('job-done', (_) => {
+		vault.broadcastEvent({
+			event: 'job-done',
+			data: {
+				id: mediaImportJob.id,
+				result: null
 			}
 		});
 	});
