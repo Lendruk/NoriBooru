@@ -14,6 +14,7 @@
 	async function uploadMedia() {
 		if (previewFiles.length > 0) {
 			const formData = new FormData();
+			formData.append('totalItems', previewFiles.length.toString());
 			for (let i = 0; i < previewFiles.length; i++) {
 				formData.append(`image-${i}`, previewFiles[i].originalFile);
 			}

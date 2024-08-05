@@ -4,6 +4,7 @@ import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import WebSocket from 'ws';
 import type { Vault } from '../db/master/schema';
 import * as vaultSchema from '../db/vault/schema';
+import { JobService } from '../services/JobService';
 import { WebSocketEvent } from '../types/WebSocketEvent';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
@@ -18,7 +19,10 @@ export abstract class VaultBase implements Vault {
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
 
+	public jobService: JobService;
+
 	public constructor(vault: Vault) {
+		this.jobService = new JobService();
 		this.id = vault.id;
 		this.name = vault.name;
 		this.path = vault.path;
@@ -31,11 +35,10 @@ export abstract class VaultBase implements Vault {
 		this.sockets = new Set();
 	}
 
-  
 	public async init(): Promise<void> {
 		await migrate(this.db, { migrationsFolder: 'migrations/vault' });
 	}
-  
+
 	public registerWebsocketConnection(socket: WebSocket): void {
 		this.sockets.add(socket);
 		socket.on('close', () => {
@@ -43,7 +46,9 @@ export abstract class VaultBase implements Vault {
 		});
 	}
 
-	public broadcastEvent<E extends string, P extends Record<string, unknown>>(event: WebSocketEvent<E, P>): void {
+	public broadcastEvent<E extends string, P extends Record<string, unknown>>(
+		event: WebSocketEvent<E, P>
+	): void {
 		for (const socket of this.sockets) {
 			socket.send(JSON.stringify(event));
 		}
