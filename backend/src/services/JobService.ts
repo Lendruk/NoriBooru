@@ -69,7 +69,6 @@ export class JobService {
 
 		try {
 			const result = await job.action(job);
-			console.log(job.isRunning);
 			// If the job was cancelled in the meantime, we won't emit a job complete event
 			if (job.isRunning) {
 				job.emit('job-done', { id: job.id, result });
