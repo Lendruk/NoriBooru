@@ -14,7 +14,7 @@ app.register(cors);
 app.register(multipart, {
 	limits: {
 		files: 100000,
-		fileSize: 107374182400
+		fileSize: Number.POSITIVE_INFINITY
 	}
 });
 
