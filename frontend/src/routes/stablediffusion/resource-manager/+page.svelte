@@ -4,6 +4,7 @@
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
@@ -49,9 +50,18 @@
 	async function downloadCivitaiResource() {
 		isDownloadingModel = true;
 		try {
-			await HttpService.post(`/sd/civitai/download-resource`, { url: civitaiModelLink });
-			await fetchResources();
-			createToast('Model added successfully!');
+			const handler = await HttpService.postJob<JobWebsocketEventData<null>>(
+				`/sd/civitai/download-resource`,
+				{ url: civitaiModelLink }
+			);
+
+			handler.subscribe(async (data) => {
+				if (data.event === 'job-done') {
+					createToast('Model added successfully!');
+					await fetchResources();
+				}
+			});
+			createToast('Request created successfully!');
 		} catch {
 		} finally {
 			isDownloadingModel = false;

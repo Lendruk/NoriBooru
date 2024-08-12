@@ -3,8 +3,8 @@
 	import { page } from '$app/stores';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
+	import Topbar from '$lib/components/Topbar/index.svelte';
 	import { WebsocketService } from '$lib/services/WebsocketService';
-	import Topbar from '$lib/Topbar.svelte';
 	import type { Vault } from '$lib/types/Vault';
 	import { onMount } from 'svelte';
 	import '../app.css';

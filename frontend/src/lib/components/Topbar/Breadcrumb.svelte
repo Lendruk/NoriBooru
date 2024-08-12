@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import House from './icons/House.svelte';
+	import House from '../../icons/House.svelte';
 	let path = $state($page.url.pathname.split('/').filter((p) => p));
 	$effect(() => {
 		path = $page.url.pathname.split('/').filter((p) => p);

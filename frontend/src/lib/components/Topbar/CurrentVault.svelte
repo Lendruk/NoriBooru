@@ -1,6 +1,6 @@
 <script lang="ts">
-	import DoorOpen from './icons/DoorOpen.svelte';
-	import type { Vault } from './types/Vault';
+	import DoorOpen from '../../icons/DoorOpen.svelte';
+	import type { Vault } from '../../types/Vault';
 
 	let currentVault: Vault | null = null;
 	let isVaultSelectionOpen = false;
