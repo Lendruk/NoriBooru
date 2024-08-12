@@ -8,7 +8,6 @@ import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../lib/Job';
 import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
-import { pause } from '../../utils/pause';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { pipeline } = require('node:stream');
 const pump = util.promisify(pipeline);
@@ -38,7 +37,6 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 			if (part.type === 'file') {
 				updatePayload.currentFileIndex++;
 				updatePayload.currentFileName = part.filename;
-				await pause(3500);
 				emitter.emit('update', updatePayload);
 				const id = randomUUID();
 				const fileType = part.mimetype.includes('image') ? 'image' : 'video';
