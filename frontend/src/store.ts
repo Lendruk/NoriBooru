@@ -8,4 +8,5 @@ export const isSdStarting = writable<boolean>(true);
 export type SDUIStatus = 'RUNNING' | 'NOT_RUNNING' | 'UNKNOWN';
 export const sdUiStatus = writable<SDUIStatus>('UNKNOWN');
 
-export const runningJobs = writable<RunningJob[]>([]);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const runningJobs = writable<RunningJob<any>[]>([]);

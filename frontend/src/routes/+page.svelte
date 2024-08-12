@@ -4,11 +4,18 @@
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import GalleryItemButton from './gallery/GalleryItemButton.svelte';
 	let previewFiles: { name: string; URL: string; originalFile: File }[] = $state([]);
 
 	type InputEvent = Event & {
 		currentTarget: EventTarget & HTMLInputElement;
+	};
+
+	type MediaUploadJobUpdatePayload = {
+		totalFiles: number;
+		currentFileIndex: number;
+		currentFileName: string;
 	};
 
 	async function uploadMedia() {
@@ -19,7 +26,16 @@
 				formData.append(`image-${i}`, previewFiles[i].originalFile);
 			}
 
-			await HttpService.post('/mediaItems', formData);
+			const handler = await HttpService.postJob<JobWebsocketEventData<MediaUploadJobUpdatePayload>>(
+				'/mediaItems',
+				formData
+			);
+
+			handler.subscribe((data) => {
+				if (data.event === 'job-done') {
+					createToast('Media uploaded successfully!');
+				}
+			});
 			createToast('Request created successfully!');
 			previewFiles = [];
 		}

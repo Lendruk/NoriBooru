@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import util from 'node:util';
 import { checkVault } from '../../hooks/checkVault';
-import { Job } from '../../services/JobService';
+import { Job } from '../../lib/Job';
 import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 import { pause } from '../../utils/pause';
@@ -75,34 +75,15 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 		}
 	});
 
-	mediaImportJob.on('update', (payload: MediaItemJobUpdatePayload) => {
-		console.log(payload);
+	vault.registerJob(mediaImportJob);
+	vault.runJob(mediaImportJob.id);
 
-		vault.broadcastEvent({
-			event: 'job-update',
-			data: {
-				jobId: mediaImportJob.id,
-				jobName: mediaImportJob.name,
-				jobTag: mediaImportJob.tag,
-				payload
-			}
-		});
+	return reply.send({
+		message: 'Job registered successfully!',
+		id: mediaImportJob.id,
+		name: mediaImportJob.name,
+		tag: mediaImportJob.tag
 	});
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	mediaImportJob.on('job-done', (_) => {
-		vault.broadcastEvent({
-			event: 'job-done',
-			data: {
-				id: mediaImportJob.id,
-				result: null
-			}
-		});
-	});
-	vault.jobService.registerJob(mediaImportJob);
-	vault.jobService.runJob(mediaImportJob.id);
-
-	return reply.send({ message: 'Job registered successfully!', jobId: mediaImportJob.id });
 };
 
 export default {

@@ -1,4 +1,3 @@
-import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 import { runningJobs, sdUiStatus } from '../../store';
 import { HttpService } from './HttpService';
 
@@ -11,16 +10,12 @@ type WebSocketEvent = {
 	data: Record<string, unknown>;
 };
 
-type JobWebsocketEventData = {
-	jobId: string;
-	jobName: string;
-	jobTag: string;
-	payload: Record<string, unknown>;
-};
-
-type JobDoneWebsocketEventData = {
+export type JobWebsocketEventData<T = Record<string, unknown>> = {
+	event: 'job-update' | 'job-done' | 'job-execution-error';
 	id: string;
-	result: unknown;
+	name: string;
+	tag: string;
+	payload: T;
 };
 
 export class WebsocketService {
@@ -47,31 +42,21 @@ export class WebsocketService {
 					const update = parsedMessage.data as JobWebsocketEventData;
 
 					runningJobs.update((jobs) => {
-						const index = jobs.findIndex((job) => job.id === update.jobId);
+						const index = jobs.findIndex((job) => job.id === update.id);
 						if (index !== -1) {
-							jobs[index].name = update.jobName;
-							jobs[index].tag = update.jobTag;
+							jobs[index].name = update.name;
+							jobs[index].tag = update.tag;
 							jobs[index].data = update.payload;
-						} else {
-							jobs.push({
-								id: update.jobId,
-								name: update.jobName,
-								tag: update.jobTag,
-								data: update.payload
-							});
+							jobs[index].next({ event: 'job-update', data: update.payload });
 						}
 						return jobs;
 					});
 				} else if (parsedMessage.event === 'job-done') {
-					const jobDoneEvent = parsedMessage.data as JobDoneWebsocketEventData;
+					const jobDoneEvent = parsedMessage.data as JobWebsocketEventData;
 					runningJobs.update((jobs) => {
 						const index = jobs.findIndex((job) => job.id === jobDoneEvent.id);
 						if (index !== -1) {
-							// Messy but will do for now
-							const job = jobs[index];
-							if (job.tag === 'media-import') {
-								createToast('Media uploaded successfully!');
-							}
+							jobs[index].next({ event: 'job-done', data: jobDoneEvent.payload });
 							jobs.splice(index, 1);
 						}
 						return jobs;
