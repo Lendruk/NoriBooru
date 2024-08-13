@@ -8,7 +8,6 @@
     "frontend-dev": "cd frontend && npm run dev",
     "prepare:backend": "cd backend && npm i",
     "prepare:frontend": "cd frontend && npm i --force",
-    "prepare:env": "node ./scripts/createEnv",
     "prepare:dev": "npm install && npm run prepare:backend && npm run prepare:frontend && npm run prepare:env",
     "build:frontend": "cd frontend && npm run build ",
     "build:backend": "cd backend && npm run build",

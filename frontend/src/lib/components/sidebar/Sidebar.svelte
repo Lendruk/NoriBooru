@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { version } from '$app/environment';
 	import { page } from '$app/stores';
-	import { PUBLIC_VERSION } from '$env/static/public';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
@@ -232,7 +232,7 @@
 		{#if isSidebarOpen}
 			<div class="flex flex-col text-xs items-center mb-4">
 				<div>NoriBooru</div>
-				<div>v{PUBLIC_VERSION}</div>
+				<div>v{version}</div>
 			</div>
 		{/if}
 		<button
