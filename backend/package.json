@@ -8,7 +8,8 @@
 		"generate:drizzle:vault": "drizzle-kit generate --config=./vault.drizzle.config.ts",
 		"generate:drizzle": "npm run generate:drizzle:master && npm run generate:drizzle:vault",
 		"drizzle:drop:migration": "drizzle-kit drop --config=./vault.drizzle.config.ts",
-		"build": "tsc",
+		"build": "rm -rf dist && node ./config.esbuild.mjs",
+		"build:tsc": "rm -rf dist && tsc",
 		"dev": "nodemon ./src/main.ts",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
@@ -35,6 +36,7 @@
 		"@types/ws": "^8.5.10",
 		"@typescript-eslint/eslint-plugin": "^7.3.1",
 		"drizzle-kit": "^0.22.7",
+		"esbuild": "^0.23.0",
 		"eslint": "^8.56.0",
 		"nodemon": "^3.0.3",
 		"prettier": "^3.2.5",
