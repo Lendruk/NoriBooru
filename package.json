@@ -15,7 +15,10 @@
     "build": "npm run build:frontend && npm run build:backend",
     "bundle": "tauri build && ./scripts/bundle.sh",
     "dev": "concurrently npm:backend-dev npm:frontend-dev",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "bump:patch": "npm version patch --git-tag-version false && cd backend && npm run bump:patch && cd ../frontend && npm run bump:patch",
+    "bump:minor": "npm version minor --git-tag-version false && cd backend && npm run bump:minor && cd ../frontend && npm run bump:minor",
+    "bump:major": "npm version major --git-tag-version false && cd backend && npm run bump:major && cd ../frontend && npm run bump:major"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.6.0",

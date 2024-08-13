@@ -12,7 +12,10 @@
 		"build:tsc": "rm -rf dist && tsc",
 		"dev": "nodemon ./src/main.ts",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"bump:patch": "npm version patch --git-tag-version false",
+		"bump:minor": "npm version minor --git-tag-version false",
+		"bump:major": "npm version major --git-tag-version false"
 	},
 	"keywords": [],
 	"author": "Lendruk",
@@ -27,7 +30,10 @@
 		"exifreader": "^4.23.1",
 		"better-sqlite3": "^9.4.0",
 		"fluent-ffmpeg": "^2.1.2",
-		"sharp": "^0.33.2"
+		"sharp": "^0.33.2",
+		"bump:patch": "npm version patch --git-tag-version false",
+		"bump:minor": "npm version minor --git-tag-version false",
+		"bump:major": "npm version major --git-tag-version false"
 	},
 	"bundleDependencies": [
 		"@fastify/multipart",

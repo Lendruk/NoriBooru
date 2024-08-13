@@ -12,7 +12,10 @@
 		"format": "prettier --write .",
 		"generate:master": "drizzle-kit generate:sqlite --config=./master.drizzle.config.ts",
 		"generate:vault": "drizzle-kit generate:sqlite --config=./vault.drizzle.config.ts",
-		"generate": "npm run generate:master && npm run generate:vault"
+		"generate": "npm run generate:master && npm run generate:vault",
+		"bump:patch": "npm version patch --git-tag-version false",
+		"bump:minor": "npm version minor --git-tag-version false",
+		"bump:major": "npm version major --git-tag-version false"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.4",
