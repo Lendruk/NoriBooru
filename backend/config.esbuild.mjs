@@ -50,13 +50,5 @@ await esbuild.build({
 execSync('cd dist && npm init -y && npm install sharp better-sqlite3 fluent-ffmpeg');
 
 await Promise.all([
-	// fs.cp('node_modules/fluent-ffmpeg', 'dist/node_modules/fluent-ffmpeg', { recursive: true }),
-	// fs.cp('node_modules/isexe', 'dist/node_modules/isexe', { recursive: true }),
-	// fs.cp('node_modules/async', 'dist/node_modules/async', { recursive: true }),
-	// fs.cp('node_modules/sharp', 'dist/node_modules/sharp', { recursive: true }),
-	// fs.cp('node_modules/color', 'dist/node_modules/color', { recursive: true }),
-	// fs.cp('node_modules/detect-libc', 'dist/node_modules/detect-libc', { recursive: true }),
-	// fs.cp('node_modules/semver', 'dist/node_modules/semver', { recursive: true }),
-	// fs.cp('node_modules/better-sqlite3/build/Release/better_sqlite3.node', 'dist/build/better_sqlite3.node', { recursive: true }),
 	fs.cp('migrations', 'dist/migrations', { recursive: true }),
 ]);
