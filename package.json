@@ -10,9 +10,15 @@
     "prepare:frontend": "cd frontend && npm i --force",
     "prepare:env": "node ./scripts/createEnv",
     "prepare:dev": "npm install && npm run prepare:backend && npm run prepare:frontend && npm run prepare:env",
-    "dev": "concurrently npm:backend-dev npm:frontend-dev"
+    "build:frontend": "cd frontend && npm run build ",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "bundle": "tauri build && ./scripts/bundle.sh",
+    "dev": "concurrently npm:backend-dev npm:frontend-dev",
+    "tauri": "tauri"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^1.6.0",
     "concurrently": "^8.2.2"
   },
   "keywords": [],

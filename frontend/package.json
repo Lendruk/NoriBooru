@@ -15,10 +15,9 @@
 		"generate": "npm run generate:master && npm run generate:vault"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/adapter-node": "^4.0.1",
-		"@sveltejs/kit": "^2.5.10",
-		"@sveltejs/vite-plugin-svelte": "^3.1.0",
+		"@sveltejs/adapter-static": "^3.0.4",
+		"@sveltejs/kit": "^2.5.22",
+		"@sveltejs/vite-plugin-svelte": "^3.1.1",
 		"@typescript-eslint/eslint-plugin": "^7.11.0",
 		"@typescript-eslint/parser": "^7.11.0",
 		"autoprefixer": "^10.4.19",
@@ -28,7 +27,7 @@
 		"postcss": "^8.4.38",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.0.0",
-		"svelte": "5.0.0-next.141",
+		"svelte": "5.0.0-next.216",
 		"svelte-check": "^3.8.0",
 		"tslib": "^2.4.1",
 		"typescript": "^5.4.5",
