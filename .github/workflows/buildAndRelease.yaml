@@ -3,7 +3,7 @@ name: "buildAndRelease"
 on:
   push:
     branches:
-      - add-release-pipeline
+      - master
 jobs:
   buildAndRelease:
     permissions:
@@ -14,6 +14,7 @@ jobs:
         include:
           - platform: "ubuntu-22.04"
             args: ""
+          # TODO support windows in the future
           # - platform: "windows-latest"
           #   args: ""
 

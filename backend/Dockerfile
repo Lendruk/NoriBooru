@@ -1,4 +1,4 @@
-FROM node:20.5.0
+FROM node:20.11.0
 RUN mkdir -p /noribooru/backend
 WORKDIR /noribooru/backend
 COPY ./package*.json ./

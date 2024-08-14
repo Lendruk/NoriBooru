@@ -18,7 +18,7 @@ Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released be
 ### Requirements
 
 - ffmpeg
-- node >= 20.0.0
+- node >= 20.11.0
 
 ### Development
 
@@ -53,6 +53,11 @@ npm run bundle
 This will create a `build` directory with the bundled app.
 Once you have unpacked the tarball you can start the backend using the shell script `runProdServer.sh`.
 This will start the backend server on port 8080.
+
+## Releases
+
+You can download the latest release from the [releases page](https://github.com/Lendruk/NoriBooru/releases).
+Currently only AppImage builds are available. Windows builds will be added in the future.
 
 ## Firefox extension
 
