@@ -1,4 +1,4 @@
-FROM node:20 as build
+FROM node:20 AS build
 WORKDIR /app
 COPY ./package*.json ./
 COPY ./src ./src
@@ -7,6 +7,13 @@ COPY ./tsconfig.json ./
 COPY ./tailwind.config.js ./
 COPY ./svelte.config.js ./
 COPY ./postcss.config.js ./
-RUN npm install --force
+COPY ./static ./static
+RUN npm ci --verbose
 RUN npm run build
-CMD ["node", "./build/index.js"]
+
+FROM nginx:stable-alpine
+COPY --from=build /app/build /var/www/html
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./mime.types /etc/nginx/mime.types
+EXPOSE 80
+CMD [ "nginx", "-g", "daemon off;" ]
