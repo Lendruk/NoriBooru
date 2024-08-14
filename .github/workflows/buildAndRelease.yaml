@@ -1,12 +1,11 @@
-name: "publish"
+name: "buildAndRelease"
 
 on:
   push:
     branches:
       - add-release-pipeline
-
 jobs:
-  publish-tauri:
+  buildAndRelease:
     permissions:
       contents: write
     strategy:
@@ -45,17 +44,25 @@ jobs:
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: install frontend dependencies
+      - name: install dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: yarn install # change this to npm or pnpm depending on which one you use.
+        run: npm prepare:dev # change this to npm or pnpm depending on which one you use.
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: build both frontend and backend
+        run: npm run build
+
+      - name: bundle app
+        run: npm run bundle
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Create Release
+        id: create_release
+        - run: |
+          gh release create v${{ steps.package-version.outputs.current-version}} ./build/nori-booru-${{ steps.package-version.outputs.current-version}}-x64.tar.gz
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: "Test v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
-          prerelease: true
-          args: ${{ matrix.args }}
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        shell: bash
+        name: Creates a release in GitHub and uploads attachments
