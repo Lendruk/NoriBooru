@@ -59,7 +59,7 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Create Release
-        run: gh release create v${{ steps.package-version.outputs.current-version}} ./build/nori-booru-${{ steps.package-version.outputs.current-version}}-x64.tar.gz
+        run: gh release create v${{ steps.package-version.outputs.current-version}} ./build/nori-booru-${{ steps.package-version.outputs.current-version}}-x64.tar.gz -p -t v${{ steps.package-version.outputs.current-version}} -F changelogs/${{ steps.package-version.outputs.current-version}}.md
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
         shell: bash

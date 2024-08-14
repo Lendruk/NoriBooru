@@ -20,7 +20,7 @@ Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released be
 - ffmpeg
 - node >= 20.0.0
 
-### Locally
+### Development
 
 In the project root directory run:
 
