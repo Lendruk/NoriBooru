@@ -3,7 +3,7 @@
 Self-hosted media database and management system.
 Uses the concept of vaults as a media database. A server can keep track of multiple vaults at the same time.
 
-Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes. For now there is no optimized production build.
+Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes.
 
 ## Current Features
 
@@ -18,9 +18,9 @@ Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released be
 ### Requirements
 
 - ffmpeg
-- node >= 20.0.0
+- node >= 20.11.0
 
-### Locally
+### Development
 
 In the project root directory run:
 
@@ -39,8 +39,25 @@ npm run dev
 In the project root directory run:
 
 ```sh
-docker-compose up
+docker compose up
 ```
+
+### Desktop App
+
+Additionally you can bundle the app into a front-end executable binary and a seperate node server using:
+
+```sh
+npm run bundle
+```
+
+This will create a `build` directory with the bundled app.
+Once you have unpacked the tarball you can start the backend using the shell script `runProdServer.sh`.
+This will start the backend server on port 8080.
+
+## Releases
+
+You can download the latest release from the [releases page](https://github.com/Lendruk/NoriBooru/releases).
+Currently only AppImage builds are available. Windows builds will be added in the future.
 
 ## Firefox extension
 

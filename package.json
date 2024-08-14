@@ -1,6 +1,6 @@
 {
   "name": "nori-booru",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,11 +8,11 @@
     "frontend-dev": "cd frontend && npm run dev",
     "prepare:backend": "cd backend && npm i",
     "prepare:frontend": "cd frontend && npm i --force",
-    "prepare:dev": "npm install && npm run prepare:backend && npm run prepare:frontend && npm run prepare:env",
+    "prepare:dev": "npm install && npm run prepare:backend && npm run prepare:frontend",
     "build:frontend": "cd frontend && npm run build ",
     "build:backend": "cd backend && npm run build",
     "build": "npm run build:frontend && npm run build:backend",
-    "bundle": "tauri build && ./scripts/bundle.sh",
+    "bundle": "tauri build && bash scripts/bundle.sh",
     "dev": "concurrently npm:backend-dev npm:frontend-dev",
     "tauri": "tauri",
     "bump:patch": "npm version patch --git-tag-version false && cd backend && npm run bump:patch && cd ../frontend && npm run bump:patch",

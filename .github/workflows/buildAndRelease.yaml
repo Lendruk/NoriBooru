@@ -1,0 +1,66 @@
+name: "buildAndRelease"
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  buildAndRelease:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "ubuntu-22.04"
+            args: ""
+          # TODO support windows in the future
+          # - platform: "windows-latest"
+          #   args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libwebkit2gtk-4.0-dev libssl-dev libappindicator3-dev libgtk-3-dev librsvg2-dev patchelf libsoup2.4-dev build-essential
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "npm"
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: install dependencies
+        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+        run: npm run prepare:dev # change this to npm or pnpm depending on which one you use.
+
+      - name: build both frontend and backend
+        run: npm run build
+
+      - name: bundle app
+        run: npm run bundle
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Create Release
+        run: gh release create v${{ steps.package-version.outputs.current-version}} ./build/nori-booru-${{ steps.package-version.outputs.current-version}}-x64.tar.gz -p -t v${{ steps.package-version.outputs.current-version}} -F changelogs/${{ steps.package-version.outputs.current-version}}.md
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        shell: bash
