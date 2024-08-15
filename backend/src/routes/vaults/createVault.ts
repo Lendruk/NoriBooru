@@ -14,7 +14,6 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	if (vaultPath) {
 		try {
 			const stats = await fs.stat(vaultPath);
-			console.log(stats);
 			if (!stats.isDirectory()) {
 				return reply.status(400).send({ message: 'Path is not a directory' });
 			}
@@ -24,7 +23,6 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 				return reply.status(400).send({ message: 'Directory must be empty' });
 			}
 		} catch (err) {
-			console.log(err);
 			await fs.mkdir(vaultPath);
 		}
 	}

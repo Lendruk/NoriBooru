@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Button from '$lib/Button.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
+	import PenIcon from '$lib/icons/PenIcon.svelte';
+	import XIcon from '$lib/icons/XIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
@@ -63,7 +66,12 @@
 	}
 
 	async function createVault() {
-		if (!newVaultName || !newVaultPath) {
+		if (!newVaultName) {
+			createToast('Vault name cannot be empty');
+			return;
+		}
+		if (!newVaultPath) {
+			createToast('Vault path cannot be empty');
 			return;
 		}
 
@@ -73,7 +81,8 @@
 				path: newVaultPath
 			});
 			newVaultName = '';
-			newVaultPath = '';
+			newVaultPath = baseVaultDir;
+			usingCustomVaultDir = false;
 			pathMessage = '';
 			isTherePathError = false;
 			vaultCreationOpen = false;
@@ -153,15 +162,24 @@
 					</div>
 					<div class="flex flex-col gap-2">
 						<label for="vaultPath">Vault path</label>
-						<input
-							disabled={!usingCustomVaultDir}
-							class={`h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white ${!usingCustomVaultDir ? 'text-gray-600 cursor-not-allowed' : ''}`}
-							bind:value={newVaultPath}
-							name="vaultPath"
-							type="text"
-							placeholder="path..."
-							on:input={checkVaultPath}
-						/>
+						<div class="flex flex-1 w-full">
+							<input
+								disabled={!usingCustomVaultDir}
+								class={`h-[40px] outline-none w-full rounded-sm bg-surface-color indent-2  ${!usingCustomVaultDir ? 'text-gray-600 cursor-not-allowed' : ''}`}
+								bind:value={newVaultPath}
+								name="vaultPath"
+								type="text"
+								placeholder="path..."
+								on:input={checkVaultPath}
+							/>
+							<Button onClick={() => (usingCustomVaultDir = !usingCustomVaultDir)}>
+								{#if usingCustomVaultDir}
+									<XIcon class="fill-white" />
+								{:else}
+									<PenIcon class="fill-white" />
+								{/if}
+							</Button>
+						</div>
 						<div class="min-h-[30px]" style={`color:${isTherePathError ? 'red' : 'lightgreen'}`}>
 							{pathMessage}
 						</div>
