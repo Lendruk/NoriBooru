@@ -1,7 +1,8 @@
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
-import { VaultController } from '../../db/VaultController';
 import { createReadStream } from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
+import { VaultController } from '../../db/VaultController';
 
 const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { vaultId: string; fileName: string };
@@ -13,9 +14,28 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
 	const videoPath = path.join(vault.path, 'media', 'videos', fileName!);
-	const videoStream = createReadStream(videoPath);
+	const stats = await fs.stat(videoPath);
 
-	return reply.send(videoStream);
+	const range = request.headers.range;
+	if (!range) {
+		// 416 Wrong range
+		return reply.status(416).send();
+	}
+
+	const positions = range.replace(/bytes=/, '').split('-');
+	const start = parseInt(positions[0], 10);
+	const total = stats.size;
+	const end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+	const chunksize = end - start + 1;
+
+	const videoStream = createReadStream(videoPath, { start, end });
+	return reply
+		.code(206)
+		.header('Content-Range', 'bytes ' + start + '-' + end + '/' + total)
+		.header('Content-Length', chunksize)
+		.header('Content-Type', 'video/mp4')
+		.header('accept-ranges', 'bytes')
+		.send(videoStream);
 };
 
 export default {
