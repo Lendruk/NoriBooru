@@ -2,6 +2,7 @@
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
+	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
 	import ArrowRight from '../../icons/ArrowRight.svelte';
@@ -68,6 +69,12 @@
 			navHref: '/playlists',
 			icon: PlayIcon,
 			subNavPaths: ['view', /(\d)/g]
+		},
+		{
+			name: 'Settings',
+			path: '/settings',
+			navHref: '/settings',
+			icon: SettingsIcon
 		}
 	];
 
