@@ -11,6 +11,9 @@
 
 	let newVaultName = $state('');
 	let newVaultPath = $state('');
+	let baseVaultDir = $state('');
+
+	let usingCustomVaultDir = $state(false);
 	let vaultCreationOpen = $state(false);
 
 	let vaultPathCheckTimeout: NodeJS.Timeout | undefined;
@@ -26,8 +29,12 @@
 	});
 
 	async function getVaults() {
-		const fetchedVaults = await HttpService.get<Vault[]>('/vaults');
-		vaults = fetchedVaults;
+		const fetchedVaults = await HttpService.get<{ vaults: Vault[]; baseVaultDir: string }>(
+			'/vaults'
+		);
+		vaults = fetchedVaults.vaults;
+		newVaultPath = fetchedVaults.baseVaultDir;
+		baseVaultDir = fetchedVaults.baseVaultDir;
 	}
 
 	async function checkVaultPath() {
@@ -39,10 +46,10 @@
 		if (newVaultPath != '') {
 			vaultPathCheckTimeout = setTimeout(async () => {
 				try {
-					await HttpService.post<{ message: string }>('/vaults/check-path', {
+					const result = await HttpService.post<{ message: string }>('/vaults/check-path', {
 						path: newVaultPath
 					});
-					pathMessage = 'Directory is valid';
+					pathMessage = result.message;
 					isTherePathError = false;
 				} catch (error) {
 					pathMessage = (error as Error).message;
@@ -133,6 +140,12 @@
 						<input
 							class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white"
 							bind:value={newVaultName}
+							on:input={() => {
+								if (!usingCustomVaultDir) {
+									newVaultPath = `${baseVaultDir}/${newVaultName}`;
+									checkVaultPath();
+								}
+							}}
 							name="vaultName"
 							type="text"
 							placeholder="name..."
@@ -141,7 +154,8 @@
 					<div class="flex flex-col gap-2">
 						<label for="vaultPath">Vault path</label>
 						<input
-							class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white"
+							disabled={!usingCustomVaultDir}
+							class={`h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white ${!usingCustomVaultDir ? 'text-gray-600 cursor-not-allowed' : ''}`}
 							bind:value={newVaultPath}
 							name="vaultPath"
 							type="text"

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
-import path from 'path';
 import * as fs from 'fs/promises';
+import path from 'path';
 
 const checkVaultPath = async (request: FastifyRequest, reply: FastifyReply) => {
 	const body = request.body as { path: string };
@@ -15,7 +15,7 @@ const checkVaultPath = async (request: FastifyRequest, reply: FastifyReply) => {
 				return reply.status(400).send({ message: 'Directory must be empty' });
 			}
 		} catch {
-			return reply.status(400).send({ message: 'Directory does not exist' });
+			return reply.status(200).send({ message: 'A new directory will be created' });
 		}
 	} else {
 		return reply.status(400).send({ message: 'Path must be absolute' });
