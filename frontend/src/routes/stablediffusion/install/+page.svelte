@@ -3,6 +3,7 @@
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import Button from '$lib/Button.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../../store';
 	let installing = false;
 
@@ -10,7 +11,7 @@
 		installing = true;
 		if (!$vaultStore?.hasInstalledSD) {
 			await HttpService.post(`/sd/install`);
-			vaultStore.set({ ...$vaultStore!, hasInstalledSD: true });
+			VaultService.setVault({ ...$vaultStore!, hasInstalledSD: true });
 			setTimeout(() => {
 				goto('/stablediffusion/generator');
 			}, 250);

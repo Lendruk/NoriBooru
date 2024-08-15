@@ -10,7 +10,7 @@
 		"drizzle:drop:migration": "drizzle-kit drop --config=./vault.drizzle.config.ts",
 		"build": "rm -rf dist && node ./config.esbuild.mjs",
 		"build:tsc": "rm -rf dist && tsc",
-		"dev": "nodemon ./src/main.ts",
+		"dev": "nodemon ./src/main.ts --config nodemon.json",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"bump:patch": "npm version patch --git-tag-version false",

@@ -50,6 +50,11 @@
 	async function downloadCivitaiResource() {
 		isDownloadingModel = true;
 		try {
+			if (!civitaiModelLink) {
+				createToast('Invalid civitai model link');
+				return;
+			}
+
 			const handler = await HttpService.postJob<JobWebsocketEventData<null>>(
 				`/sd/civitai/download-resource`,
 				{ url: civitaiModelLink }
@@ -61,6 +66,8 @@
 					await fetchResources();
 				}
 			});
+
+			civitaiModelLink = '';
 			createToast('Request created successfully!');
 		} catch {
 		} finally {

@@ -2,7 +2,6 @@
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
-	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
 	import ArrowRight from '../../icons/ArrowRight.svelte';
@@ -72,39 +71,38 @@
 		}
 	];
 
-	onMount(() => {
-		vaultStore.subscribe((vault) => {
-			if (vault?.hasInstalledSD) {
-				stableDiffusionRoutes = [
-					{
-						icon: FolderClosedIcon,
-						name: 'Resources',
-						path: '/stablediffusion/resource-manager',
-						navHref: '/stablediffusion/resource-manager'
-					},
-					{
-						icon: PenIcon,
-						addon: SdUiStatusDisplay,
-						name: 'Generator',
-						path: '/stablediffusion/generator',
-						navHref: '/stablediffusion/generator'
-					}
-				];
-			} else {
-				stableDiffusionRoutes = [
-					{
-						icon: DownloadIcon,
-						name: 'Install',
-						path: '/stablediffusion/install',
-						navHref: '/stablediffusion/install'
-					}
-				];
-			}
-			const index = routes.findIndex((route) => route.name === 'Stable Diffusion');
-			routes[index].subRoutes = stableDiffusionRoutes;
-			routes = routes;
-		});
-	});
+	$: {
+		if ($vaultStore?.hasInstalledSD) {
+			stableDiffusionRoutes = [
+				{
+					icon: FolderClosedIcon,
+					name: 'Resources',
+					path: '/stablediffusion/resource-manager',
+					navHref: '/stablediffusion/resource-manager'
+				},
+				{
+					icon: PenIcon,
+					addon: SdUiStatusDisplay,
+					name: 'Generator',
+					path: '/stablediffusion/generator',
+					navHref: '/stablediffusion/generator'
+				}
+			];
+		} else {
+			stableDiffusionRoutes = [
+				{
+					icon: DownloadIcon,
+					name: 'Install',
+					path: '/stablediffusion/install',
+					navHref: '/stablediffusion/install'
+				}
+			];
+		}
+
+		const index = routes.findIndex((route) => route.name === 'Stable Diffusion');
+		routes[index].subRoutes = stableDiffusionRoutes;
+		routes = routes;
+	}
 
 	function isCurrentPathSelected(route: Route): boolean {
 		if ($page.url.pathname === '/') {

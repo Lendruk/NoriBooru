@@ -6,9 +6,9 @@
 	import PenIcon from '$lib/icons/PenIcon.svelte';
 	import XIcon from '$lib/icons/XIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
-	import { vaultStore } from '../../store';
 
 	let vaults: Vault[] = $state([]);
 
@@ -25,7 +25,7 @@
 
 	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
-			HttpService.clearVault();
+			VaultService.removeVault();
 			WebsocketService.unregisterWebsocket();
 		}
 		getVaults();
@@ -94,8 +94,7 @@
 	}
 
 	function publishVaultToLocalStorage(vault: Vault) {
-		localStorage.setItem('currentVault', JSON.stringify(vault));
-		vaultStore.set(vault);
+		VaultService.setVault(vault);
 		goto('/');
 		WebsocketService.registerWebsocket();
 	}

@@ -1,0 +1,4 @@
+{
+	"verbose": true,
+	"ignore": ["**/dist/**", "**/vaults/**", "database.sqlite"]
+}

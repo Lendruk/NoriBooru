@@ -4,11 +4,11 @@
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
 	import Topbar from '$lib/components/Topbar/index.svelte';
+	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import { vaultStore } from '../store';
 
 	onMount(() => {
 		document.documentElement.className = 'darkTheme';
@@ -17,7 +17,7 @@
 		if (!curVault) {
 			goto('/vaults');
 		} else {
-			vaultStore.set(JSON.parse(curVault) as Vault);
+			VaultService.setVault(JSON.parse(curVault) satisfies Vault);
 		}
 
 		WebsocketService.registerWebsocket();

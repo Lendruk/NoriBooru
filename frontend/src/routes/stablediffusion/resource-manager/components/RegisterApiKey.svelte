@@ -3,6 +3,8 @@
 	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import { VaultService } from '$lib/services/VaultService';
+	import { vaultStore } from '../../../../store';
 	import TextInput from '../../../components/TextInput.svelte';
 
 	let key: string;
@@ -14,6 +16,7 @@
 			key
 		});
 		isLoading = false;
+		VaultService.setVault({ ...$vaultStore!, civitaiApiKey: key });
 		createToast('Civitai api key registered successfully!');
 	}
 </script>
