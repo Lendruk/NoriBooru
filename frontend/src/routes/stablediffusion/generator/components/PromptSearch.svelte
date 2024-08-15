@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
 
 	export let isOpen: boolean;
 	export let onSelectPrompt: (prompt: SavedPrompt) => void | Promise<void>;

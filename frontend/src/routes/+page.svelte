@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';

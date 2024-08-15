@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../../store';

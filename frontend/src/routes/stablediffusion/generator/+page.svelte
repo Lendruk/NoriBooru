@@ -2,15 +2,16 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import Checkbox from '$lib/components/Checkbox.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
 	import SaveIcon from '$lib/icons/SaveIcon.svelte';
 	import SearchIcon from '$lib/icons/SearchIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import Tooltip from '$lib/Tooltip.svelte';
 	import type { MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
@@ -25,7 +26,6 @@
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
 	import { isSdStarting, vaultStore } from '../../../store';
-	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import ProgressTracker from './components/ProgressTracker.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';

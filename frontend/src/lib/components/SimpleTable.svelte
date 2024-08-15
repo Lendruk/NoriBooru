@@ -1,7 +1,7 @@
 <script lang="ts">
+	import ChevronDown from '../icons/ChevronDown.svelte';
+	import ChevronUp from '../icons/ChevronUp.svelte';
 	import Tooltip from './Tooltip.svelte';
-	import ChevronDown from './icons/ChevronDown.svelte';
-	import ChevronUp from './icons/ChevronUp.svelte';
 
 	type SimpleCol = {
 		key: string;

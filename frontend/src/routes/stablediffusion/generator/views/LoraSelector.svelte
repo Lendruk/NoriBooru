@@ -1,17 +1,17 @@
 <script lang="ts">
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import ImageIcon from '$lib/icons/ImageIcon.svelte';
 	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 	import UploadIcon from '$lib/icons/UploadIcon.svelte';
-	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import { onDestroy, onMount } from 'svelte';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
-	import TextInput from '../../../components/TextInput.svelte';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 
 	export let loras: SDLora[];

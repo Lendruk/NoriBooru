@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ChevronDown from './icons/ChevronDown.svelte';
-	import ChevronUp from './icons/ChevronUp.svelte';
+	import ChevronDown from '../icons/ChevronDown.svelte';
+	import ChevronUp from '../icons/ChevronUp.svelte';
 
 	export let header = '';
 	export let open = false;

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { HttpService } from './services/HttpService';
+	import { HttpService } from '../services/HttpService';
+	import type { PopulatedTag } from '../types/PopulatedTag';
 	import Tag from './Tag.svelte';
-	import type { PopulatedTag } from './types/PopulatedTag';
 
 	export let onTagSearchSubmit: (tag: PopulatedTag) => void;
 	export let onAppliedTagClick: (tag: PopulatedTag) => void;

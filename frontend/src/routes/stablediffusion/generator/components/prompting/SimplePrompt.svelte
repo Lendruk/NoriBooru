@@ -1,6 +1,6 @@
 <script lang="ts">
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
-	import LabeledComponent from '../../../../components/LabeledComponent.svelte';
 
 	export let positivePrompt: string;
 	export let negativePrompt: string;

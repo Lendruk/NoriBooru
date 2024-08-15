@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
-	import TextInput from '../../../components/TextInput.svelte';
 
 	export let sdLora: SDLora;
 	export let isOpen: boolean;

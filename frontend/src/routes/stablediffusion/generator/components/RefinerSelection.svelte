@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Select from '$lib/components/Select.svelte';
+	import SliderInput from '$lib/components/SliderInput.svelte';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import SliderInput from '../../../components/SliderInput.svelte';
 
 	export let currentCheckpoint: string;
 	export let currentRefinerCheckpoint: string;

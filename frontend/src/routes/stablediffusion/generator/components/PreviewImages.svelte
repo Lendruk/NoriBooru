@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import Tooltip from '$lib/Tooltip.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
