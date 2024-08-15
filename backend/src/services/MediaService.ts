@@ -161,8 +161,8 @@ class MediaService {
 		const metadataPayload: MediaItemMetadataSchema = {
 			id: randomUUID(),
 			mediaItem: mediaItemId,
-			width: exif['Image Width'].value,
-			height: exif['Image Height'].value,
+			width: exif['Image Width']?.value ?? 0,
+			height: exif['Image Height']?.value ?? 0,
 			cfgScale: null,
 			denoisingStrength: null,
 			loras: null,
