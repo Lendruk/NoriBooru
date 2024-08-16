@@ -4,11 +4,12 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import { createConnection } from 'net';
+import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
 import { masterDb } from '../db/master/db';
 import { Vault, vaults } from '../db/master/schema';
-import { sdCheckpoints, sdLoras } from '../db/vault/schema';
+import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
 import TagService from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
@@ -48,7 +49,7 @@ export class VaultInstance extends VaultBase {
 		);
 	}
 
-	public async install(): Promise<void> {
+	public async installSDUi(): Promise<void> {
 		if (this.hasInstalledSD) {
 			return;
 		}
@@ -68,6 +69,18 @@ export class VaultInstance extends VaultBase {
 
 			await this.startSDUi();
 		} catch (error) {
+			await masterDb.update(vaults).set({ hasInstalledSD: 0 }).where(eq(vaults.id, this.id));
+		}
+	}
+
+	public async uninstallSDUi(): Promise<void> {
+		if (this.hasInstalledSD) {
+			await this.stopSDUi();
+			await this.db.delete(sdCheckpoints);
+			await this.db.delete(sdLoras);
+			await this.db.delete(sdPrompts);
+			await this.db.delete(sdWildcards);
+			await fs.rm(path.join(this.path, 'stable-diffusion-webui'), { recursive: true, force: true });
 			await masterDb.update(vaults).set({ hasInstalledSD: 0 }).where(eq(vaults.id, this.id));
 		}
 	}
