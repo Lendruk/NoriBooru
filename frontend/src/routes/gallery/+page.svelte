@@ -457,7 +457,7 @@
 					{#if mediaItem.type === 'video'}
 						<Video
 							cssClass="bg-cover w-full h-full"
-							src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+							src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.mp4`}
 						/>
 					{/if}
 				</GalleryItem>

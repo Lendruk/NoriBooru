@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import ExifReader from 'exifreader';
+import Ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
@@ -57,6 +58,22 @@ class MediaService {
 			await sharp(filePath)
 				.jpeg({ quality: 80 })
 				.toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
+		} else if (fileType === 'video') {
+			const thumbnailPath = path.join(vault.path, 'media', 'videos', '.thumb', `${id}.mp4`);
+			const conversionPromise = new Promise((resolve, reject) => {
+				Ffmpeg(filePath)
+					.noAudio()
+					.addOutputOption('-movflags', 'frag_keyframe+empty_moov')
+					.addOutputOption('-pix_fmt', 'yuv420p')
+					.size('640x480')
+					.autoPad()
+					.withFps(24)
+					.withDuration(5)
+					.saveToFile(thumbnailPath)
+					.on('end', () => resolve(undefined))
+					.on('error', (err) => reject(err));
+			});
+			await conversionPromise;
 		}
 
 		for (const lora of loras) {

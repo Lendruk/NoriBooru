@@ -14,6 +14,7 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
 	const videoPath = path.join(vault.path, 'media', 'videos', fileName!);
+
 	const stats = await fs.stat(videoPath);
 
 	const range = request.headers.range;

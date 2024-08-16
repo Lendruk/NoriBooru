@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let src = '';
 	export let cssClass = '';
+	export let autoplay = true;
 
 	let muted = true;
 	let videoElement: HTMLVideoElement;
@@ -18,8 +19,8 @@
 
 <video
 	class={cssClass}
-	autoplay
 	loop
+	{autoplay}
 	playsinline
 	bind:this={videoElement}
 	on:focus={() => {}}

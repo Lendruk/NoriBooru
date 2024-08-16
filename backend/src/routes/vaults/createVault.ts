@@ -40,6 +40,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	await fs.mkdir(`${vaultPath}/media/images`);
 	await fs.mkdir(`${vaultPath}/media/images/.thumb`);
 	await fs.mkdir(`${vaultPath}/media/videos`);
+	await fs.mkdir(`${vaultPath}/media/videos/.thumb`);
 
 	const vaultConfig: VaultConfig = {
 		id: newVault[0].id,

@@ -1,5 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { createWriteStream } from 'fs';
+import fs from 'fs/promises';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { pipeline } from 'stream/promises';
@@ -47,25 +48,19 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				);
 
 				try {
-					// Removed video conversion for now
-					// if (fileType === 'video' && currentFileExtension !== 'mp4') {
-					// 	const conversionPromise = new Promise((resolve, reject) => {
-					// 		ffmpeg(part.file)
-					// 			.outputOptions(['-vf pad=ceil(iw/2)*2:ceil(ih/2)*2'])
-					// 			.saveToFile(finalPath)
-					// 			.outputOptions('-preset ultrafast')
-					// 			.on('end', () => resolve(undefined))
-					// 			.on('error', (err) => reject(err));
-					// 	});
-					// 	await conversionPromise;
-					// } else {
-					// }
 					await pipeline(part.file, createWriteStream(finalPath));
 
 					await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
 				} catch (error) {
 					console.log(`Failed to upload file - ${part.filename}`);
 					console.log(error);
+
+					// Cleanup any possible leftover files
+					try {
+						await fs.unlink(finalPath);
+					} catch {
+						// Nothing
+					}
 				}
 			} else if (part.fieldname === 'totalItems') {
 				updatePayload.totalFiles = Number.parseInt(part.value as string);
