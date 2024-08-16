@@ -45,7 +45,7 @@ export type MediaSearchQuery = {
 	mediaType?: MediaTypes;
 };
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 50;
 type SortMethods = 'newest' | 'oldest';
 
 const searchMediaItems = async (request: Request, reply: FastifyReply) => {

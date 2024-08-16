@@ -10,7 +10,7 @@ const stopSDUi = async (request: Request, reply: FastifyReply) => {
 
 	await vault.stopSDUi();
 
-	reply.send();
+	reply.send({ message: 'SDUi stopped successfully' });
 };
 
 export default {
