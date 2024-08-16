@@ -53,13 +53,32 @@ class MediaService {
 			await this.processMediaItemExif(vault, newMediaItem.id, exif);
 		}
 
-		// Create thumbnail in case of images
-		if (fileType === 'image') {
+		await this.generateItemThumbnail(vault, filePath, newMediaItem);
+
+		for (const lora of loras) {
+			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+		}
+
+		return newMediaItem;
+	}
+
+	public async generateItemThumbnail(
+		vault: VaultInstance,
+		filePath: string,
+		mediaItem: MediaItem
+	): Promise<void> {
+		if (mediaItem.type === 'image') {
 			await sharp(filePath)
 				.jpeg({ quality: 80 })
-				.toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
-		} else if (fileType === 'video') {
-			const thumbnailPath = path.join(vault.path, 'media', 'videos', '.thumb', `${id}.mp4`);
+				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.id}.jpg`);
+		} else if (mediaItem.type === 'video') {
+			const thumbnailPath = path.join(
+				vault.path,
+				'media',
+				'videos',
+				'.thumb',
+				`${mediaItem.fileName}.mp4`
+			);
 			const conversionPromise = new Promise((resolve, reject) => {
 				Ffmpeg(filePath)
 					.noAudio()
@@ -75,12 +94,6 @@ class MediaService {
 			});
 			await conversionPromise;
 		}
-
-		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
-		}
-
-		return newMediaItem;
 	}
 
 	public async createImageFromBase64(
