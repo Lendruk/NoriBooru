@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
@@ -18,10 +20,13 @@
 
 	let usingCustomVaultDir = $state(false);
 	let vaultCreationOpen = $state(false);
+	let vaultImportOpen = $state(false);
 
 	let vaultPathCheckTimeout: NodeJS.Timeout | undefined;
 	let pathMessage = $state('');
 	let isTherePathError = $state(false);
+
+	let vaultImportPath = $state('');
 
 	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
@@ -40,17 +45,18 @@
 		baseVaultDir = fetchedVaults.baseVaultDir;
 	}
 
-	async function checkVaultPath() {
+	async function checkVaultPath(path: string, checkingForExistingVault?: boolean) {
 		if (vaultPathCheckTimeout) {
 			clearTimeout(vaultPathCheckTimeout);
 			vaultPathCheckTimeout = undefined;
 		}
 
-		if (newVaultPath != '') {
+		if (path != '') {
 			vaultPathCheckTimeout = setTimeout(async () => {
 				try {
 					const result = await HttpService.post<{ message: string }>('/vaults/check-path', {
-						path: newVaultPath
+						path,
+						checkingForExistingVault
 					});
 					pathMessage = result.message;
 					isTherePathError = false;
@@ -93,6 +99,24 @@
 		}
 	}
 
+	async function importVault() {
+		if (!vaultImportPath) {
+			createToast('Vault path cannot be empty');
+			return;
+		}
+
+		try {
+			const importedVault = await HttpService.post<Vault>(`/vaults/import`, {
+				path: vaultImportPath
+			});
+			vaultImportOpen = false;
+			vaults.push(importedVault);
+			createToast('Vault imported successfully!');
+		} catch {
+			createToast('Vault import failed');
+		}
+	}
+
 	function publishVaultToLocalStorage(vault: Vault) {
 		VaultService.setVault(vault);
 		goto('/');
@@ -127,15 +151,22 @@
 	<div class="flex flex-col rounded-tr-sm rounded-br-sm bg-zinc-900 h-full w-[60%]">
 		<h1 class="text-3xl mb-5 flex self-center mt-4">NoriBooru</h1>
 
-		{#if !vaultCreationOpen}
+		{#if !vaultCreationOpen && !vaultImportOpen}
 			<div class="flex p-4 justify-between">
 				<div class="flex flex-col">
-					<div>Create a media vault</div>
+					<div class="font-semibold">Create a media vault</div>
 					<div class="text-xs">Create a new media vault in a directory of your choice</div>
 				</div>
 				<Button onClick={() => (vaultCreationOpen = true)}>Create</Button>
 			</div>
-		{:else}
+			<div class="flex p-4 justify-between">
+				<div class="flex flex-col">
+					<div class="font-semibold">Import a media vault</div>
+					<div class="text-xs">Import an already existing nori-booru vault</div>
+				</div>
+				<Button onClick={() => (vaultImportOpen = true)}>Import</Button>
+			</div>
+		{:else if vaultCreationOpen}
 			<div class={`flex flex-col p-4 w-[80%] self-center overflow-scroll`}>
 				<button
 					class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent"
@@ -151,7 +182,7 @@
 							on:input={() => {
 								if (!usingCustomVaultDir) {
 									newVaultPath = `${baseVaultDir}/${newVaultName}`;
-									checkVaultPath();
+									checkVaultPath(newVaultPath);
 								}
 							}}
 							name="vaultName"
@@ -169,7 +200,7 @@
 								name="vaultPath"
 								type="text"
 								placeholder="path..."
-								on:input={checkVaultPath}
+								on:input={() => checkVaultPath(newVaultPath)}
 							/>
 							<Button onClick={() => (usingCustomVaultDir = !usingCustomVaultDir)}>
 								{#if usingCustomVaultDir}
@@ -185,6 +216,27 @@
 					</div>
 				</div>
 				<Button class="w-[100px] h-[40px] self-end" onClick={createVault}>Create</Button>
+			</div>
+		{:else if vaultImportOpen}
+			<div class={`flex flex-col p-4 w-[80%] self-center overflow-scroll`}>
+				<button
+					class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent"
+					on:click={() => (vaultImportOpen = false)}
+					><ArrowLeft class="fill-inherit" /> Back
+				</button>
+				<LabeledComponent>
+					<div slot="label">Path</div>
+					<TextInput
+						slot="content"
+						on:input={() => checkVaultPath(vaultImportPath, true)}
+						placeholder="Path to vault"
+						bind:value={vaultImportPath}
+					/>
+				</LabeledComponent>
+				<div class="min-h-[30px]" style={`color:${isTherePathError ? 'red' : 'lightgreen'}`}>
+					{pathMessage}
+				</div>
+				<Button class="w-[100px] h-[40px] self-end" onClick={importVault}>Import</Button>
 			</div>
 		{/if}
 	</div>

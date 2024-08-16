@@ -19,7 +19,7 @@
 			return;
 		}
 
-		await HttpService.put(`/vaults/${$vaultStore?.id}`, {
+		await HttpService.put(`/vaults`, {
 			name: vaultName
 		});
 		VaultService.setVault({ ...$vaultStore!, name: vaultName });

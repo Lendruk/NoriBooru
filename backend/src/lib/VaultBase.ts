@@ -2,26 +2,27 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import fs from 'fs/promises';
 import WebSocket from 'ws';
-import type { Vault } from '../db/master/schema';
 import * as vaultSchema from '../db/vault/schema';
+import { VaultConfig } from '../types/VaultConfig';
 import { WebSocketEvent } from '../types/WebSocketEvent';
 import { Job, JobAction, JobTag } from './Job';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export abstract class VaultBase implements Vault {
+export abstract class VaultBase implements VaultConfig {
 	public id: string;
-	public name: string | null;
+	public name: string;
 	public path: string;
 	public createdAt: number;
-	public hasInstalledSD: number;
+	public hasInstalledSD: boolean;
 	public db: VaultDb;
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
 	private jobs: Map<string, Job> = new Map();
 
-	public constructor(vault: Vault) {
+	public constructor(vault: VaultConfig) {
 		this.id = vault.id;
 		this.name = vault.name;
 		this.path = vault.path;
@@ -117,5 +118,23 @@ export abstract class VaultBase implements Vault {
 		}
 
 		job.isRunning = false;
+	}
+
+	public async saveConfig(): Promise<void> {
+		await fs.writeFile(
+			`${this.path}/vault.config.json`,
+			JSON.stringify(
+				{
+					id: this.id,
+					name: this.name,
+					path: this.path,
+					createdAt: this.createdAt,
+					hasInstalledSD: this.hasInstalledSD,
+					civitaiApiKey: this.civitaiApiKey
+				} satisfies VaultConfig,
+				null,
+				2
+			)
+		);
 	}
 }

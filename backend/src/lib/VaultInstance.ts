@@ -7,12 +7,11 @@ import { createConnection } from 'net';
 import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
-import { masterDb } from '../db/master/db';
-import { Vault, vaults } from '../db/master/schema';
 import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
 import TagService from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
+import { VaultConfig } from '../types/VaultConfig';
 import { VaultBase } from './VaultBase';
 
 const execAsync = promisify(exec);
@@ -34,7 +33,7 @@ export class VaultInstance extends VaultBase {
 		'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
 	private static readonly PROCESS_INACTIVE_TTL = 60 * 1000 * 10; // 10 Minutes
 
-	public constructor(vault: Vault) {
+	public constructor(vault: VaultConfig) {
 		super(vault);
 	}
 
@@ -49,6 +48,27 @@ export class VaultInstance extends VaultBase {
 		);
 	}
 
+	public getConfig(): VaultConfig {
+		return {
+			id: this.id,
+			name: this.name,
+			path: this.path,
+			createdAt: this.createdAt,
+			hasInstalledSD: this.hasInstalledSD,
+			civitaiApiKey: this.civitaiApiKey
+		};
+	}
+
+	public async setName(name: string): Promise<void> {
+		this.name = name;
+		await this.saveConfig();
+	}
+
+	public async setCivitaiApiKey(key: string): Promise<void> {
+		this.civitaiApiKey = key;
+		await this.saveConfig();
+	}
+
 	public async installSDUi(): Promise<void> {
 		if (this.hasInstalledSD) {
 			return;
@@ -59,8 +79,7 @@ export class VaultInstance extends VaultBase {
 				`bash ./scripts/installAutomatic.sh ${this.path} ${VaultInstance.SD_UI_LINK}`
 			);
 
-			await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, this.id));
-
+			this.hasInstalledSD = true;
 			if (!(await TagService.doesTagExist(this, 'AI'))) {
 				await TagService.createTag(this, 'AI', '#3264a8');
 			}
@@ -69,7 +88,9 @@ export class VaultInstance extends VaultBase {
 
 			await this.startSDUi();
 		} catch (error) {
-			await masterDb.update(vaults).set({ hasInstalledSD: 0 }).where(eq(vaults.id, this.id));
+			this.hasInstalledSD = false;
+		} finally {
+			await this.saveConfig();
 		}
 	}
 
@@ -81,7 +102,8 @@ export class VaultInstance extends VaultBase {
 			await this.db.delete(sdPrompts);
 			await this.db.delete(sdWildcards);
 			await fs.rm(path.join(this.path, 'stable-diffusion-webui'), { recursive: true, force: true });
-			await masterDb.update(vaults).set({ hasInstalledSD: 0 }).where(eq(vaults.id, this.id));
+			this.hasInstalledSD = false;
+			await this.saveConfig();
 		}
 	}
 

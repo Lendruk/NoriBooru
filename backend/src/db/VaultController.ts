@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import fs from 'fs/promises';
 import { VaultInstance } from '../lib/VaultInstance';
+import { VaultConfig } from '../types/VaultConfig';
 import { masterDb } from './master/db';
 import { vaults, type Vault } from './master/schema';
 import * as vaultSchema from './vault/schema';
@@ -22,7 +24,10 @@ export class VaultController {
 			vault = result;
 		}
 
-		const vaultInstance = new VaultInstance(vault);
+		const vaultConfig = JSON.parse(
+			(await fs.readFile(`${vault.path}/vault.config.json`)).toString()
+		) as VaultConfig;
+		const vaultInstance = new VaultInstance(vaultConfig);
 		await vaultInstance.init();
 		this.vaults.set(vault.id, vaultInstance);
 		return vaultInstance;

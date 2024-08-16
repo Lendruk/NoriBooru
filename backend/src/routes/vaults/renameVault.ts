@@ -1,23 +1,23 @@
-import { eq } from 'drizzle-orm';
-import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
-import { masterDb } from '../../db/master/db';
-import { vaults } from '../../db/master/schema';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
-const renameVault = async (request: FastifyRequest, reply: FastifyReply) => {
+const renameVault = async (request: Request, reply: FastifyReply) => {
 	const body = request.body as { name: string };
-	const params = request.params as { id: string };
+	const { vault } = request;
 
-	const updatedVault = await masterDb
-		.update(vaults)
-		.set({ name: body.name })
-		.where(eq(vaults.id, params.id))
-		.returning();
+	if (!vault) {
+		return reply.status(400).send('No vault provided');
+	}
 
-	return reply.send(updatedVault[0]);
+	await vault.setName(body.name);
+
+	return reply.send(vault.getConfig());
 };
 
 export default {
 	method: 'PUT',
-	url: '/vaults/:id',
+	url: '/vaults',
+	onRequest: checkVault,
 	handler: renameVault
 } as RouteOptions;

@@ -4,6 +4,7 @@ import * as fs from 'fs/promises';
 import { masterDb } from '../../db/master/db';
 import { vaults } from '../../db/master/schema';
 import { VaultController } from '../../db/VaultController';
+import { VaultConfig } from '../../types/VaultConfig';
 import { getServerConfig } from '../../utils/getServerConfig';
 
 const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -31,8 +32,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 		.insert(vaults)
 		.values({
 			id: randomUUID(),
-			path: body.path ?? (await getServerConfig()).baseVaultDir,
-			name: body.name
+			path: body.path ?? (await getServerConfig()).baseVaultDir
 		})
 		.returning();
 
@@ -40,8 +40,18 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	await fs.mkdir(`${vaultPath}/media/images`);
 	await fs.mkdir(`${vaultPath}/media/images/.thumb`);
 	await fs.mkdir(`${vaultPath}/media/videos`);
-	VaultController.registerVault(newVault[0]);
-	return reply.send(newVault[0]);
+
+	const vaultConfig: VaultConfig = {
+		id: newVault[0].id,
+		name: body.name,
+		path: vaultPath,
+		createdAt: Date.now(),
+		hasInstalledSD: false,
+		civitaiApiKey: null
+	};
+	await fs.writeFile(`${vaultPath}/vault.config.json`, JSON.stringify(vaultConfig, null, 2));
+	await VaultController.registerVault(newVault[0]);
+	return reply.send(vaultConfig);
 };
 
 export default {
