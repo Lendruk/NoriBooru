@@ -2,15 +2,11 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import { createWriteStream } from 'fs';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import util from 'node:util';
+import { pipeline } from 'stream/promises';
 import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../lib/Job';
 import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
-import { pause } from '../../utils/pause';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { pipeline } = require('node:stream');
-const pump = util.promisify(pipeline);
 
 type MediaItemJobUpdatePayload = {
 	totalFiles: number;
@@ -25,20 +21,20 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	const mediaImportJob = new Job('media-import', 'Media import', async (emitter) => {
+	const mediaImportJob = new Job('media-import', 'Media import', async (job) => {
 		const parts = request.parts();
 		const updatePayload: MediaItemJobUpdatePayload = {
 			totalFiles: 0,
 			currentFileIndex: 0,
 			currentFileName: ''
 		};
-		emitter.emit('update', updatePayload);
+		job.setData(updatePayload);
+
 		for await (const part of parts) {
 			if (part.type === 'file') {
 				updatePayload.currentFileIndex++;
 				updatePayload.currentFileName = part.filename;
-				await pause(3500);
-				emitter.emit('update', updatePayload);
+				job.setData(updatePayload);
 				const id = randomUUID();
 				const fileType = part.mimetype.includes('image') ? 'image' : 'video';
 				const currentFileExtension = part.mimetype.split('/')[1];
@@ -64,7 +60,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 					// 	await conversionPromise;
 					// } else {
 					// }
-					await pump(part.file, createWriteStream(finalPath));
+					await pipeline(part.file, createWriteStream(finalPath));
 
 					await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
 				} catch (error) {

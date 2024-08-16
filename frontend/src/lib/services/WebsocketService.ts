@@ -1,3 +1,6 @@
+import { RunningJob } from '$lib/types/RunningJob';
+import { pause } from '$lib/utils/time';
+import { get } from 'svelte/store';
 import { runningJobs, sdUiStatus } from '../../store';
 import { HttpService } from './HttpService';
 
@@ -18,7 +21,18 @@ export type JobWebsocketEventData<T = Record<string, unknown>> = {
 	payload: T;
 };
 
+type CurrentJobsEventData = {
+	jobs: {
+		id: string;
+		name: string;
+		tag: string;
+		runtimeData: Record<string, unknown>;
+	}[];
+};
+
 export class WebsocketService {
+	private static isProcessingMessage = false;
+	private static messageQueue: MessageEvent[] = [];
 	public static BASE_WEBSOCKET_URL = `ws://localhost:8080`;
 	public static socket: WebSocket | undefined;
 
@@ -33,34 +47,11 @@ export class WebsocketService {
 				);
 			});
 
-			WebsocketService.socket.addEventListener('message', (message) => {
-				console.log(message.data);
-				const parsedMessage = JSON.parse(message.data) as WebSocketEvent;
-				if (parsedMessage.event === 'SD') {
-					sdUiStatus.set((parsedMessage.data as SDWebsocketEventData).status);
-				} else if (parsedMessage.event === 'job-update') {
-					const update = parsedMessage.data as JobWebsocketEventData;
-
-					runningJobs.update((jobs) => {
-						const index = jobs.findIndex((job) => job.id === update.id);
-						if (index !== -1) {
-							jobs[index].name = update.name;
-							jobs[index].tag = update.tag;
-							jobs[index].data = update.payload;
-							jobs[index].next({ event: 'job-update', data: update.payload });
-						}
-						return jobs;
-					});
-				} else if (parsedMessage.event === 'job-done') {
-					const jobDoneEvent = parsedMessage.data as JobWebsocketEventData;
-					runningJobs.update((jobs) => {
-						const index = jobs.findIndex((job) => job.id === jobDoneEvent.id);
-						if (index !== -1) {
-							jobs[index].next({ event: 'job-done', data: jobDoneEvent.payload });
-							jobs.splice(index, 1);
-						}
-						return jobs;
-					});
+			WebsocketService.socket.addEventListener('message', async (message) => {
+				WebsocketService.messageQueue.push(message);
+				if (!WebsocketService.isProcessingMessage) {
+					WebsocketService.isProcessingMessage = true;
+					await WebsocketService.processWebsocketMessages();
 				}
 			});
 
@@ -71,6 +62,61 @@ export class WebsocketService {
 		}
 	}
 
+	private static async processWebsocketMessages() {
+		WebsocketService.isProcessingMessage = true;
+		const message = WebsocketService.messageQueue.shift()!;
+		console.log(message);
+		const parsedMessage = JSON.parse(message.data) as WebSocketEvent;
+		switch (parsedMessage.event) {
+			case 'SD':
+				sdUiStatus.set((parsedMessage.data as SDWebsocketEventData).status);
+				break;
+			case 'current-jobs': {
+				runningJobs.set(
+					(parsedMessage.data as CurrentJobsEventData).jobs.map(
+						(job) => new RunningJob(job.id, job.name, job.tag, job.runtimeData)
+					)
+				);
+				break;
+			}
+			case 'job-update': {
+				const update = parsedMessage.data as JobWebsocketEventData;
+				runningJobs.update((jobs) => {
+					const index = jobs.findIndex((job) => job.id === update.id);
+					if (index !== -1) {
+						jobs[index].name = update.name;
+						jobs[index].tag = update.tag;
+						jobs[index].data = update.payload;
+						jobs[index].next({ event: 'job-update', data: update.payload });
+					} else {
+						jobs.push(new RunningJob(update.id, update.name, update.tag, update.payload));
+					}
+					return jobs;
+				});
+				await pause(250);
+				break;
+			}
+			case 'job-done': {
+				const jobDoneEvent = parsedMessage.data as JobWebsocketEventData;
+				const jobs = get(runningJobs);
+
+				const index = jobs.findIndex((job) => job.id === jobDoneEvent.id);
+				if (index !== -1) {
+					const job = jobs[index];
+					job.next({ event: 'job-done', data: jobDoneEvent.payload });
+					jobs.splice(index, 1);
+				}
+
+				runningJobs.set(jobs);
+				break;
+			}
+		}
+
+		if (WebsocketService.messageQueue.length > 0) {
+			await WebsocketService.processWebsocketMessages();
+		}
+		WebsocketService.isProcessingMessage = false;
+	}
 	public static unregisterWebsocket(): void {
 		if (WebsocketService.socket) {
 			WebsocketService.socket.close();

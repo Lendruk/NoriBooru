@@ -21,21 +21,15 @@
 	async function uploadMedia() {
 		if (previewFiles.length > 0) {
 			const formData = new FormData();
-			formData.append('totalItems', previewFiles.length.toString());
+			formData.append(`${previewFiles.length.toString()}`, previewFiles.length.toString());
 			for (let i = 0; i < previewFiles.length; i++) {
 				formData.append(`image-${i}`, previewFiles[i].originalFile);
 			}
 
-			const handler = await HttpService.postJob<JobWebsocketEventData<MediaUploadJobUpdatePayload>>(
+			void HttpService.postJob<JobWebsocketEventData<MediaUploadJobUpdatePayload>>(
 				'/mediaItems',
 				formData
 			);
-
-			handler.subscribe((data) => {
-				if (data.event === 'job-done') {
-					createToast('Media uploaded successfully!');
-				}
-			});
 			createToast('Request created successfully!');
 			previewFiles = [];
 		}
@@ -70,6 +64,9 @@
 				>
 					Browse
 				</label>
+				{#if previewFiles.length > 0}
+					<Button class="h-[40px] min-w-[150px]" onClick={uploadMedia}>Upload Media</Button>
+				{/if}
 			</div>
 			<input id="fileUpload" class="hidden" type="file" on:change={createPreviewImages} multiple />
 		</div>
@@ -95,7 +92,6 @@
 						</div>
 					{/each}
 				</div>
-				<Button class="h-[40px]" onClick={uploadMedia}>Upload Media</Button>
 			</div>
 		{/if}
 	</div>

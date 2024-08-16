@@ -83,7 +83,6 @@
 						class="h-[40px] w-full"
 						bind:value={selectedCheckpoint}
 						bind:isLoading={isUnloadingCheckpoint}
-						on:change={unloadCheckpoints}
 					>
 						{#each checkpoints as checkpoint}
 							<option value={checkpoint.id}>{checkpoint.name}</option>

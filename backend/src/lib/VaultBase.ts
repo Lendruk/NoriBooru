@@ -41,6 +41,13 @@ export abstract class VaultBase implements VaultConfig {
 
 	public registerWebsocketConnection(socket: WebSocket): void {
 		this.sockets.add(socket);
+
+		if (this.jobs.size > 0) {
+			this.broadcastEvent({
+				event: 'current-jobs',
+				data: { jobs: Array.from(this.jobs.values()) }
+			});
+		}
 		socket.on('close', () => {
 			this.sockets.delete(socket);
 		});
@@ -66,18 +73,6 @@ export abstract class VaultBase implements VaultConfig {
 			const job = this.jobs.get(jobId)!;
 			if (!job.isRunning) {
 				job.isRunning = true;
-				job.on('update', (payload: unknown) => {
-					console.log(payload);
-					this.broadcastEvent({
-						event: 'job-update',
-						data: {
-							id: job.id,
-							name: job.name,
-							tag: job.tag,
-							payload
-						}
-					});
-				});
 				void this.runWrappedJob(job);
 			}
 		}
@@ -99,8 +94,19 @@ export abstract class VaultBase implements VaultConfig {
 
 	private async runWrappedJob(job: Job): Promise<void> {
 		job.isRunning = true;
-
+		let handler: NodeJS.Timeout;
 		try {
+			handler = setInterval(() => {
+				this.broadcastEvent({
+					event: 'job-update',
+					data: {
+						id: job.id,
+						name: job.name,
+						tag: job.tag,
+						payload: job.runtimeData
+					}
+				});
+			}, job.updateEvery);
 			const result = await job.action(job);
 			// If the job was cancelled in the meantime, we won't emit a job complete event
 			if (job.isRunning) {
@@ -114,7 +120,15 @@ export abstract class VaultBase implements VaultConfig {
 				this.unregisterJob(job.id);
 			}
 		} catch (error) {
-			job.emit('job-execution-error', { id: job.id, error: (error as Error).message });
+			this.broadcastEvent({
+				event: 'job-execution-error',
+				data: {
+					id: job.id,
+					error: (error as Error).message
+				}
+			});
+		} finally {
+			clearInterval(handler!);
 		}
 
 		job.isRunning = false;
