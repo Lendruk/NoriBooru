@@ -39,8 +39,7 @@ class MediaService {
 			.insert(mediaItems)
 			.values({
 				fileName: id,
-				extension: fileType === 'image' ? 'png' : 'mp4',
-				// exif: JSON.stringify(exif),
+				extension: fileType === 'image' ? 'png' : filePath.split('.').pop()!,
 				type: fileType,
 				createdAt: Date.now(),
 				hash: hexHash,

@@ -1,5 +1,4 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import ffmpeg from 'fluent-ffmpeg';
 import { createWriteStream } from 'fs';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
@@ -43,7 +42,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				const id = randomUUID();
 				const fileType = part.mimetype.includes('image') ? 'image' : 'video';
 				const currentFileExtension = part.mimetype.split('/')[1];
-				const finalExtension = fileType === 'image' ? 'png' : 'mp4';
+				const finalExtension = fileType === 'image' ? 'png' : currentFileExtension;
 				const finalPath = path.join(
 					vault.path,
 					'media',
@@ -52,17 +51,20 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				);
 
 				try {
-					if (fileType === 'video' && currentFileExtension !== 'mp4') {
-						const conversionPromise = new Promise((resolve, reject) => {
-							ffmpeg(part.file)
-								.saveToFile(finalPath)
-								.on('end', () => resolve(undefined))
-								.on('error', (err) => reject(err));
-						});
-						await conversionPromise;
-					} else {
-						await pump(part.file, createWriteStream(finalPath));
-					}
+					// Removed video conversion for now
+					// if (fileType === 'video' && currentFileExtension !== 'mp4') {
+					// 	const conversionPromise = new Promise((resolve, reject) => {
+					// 		ffmpeg(part.file)
+					// 			.outputOptions(['-vf pad=ceil(iw/2)*2:ceil(ih/2)*2'])
+					// 			.saveToFile(finalPath)
+					// 			.outputOptions('-preset ultrafast')
+					// 			.on('end', () => resolve(undefined))
+					// 			.on('error', (err) => reject(err));
+					// 	});
+					// 	await conversionPromise;
+					// } else {
+					// }
+					await pump(part.file, createWriteStream(finalPath));
 
 					await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
 				} catch (error) {

@@ -28,12 +28,12 @@ const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	const end = positions[1] ? parseInt(positions[1], 10) : total - 1;
 	const chunksize = end - start + 1;
 
-	const videoStream = createReadStream(videoPath, { start, end });
+	const videoStream = createReadStream(videoPath, { start, end: end === total - 1 ? total : end });
 	return reply
 		.code(206)
-		.header('Content-Range', 'bytes ' + start + '-' + end + '/' + total)
+		.header('Content-Range', `bytes ${start}-${end}/${total}`)
 		.header('Content-Length', chunksize)
-		.header('Content-Type', 'video/mp4')
+		.header('Content-Type', `video/${videoPath.split('.').pop()!}`)
 		.header('accept-ranges', 'bytes')
 		.send(videoStream);
 };
