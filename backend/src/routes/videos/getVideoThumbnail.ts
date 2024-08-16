@@ -1,4 +1,3 @@
-import console from 'console';
 import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import * as fs from 'fs/promises';
@@ -28,10 +27,14 @@ const getVideoThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 				where: eq(mediaItems.fileName, fileName.split('.')[0])
 			});
 
-			console.log(fileName);
-			console.log(item);
 			if (item) {
-				await mediaService.generateItemThumbnail(vault, thumbnailPath.replace('.thumb/', ''), item);
+				const filePath = path.join(
+					vault.path,
+					'media',
+					'videos',
+					`${item.fileName}.${item.extension}`
+				);
+				await mediaService.generateItemThumbnail(vault, filePath, item);
 				video = await fs.readFile(thumbnailPath);
 			}
 		}
