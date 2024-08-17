@@ -70,7 +70,7 @@ class MediaService {
 		if (mediaItem.type === 'image') {
 			await sharp(filePath)
 				.jpeg({ quality: 80 })
-				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.id}.jpg`);
+				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
 		} else if (mediaItem.type === 'video') {
 			const thumbnailPath = path.join(
 				vault.path,
