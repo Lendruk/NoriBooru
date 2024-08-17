@@ -1,3 +1,21 @@
+<script context="module" lang="ts">
+	export type SortMethod = 'newest' | 'oldest';
+	export type MediaType = 'ALL' | 'IMAGES' | 'VIDEOS';
+	export type CombinationalLogicType = 'AND' | 'OR';
+	export type MediaTypes = 'ALL' | 'IMAGES' | 'VIDEOS';
+
+	export type GalleryQuery = {
+		positiveTags: PopulatedTag[];
+		negativeTags: PopulatedTag[];
+		sortMethod: SortMethod;
+		page: number;
+		inbox: boolean;
+		positiveQueryType: CombinationalLogicType;
+		negativeQueryType: CombinationalLogicType;
+		mediaType: MediaTypes;
+	};
+</script>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -22,18 +40,14 @@
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
-	type SortMethod = 'newest' | 'oldest';
-	type MediaType = 'ALL' | 'IMAGES' | 'VIDEOS';
-	type CombinationalLogicType = 'AND' | 'OR';
-
 	let mediaItems: MediaItem[] = [];
 	let appliedPositiveTags: PopulatedTag[] = [];
-	let positiveQueryType: 'AND' | 'OR' = 'AND';
+	let positiveQueryType: CombinationalLogicType = 'AND';
 	let appliedNegativeTags: PopulatedTag[] = [];
-	let negativeQueryType: 'AND' | 'OR' = 'AND';
+	let negativeQueryType: CombinationalLogicType = 'AND';
 	let tags: PopulatedTag[] = [];
 	let sortMethod: SortMethod = 'newest';
-	let mediaType: 'ALL' | 'VIDEOS' | 'IMAGES' = 'ALL';
+	let mediaType: MediaTypes = 'ALL';
 	let showMediaTagEditModal = false;
 	let showMassTagEditModal = false;
 	let currentPage = 0;
@@ -78,6 +92,9 @@
 				isInbox = false;
 			}
 
+			if (!isInbox) {
+				searchParams.delete('inbox');
+			}
 			selectedItems = new Map();
 			currentPage = 0;
 			mediaItems = [];
