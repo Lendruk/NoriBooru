@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import Modal from '$lib/Modal.svelte';
-	import Tag from '$lib/Tag.svelte';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import Tag from '$lib/components/Tag.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	let tagName = $state('');

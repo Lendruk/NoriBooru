@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { MouseEventHandler } from 'svelte/elements';
-	import ArrowRight from './icons/ArrowRight.svelte';
-	import EditIcon from './icons/editIcon.svelte';
-	import type { PopulatedTag } from './types/PopulatedTag';
+	import ArrowRight from '../icons/ArrowRight.svelte';
+	import EditIcon from '../icons/editIcon.svelte';
+	import type { PopulatedTag } from '../types/PopulatedTag';
 
 	export let tag: PopulatedTag;
 	export let onDelete: MouseEventHandler<HTMLButtonElement> | undefined = undefined;

@@ -1,18 +1,18 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
-	import LabeledComponent from '../../components/LabeledComponent.svelte';
-	import TextInput from '../../components/TextInput.svelte';
 	import CheckpointEdit from './components/CheckpointEdit.svelte';
 	import LoraEdit from './components/LoraEdit.svelte';
 	import RegisterApiKey from './components/RegisterApiKey.svelte';
@@ -50,6 +50,11 @@
 	async function downloadCivitaiResource() {
 		isDownloadingModel = true;
 		try {
+			if (!civitaiModelLink) {
+				createToast('Invalid civitai model link');
+				return;
+			}
+
 			const handler = await HttpService.postJob<JobWebsocketEventData<null>>(
 				`/sd/civitai/download-resource`,
 				{ url: civitaiModelLink }
@@ -61,6 +66,8 @@
 					await fetchResources();
 				}
 			});
+
+			civitaiModelLink = '';
 			createToast('Request created successfully!');
 		} catch {
 		} finally {

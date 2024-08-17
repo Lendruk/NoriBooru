@@ -1,13 +1,13 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import EditIcon from '$lib/icons/editIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import SimpleTable from '$lib/SimpleTable.svelte';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
 
 	export let wildcards: SDWildcard[];
 	let isWildcardModalOpen = false;

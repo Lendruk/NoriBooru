@@ -2,26 +2,27 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import fs from 'fs/promises';
 import WebSocket from 'ws';
-import type { Vault } from '../db/master/schema';
 import * as vaultSchema from '../db/vault/schema';
+import { VaultConfig } from '../types/VaultConfig';
 import { WebSocketEvent } from '../types/WebSocketEvent';
 import { Job, JobAction, JobTag } from './Job';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export abstract class VaultBase implements Vault {
+export abstract class VaultBase implements VaultConfig {
 	public id: string;
-	public name: string | null;
+	public name: string;
 	public path: string;
 	public createdAt: number;
-	public hasInstalledSD: number;
+	public hasInstalledSD: boolean;
 	public db: VaultDb;
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
 	private jobs: Map<string, Job> = new Map();
 
-	public constructor(vault: Vault) {
+	public constructor(vault: VaultConfig) {
 		this.id = vault.id;
 		this.name = vault.name;
 		this.path = vault.path;
@@ -40,6 +41,13 @@ export abstract class VaultBase implements Vault {
 
 	public registerWebsocketConnection(socket: WebSocket): void {
 		this.sockets.add(socket);
+
+		if (this.jobs.size > 0) {
+			this.broadcastEvent({
+				event: 'current-jobs',
+				data: { jobs: Array.from(this.jobs.values()) }
+			});
+		}
 		socket.on('close', () => {
 			this.sockets.delete(socket);
 		});
@@ -65,18 +73,6 @@ export abstract class VaultBase implements Vault {
 			const job = this.jobs.get(jobId)!;
 			if (!job.isRunning) {
 				job.isRunning = true;
-				job.on('update', (payload: unknown) => {
-					console.log(payload);
-					this.broadcastEvent({
-						event: 'job-update',
-						data: {
-							id: job.id,
-							name: job.name,
-							tag: job.tag,
-							payload
-						}
-					});
-				});
 				void this.runWrappedJob(job);
 			}
 		}
@@ -98,8 +94,19 @@ export abstract class VaultBase implements Vault {
 
 	private async runWrappedJob(job: Job): Promise<void> {
 		job.isRunning = true;
-
+		let handler: NodeJS.Timeout;
 		try {
+			handler = setInterval(() => {
+				this.broadcastEvent({
+					event: 'job-update',
+					data: {
+						id: job.id,
+						name: job.name,
+						tag: job.tag,
+						payload: job.runtimeData
+					}
+				});
+			}, job.updateEvery);
 			const result = await job.action(job);
 			// If the job was cancelled in the meantime, we won't emit a job complete event
 			if (job.isRunning) {
@@ -113,9 +120,35 @@ export abstract class VaultBase implements Vault {
 				this.unregisterJob(job.id);
 			}
 		} catch (error) {
-			job.emit('job-execution-error', { id: job.id, error: (error as Error).message });
+			this.broadcastEvent({
+				event: 'job-execution-error',
+				data: {
+					id: job.id,
+					error: (error as Error).message
+				}
+			});
+		} finally {
+			clearInterval(handler!);
 		}
 
 		job.isRunning = false;
+	}
+
+	public async saveConfig(): Promise<void> {
+		await fs.writeFile(
+			`${this.path}/vault.config.json`,
+			JSON.stringify(
+				{
+					id: this.id,
+					name: this.name,
+					path: this.path,
+					createdAt: this.createdAt,
+					hasInstalledSD: this.hasInstalledSD,
+					civitaiApiKey: this.civitaiApiKey
+				} satisfies VaultConfig,
+				null,
+				2
+			)
+		);
 	}
 }

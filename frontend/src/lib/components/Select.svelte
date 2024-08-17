@@ -1,6 +1,6 @@
 <script lang="ts">
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import LoadingSpinner from '../../routes/components/LoadingSpinner.svelte';
 	export { cssClass as class };
 	let cssClass = '';
 

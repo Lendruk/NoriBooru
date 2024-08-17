@@ -1,14 +1,14 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import TextArea from '$lib/components/TextArea.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
-	import LoadingSpinner from '../../../components/LoadingSpinner.svelte';
-	import TextInput from '../../../components/TextInput.svelte';
 
 	export let checkpoint: SDCheckpoint;
 	export let isOpen: boolean;

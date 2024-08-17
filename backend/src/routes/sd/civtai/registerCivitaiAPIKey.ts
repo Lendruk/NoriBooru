@@ -1,7 +1,4 @@
-import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { masterDb } from '../../../db/master/db';
-import { vaults } from '../../../db/master/schema';
 import { checkVault } from '../../../hooks/checkVault';
 import { Request } from '../../../types/Request';
 
@@ -12,12 +9,12 @@ const registerCivitaiAPIKey = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { key } = request.body as { key: string };
-  
+
 	if (key) {
-		await masterDb.update(vaults).set({ civitaiApiKey: key }).where(eq(vaults.id, vault.id));
+		await vault.setCivitaiApiKey(key);
 	}
 
-	reply.send({message: 'API key registered successfully'});
+	reply.send({ message: 'API key registered successfully' });
 };
 
 export default {

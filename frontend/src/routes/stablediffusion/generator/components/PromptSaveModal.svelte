@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import LabeledComponent from '../../../components/LabeledComponent.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 
 	export let isOpen: boolean;
 	export let onSubmit: (name: string) => void | Promise<void>;

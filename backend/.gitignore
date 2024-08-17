@@ -10,3 +10,4 @@
 database.sqlite
 /drizzle/*
 /drizzle/meta/*
+/vaults

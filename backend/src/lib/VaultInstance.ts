@@ -4,14 +4,14 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import { createConnection } from 'net';
+import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
-import { masterDb } from '../db/master/db';
-import { Vault, vaults } from '../db/master/schema';
-import { sdCheckpoints, sdLoras } from '../db/vault/schema';
+import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
 import TagService from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
+import { VaultConfig } from '../types/VaultConfig';
 import { VaultBase } from './VaultBase';
 
 const execAsync = promisify(exec);
@@ -32,15 +32,15 @@ export class VaultInstance extends VaultBase {
 	private static readonly SD_UI_LINK =
 		'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
 	private static readonly PROCESS_INACTIVE_TTL = 60 * 1000 * 10; // 10 Minutes
-  
-	public constructor(vault: Vault) {
+
+	public constructor(vault: VaultConfig) {
 		super(vault);
 	}
-  
+
 	public getSdPort(): number | undefined {
 		return this.sdProcess?.port;
 	}
-  
+
 	private async modifySDUiPort(path: string, port: number): Promise<void> {
 		await fs.writeFile(
 			`${path}/stable-diffusion-webui/webui-user.sh`,
@@ -48,26 +48,63 @@ export class VaultInstance extends VaultBase {
 		);
 	}
 
-  
-	public async install(): Promise<void> {
+	public getConfig(): VaultConfig {
+		return {
+			id: this.id,
+			name: this.name,
+			path: this.path,
+			createdAt: this.createdAt,
+			hasInstalledSD: this.hasInstalledSD,
+			civitaiApiKey: this.civitaiApiKey
+		};
+	}
+
+	public async setName(name: string): Promise<void> {
+		this.name = name;
+		await this.saveConfig();
+	}
+
+	public async setCivitaiApiKey(key: string): Promise<void> {
+		this.civitaiApiKey = key;
+		await this.saveConfig();
+	}
+
+	public async installSDUi(): Promise<void> {
 		if (this.hasInstalledSD) {
 			return;
 		}
 
-		const { stderr, stdout } = await execAsync(
-			`bash ./scripts/installAutomatic.sh ${this.path} ${VaultInstance.SD_UI_LINK}`
-		);
+		try {
+			const { stderr, stdout } = await execAsync(
+				`bash ./scripts/installAutomatic.sh ${this.path} ${VaultInstance.SD_UI_LINK}`
+			);
 
-		await masterDb.update(vaults).set({ hasInstalledSD: 1 }).where(eq(vaults.id, this.id));
+			this.hasInstalledSD = true;
+			if (!(await TagService.doesTagExist(this, 'AI'))) {
+				await TagService.createTag(this, 'AI', '#3264a8');
+			}
+			console.log(stderr);
+			console.log(stdout);
 
-		if (!await TagService.doesTagExist(this, 'AI')) {
-			await TagService.createTag(this, 'AI', '#3264a8');
+			await this.startSDUi();
+		} catch (error) {
+			this.hasInstalledSD = false;
+		} finally {
+			await this.saveConfig();
 		}
+	}
 
-		await this.startSDUi();
-
-		console.log(stderr);
-		console.log(stdout);
+	public async uninstallSDUi(): Promise<void> {
+		if (this.hasInstalledSD) {
+			await this.stopSDUi();
+			await this.db.delete(sdCheckpoints);
+			await this.db.delete(sdLoras);
+			await this.db.delete(sdPrompts);
+			await this.db.delete(sdWildcards);
+			await fs.rm(path.join(this.path, 'stable-diffusion-webui'), { recursive: true, force: true });
+			this.hasInstalledSD = false;
+			await this.saveConfig();
+		}
 	}
 
 	public markProcessAsActive(): void {
@@ -82,7 +119,6 @@ export class VaultInstance extends VaultBase {
 	}
 
 	public markProcessAsInactive(): void {
-
 		if (this.sdProcess && this.sdProcess.isActive) {
 			this.sdProcess.isActive = false;
 			this.inactiveProcessTimer = setTimeout(() => {
@@ -146,13 +182,13 @@ export class VaultInstance extends VaultBase {
 		console.log(`Stopping SD ui for vault ${this.name}`);
 		if (this.sdProcess) {
 			if (this.sdProcess.process.pid) {
-				kill(this.sdProcess.process.pid, );
+				kill(this.sdProcess.process.pid);
 				this.sdProcess = undefined;
 				this.broadcastEvent({ event: 'SD', data: { status: 'NOT_RUNNING' } });
 			}
 		}
 	}
-	
+
 	public async refreshLoras(): Promise<void> {
 		const sdPort = this.getSdPort();
 		if (!sdPort) {
@@ -168,7 +204,7 @@ export class VaultInstance extends VaultBase {
 		const savedLoras = await this.db.query.sdLoras.findMany();
 
 		for (const rawLora of sdClientLoras) {
-			const savedLora = savedLoras.find(lora => lora.path === rawLora.path);
+			const savedLora = savedLoras.find((lora) => lora.path === rawLora.path);
 
 			// We need to create a new lora in our database
 			if (!savedLora) {
@@ -179,18 +215,21 @@ export class VaultInstance extends VaultBase {
 					origin: 'LOCAL',
 					sdVersion: '',
 					activationWords: '',
-					metadata: JSON.stringify(rawLora.metadata),
+					metadata: JSON.stringify(rawLora.metadata)
 				});
 			} else {
 				if (!savedLora.metadata) {
-					await this.db.update(sdLoras).set({ metadata:  JSON.stringify(rawLora.metadata)}).where(eq(sdLoras.id, savedLora.id));
+					await this.db
+						.update(sdLoras)
+						.set({ metadata: JSON.stringify(rawLora.metadata) })
+						.where(eq(sdLoras.id, savedLora.id));
 				}
 			}
 		}
-		
+
 		// We need to also check if something has been deleted from the file system
 		for (const savedLora of savedLoras) {
-			const sdClientLora = sdClientLoras.find(lora => lora.path === savedLora.path);
+			const sdClientLora = sdClientLoras.find((lora) => lora.path === savedLora.path);
 
 			if (!sdClientLora) {
 				await this.db.delete(sdLoras).where(eq(sdLoras.id, savedLora.id));
@@ -213,7 +252,9 @@ export class VaultInstance extends VaultBase {
 		const savedCheckpoints = await this.db.query.sdCheckpoints.findMany();
 
 		for (const rawCheckpoint of sdClientCheckpoints) {
-			const savedCheckpoint = savedCheckpoints.find(checkpoint => checkpoint.path === rawCheckpoint.filename);
+			const savedCheckpoint = savedCheckpoints.find(
+				(checkpoint) => checkpoint.path === rawCheckpoint.filename
+			);
 
 			if (!savedCheckpoint) {
 				await this.db.insert(sdCheckpoints).values({
@@ -222,14 +263,16 @@ export class VaultInstance extends VaultBase {
 					origin: 'LOCAL',
 					path: rawCheckpoint.filename,
 					sdVersion: '',
-					sha256: rawCheckpoint.sha256 ?? '',
+					sha256: rawCheckpoint.sha256 ?? ''
 				});
 			}
 		}
 
 		// We need to also check if something has been deleted from the file system
 		for (const savedCheckpoint of savedCheckpoints) {
-			const sdClientCheckpoint = sdClientCheckpoints.find(checkpoint => checkpoint.filename === savedCheckpoint.path);
+			const sdClientCheckpoint = sdClientCheckpoints.find(
+				(checkpoint) => checkpoint.filename === savedCheckpoint.path
+			);
 
 			if (!sdClientCheckpoint) {
 				await this.db.delete(sdCheckpoints).where(eq(sdCheckpoints.id, savedCheckpoint.id));
@@ -239,7 +282,12 @@ export class VaultInstance extends VaultBase {
 
 	public override registerWebsocketConnection(connection: WebSocket) {
 		super.registerWebsocketConnection(connection);
-		connection.send(JSON.stringify({ event: 'SD', data: { status: this.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' } }));
+		connection.send(
+			JSON.stringify({
+				event: 'SD',
+				data: { status: this.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' }
+			})
+		);
 	}
 
 	private async findOpenPort(): Promise<number> {

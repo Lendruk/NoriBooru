@@ -1,14 +1,8 @@
 <script lang="ts">
+	import { vaultStore } from '../../../store';
 	import DoorOpen from '../../icons/DoorOpen.svelte';
-	import type { Vault } from '../../types/Vault';
 
-	let currentVault: Vault | null = null;
 	let isVaultSelectionOpen = false;
-
-	if (typeof localStorage !== 'undefined') {
-		let storageVault = localStorage?.getItem('currentVault');
-		currentVault = storageVault ? JSON.parse(storageVault) : null;
-	}
 
 	function onSelectedVaultClick() {
 		isVaultSelectionOpen = !isVaultSelectionOpen;
@@ -20,7 +14,7 @@
 	class="mr-4 hover:bg-red-900 hover:transition relative p-2 flex flex-col items-center bg-red-950 rounded-lg shadow-md"
 >
 	<div>
-		Vault: {currentVault?.name}
+		Vault: {$vaultStore?.name}
 	</div>
 </button>
 {#if isVaultSelectionOpen}

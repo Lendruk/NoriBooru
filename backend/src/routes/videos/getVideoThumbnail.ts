@@ -2,11 +2,11 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { VaultController } from '../../db/VaultController';
 import { mediaItems } from '../../db/vault/schema';
+import { VaultController } from '../../db/VaultController';
 import { mediaService } from '../../services/MediaService';
 
-const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) => {
+const getVideoThumbnail = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { fileName: string; vaultId: string };
 
 	const vaultId = params.vaultId;
@@ -17,11 +17,10 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
 
-	const thumbnailPath = path.join(vault.path, 'media', 'images', '.thumb', `${fileName}`);
-
-	let image: Buffer | undefined;
+	const thumbnailPath = path.join(vault.path, 'media', 'videos', '.thumb', `${fileName}`);
+	let video: Buffer | undefined;
 	try {
-		image = await fs.readFile(thumbnailPath);
+		video = await fs.readFile(thumbnailPath);
 	} catch (error) {
 		if ((error as { code: string }).code === 'ENOENT') {
 			const item = await vault.db.query.mediaItems.findFirst({
@@ -32,24 +31,24 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 				const filePath = path.join(
 					vault.path,
 					'media',
-					'images',
+					'videos',
 					`${item.fileName}.${item.extension}`
 				);
 				await mediaService.generateItemThumbnail(vault, filePath, item);
-				image = await fs.readFile(thumbnailPath);
+				video = await fs.readFile(thumbnailPath);
 			}
 		}
 	}
 
-	if (!image) {
+	if (!video) {
 		return reply.status(404).send();
 	} else {
-		return reply.header('Content-Type', 'image/jpg').send(image);
+		return reply.header('Content-Type', 'image/mp4').send(video);
 	}
 };
 
 export default {
 	method: 'GET',
-	url: '/images/:vaultId/thumb/:fileName',
-	handler: getImageThumbnail
+	url: '/videos/:vaultId/thumb/:fileName',
+	handler: getVideoThumbnail
 } as RouteOptions;

@@ -5,6 +5,7 @@ export class RunningJob<T> extends Subject<T> {
 	name: string;
 	tag: string;
 	data: Record<string, unknown>;
+	createdAt: number;
 
 	public constructor(id: string, name: string, tag: string, data: Record<string, unknown>) {
 		super();
@@ -12,5 +13,6 @@ export class RunningJob<T> extends Subject<T> {
 		this.name = name;
 		this.tag = tag;
 		this.data = data;
+		this.createdAt = Date.now();
 	}
 }

@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/Button.svelte';
-	import Checkbox from '$lib/Checkbox.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Checkbox from '$lib/components/Checkbox.svelte';
+	import SimpleTable from '$lib/components/SimpleTable.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import VerticalDrawer from '$lib/components/VerticalDrawer.svelte';
+	import Video from '$lib/components/Video.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import SimpleTable from '$lib/SimpleTable.svelte';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import VerticalDrawer from '$lib/VerticalDrawer.svelte';
-	import Video from '$lib/Video.svelte';
 	import SidebarMediaItem from './SidebarMediaItem.svelte';
 	import TableImage from './TableImage.svelte';
 
@@ -169,7 +169,7 @@
 					bind:value={timePerItem}
 				/>
 			</div>
-			<Checkbox class="mt-4 mb-4" bind:isChecked={randomizeOrder} />
+			<Checkbox bind:checked={randomizeOrder} inlineLabel={'Randomize order'} />
 		</div>
 
 		<div>

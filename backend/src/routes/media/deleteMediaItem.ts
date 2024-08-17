@@ -59,7 +59,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 									'media',
 									mediaItem.type + 's',
 									'.thumb',
-									`${mediaItem.fileName}.jpg`
+									`${mediaItem.fileName}.${mediaItem.type === 'video' ? 'mp4' : 'jpg'}`
 								)
 							)
 						]);

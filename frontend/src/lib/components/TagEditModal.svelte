@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Modal from '$lib/Modal.svelte';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import Modal from './Modal.svelte';
+	import TagSearchInput from './TagSearchInput.svelte';
 
 	export let showModal = false;
 

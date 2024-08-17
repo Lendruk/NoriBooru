@@ -1,7 +1,31 @@
+<script context="module" lang="ts">
+	export type SortMethod = 'newest' | 'oldest';
+	export type MediaType = 'ALL' | 'IMAGES' | 'VIDEOS';
+	export type CombinationalLogicType = 'AND' | 'OR';
+	export type MediaTypes = 'ALL' | 'IMAGES' | 'VIDEOS';
+
+	export type GalleryQuery = {
+		positiveTags: PopulatedTag[];
+		negativeTags: PopulatedTag[];
+		sortMethod: SortMethod;
+		page: number;
+		inbox: boolean;
+		positiveQueryType: CombinationalLogicType;
+		negativeQueryType: CombinationalLogicType;
+		mediaType: MediaTypes;
+	};
+</script>
+
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import Link from '$lib/components/Link.svelte';
+	import MassTagEditModal from '$lib/components/MassTagEditModal.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import Video from '$lib/components/Video.svelte';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 	import FilterIcon from '$lib/icons/FilterIcon.svelte';
@@ -9,31 +33,21 @@
 	import TagIcon from '$lib/icons/TagIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import XIcon from '$lib/icons/XIcon.svelte';
-	import Link from '$lib/Link.svelte';
-	import Modal from '$lib/Modal.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
 	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import { pause } from '$lib/utils/time';
-	import Video from '$lib/Video.svelte';
 	import { onMount } from 'svelte';
-	import LabeledComponent from '../components/LabeledComponent.svelte';
-	import MassTagEditModal from '../components/MassTagEditModal.svelte';
 	import GalleryItem from './GalleryItem.svelte';
-
-	type SortMethod = 'newest' | 'oldest';
-	type MediaType = 'ALL' | 'IMAGES' | 'VIDEOS';
-	type CombinationalLogicType = 'AND' | 'OR';
 
 	let mediaItems: MediaItem[] = [];
 	let appliedPositiveTags: PopulatedTag[] = [];
-	let positiveQueryType: 'AND' | 'OR' = 'AND';
+	let positiveQueryType: CombinationalLogicType = 'AND';
 	let appliedNegativeTags: PopulatedTag[] = [];
-	let negativeQueryType: 'AND' | 'OR' = 'AND';
+	let negativeQueryType: CombinationalLogicType = 'AND';
 	let tags: PopulatedTag[] = [];
 	let sortMethod: SortMethod = 'newest';
-	let mediaType: 'ALL' | 'VIDEOS' | 'IMAGES' = 'ALL';
+	let mediaType: MediaTypes = 'ALL';
 	let showMediaTagEditModal = false;
 	let showMassTagEditModal = false;
 	let currentPage = 0;
@@ -78,6 +92,9 @@
 				isInbox = false;
 			}
 
+			if (!isInbox) {
+				searchParams.delete('inbox');
+			}
 			selectedItems = new Map();
 			currentPage = 0;
 			mediaItems = [];
@@ -457,7 +474,7 @@
 					{#if mediaItem.type === 'video'}
 						<Video
 							cssClass="bg-cover w-full h-full"
-							src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+							src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.mp4`}
 						/>
 					{/if}
 				</GalleryItem>

@@ -1,5 +1,5 @@
 <script>
-	import LoadingSpinner from '../../routes/components/LoadingSpinner.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 </script>
 
 <div

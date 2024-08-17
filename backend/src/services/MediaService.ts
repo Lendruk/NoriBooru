@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import ExifReader from 'exifreader';
+import Ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
@@ -39,8 +40,7 @@ class MediaService {
 			.insert(mediaItems)
 			.values({
 				fileName: id,
-				extension: fileType === 'image' ? 'png' : 'mp4',
-				// exif: JSON.stringify(exif),
+				extension: fileType === 'image' ? 'png' : filePath.split('.').pop()!,
 				type: fileType,
 				createdAt: Date.now(),
 				hash: hexHash,
@@ -53,18 +53,47 @@ class MediaService {
 			await this.processMediaItemExif(vault, newMediaItem.id, exif);
 		}
 
-		// Create thumbnail in case of images
-		if (fileType === 'image') {
-			await sharp(filePath)
-				.jpeg({ quality: 80 })
-				.toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
-		}
+		await this.generateItemThumbnail(vault, filePath, newMediaItem);
 
 		for (const lora of loras) {
 			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
 		}
 
 		return newMediaItem;
+	}
+
+	public async generateItemThumbnail(
+		vault: VaultInstance,
+		filePath: string,
+		mediaItem: MediaItem
+	): Promise<void> {
+		if (mediaItem.type === 'image') {
+			await sharp(filePath)
+				.jpeg({ quality: 80 })
+				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+		} else if (mediaItem.type === 'video') {
+			const thumbnailPath = path.join(
+				vault.path,
+				'media',
+				'videos',
+				'.thumb',
+				`${mediaItem.fileName}.mp4`
+			);
+			const conversionPromise = new Promise((resolve, reject) => {
+				Ffmpeg(filePath)
+					.noAudio()
+					.addOutputOption('-movflags', 'frag_keyframe+empty_moov')
+					.addOutputOption('-pix_fmt', 'yuv420p')
+					.size('640x480')
+					.autoPad()
+					.withFps(24)
+					.withDuration(5)
+					.saveToFile(thumbnailPath)
+					.on('end', () => resolve(undefined))
+					.on('error', (err) => reject(err));
+			});
+			await conversionPromise;
+		}
 	}
 
 	public async createImageFromBase64(
@@ -161,8 +190,8 @@ class MediaService {
 		const metadataPayload: MediaItemMetadataSchema = {
 			id: randomUUID(),
 			mediaItem: mediaItemId,
-			width: exif['Image Width'].value,
-			height: exif['Image Height'].value,
+			width: exif['Image Width']?.value ?? 0,
+			height: exif['Image Height']?.value ?? 0,
 			cfgScale: null,
 			denoisingStrength: null,
 			loras: null,

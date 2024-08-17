@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import Modal from '$lib/Modal.svelte';
-	import TagSearchInput from '$lib/TagSearchInput.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import Modal from './Modal.svelte';
+	import TagSearchInput from './TagSearchInput.svelte';
 
 	export let itemsInEdit: Map<number, MediaItem>;
 	export let availableTags: PopulatedTag[];

@@ -2,15 +2,16 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
 	import Checkbox from '$lib/components/Checkbox.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
 	import SaveIcon from '$lib/icons/SaveIcon.svelte';
 	import SearchIcon from '$lib/icons/SearchIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
-	import Tooltip from '$lib/Tooltip.svelte';
 	import type { MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
@@ -24,8 +25,7 @@
 	import { processPrompt } from '$lib/utils/promptUtils';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import { onMount } from 'svelte';
-	import { isSdStarting, vaultStore } from '../../../store';
-	import LoadingSpinner from '../../components/LoadingSpinner.svelte';
+	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import ProgressTracker from './components/ProgressTracker.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
@@ -323,6 +323,13 @@
 		usedLoras.push(lora.id);
 	}
 
+	async function stopSdUi() {
+		isSdStopping.set(true);
+		await HttpService.post(`/sd/stop`);
+		isSdStopping.set(false);
+		goto('/');
+	}
+
 	beforeNavigate(async () => {
 		await HttpService.post(`/sd/inactive`);
 	});
@@ -363,6 +370,7 @@
 			</Tooltip>
 		</div>
 		<div class="flex gap-2">
+			<Button onClick={stopSdUi}>Stop SDUi</Button>
 			<Checkbox bind:checked={autoTag} inlineLabel={'Auto tag'} />
 			<div class="flex relative">
 				<Tooltip>
@@ -510,11 +518,11 @@
 			</div>
 		</div>
 	</div>
-	{#if $isSdStarting}
+	{#if $isSdStarting || $isSdStopping}
 		<div
 			class="absolute w-full h-full top-0 left-0 backdrop-blur-lg flex items-center justify-center rounded-md gap-4"
 		>
-			<div class="text-4xl">SDUi is Starting</div>
+			<div class="text-4xl">{$isSdStarting ? 'SDUi is Starting...' : 'SDUi is Stopping...'}</div>
 			<LoadingSpinner />
 		</div>
 	{/if}

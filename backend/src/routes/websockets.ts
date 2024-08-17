@@ -23,7 +23,8 @@ const websocketHandler = (connection: WebSocket) => {
 				}
 				vault!.registerWebsocketConnection(connection);
 			}
-		} catch {
+		} catch (error) {
+			console.log(error);
 			console.error('There was an error establishing the websocket connection');
 		}
 	});

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/Button.svelte';
-	import Modal from '$lib/Modal.svelte';
-	import Tooltip from '$lib/Tooltip.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import TagEditModal from '$lib/components/TagEditModal.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
@@ -13,7 +14,6 @@
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import TagEditModal from '../../components/TagEditModal.svelte';
 	type ReviewAction = 'Archive' | 'Delete';
 
 	let currentMediaIndex = $state(0);

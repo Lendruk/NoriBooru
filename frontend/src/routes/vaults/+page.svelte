@@ -1,48 +1,64 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/Button.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
+	import PenIcon from '$lib/icons/PenIcon.svelte';
+	import XIcon from '$lib/icons/XIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
-	import { vaultStore } from '../../store';
 
 	let vaults: Vault[] = $state([]);
 
 	let newVaultName = $state('');
 	let newVaultPath = $state('');
+	let baseVaultDir = $state('');
+
+	let usingCustomVaultDir = $state(false);
 	let vaultCreationOpen = $state(false);
+	let vaultImportOpen = $state(false);
 
 	let vaultPathCheckTimeout: NodeJS.Timeout | undefined;
 	let pathMessage = $state('');
 	let isTherePathError = $state(false);
 
+	let vaultImportPath = $state('');
+
 	$effect(() => {
 		if (typeof localStorage !== 'undefined') {
-			HttpService.clearVault();
+			VaultService.removeVault();
 			WebsocketService.unregisterWebsocket();
 		}
 		getVaults();
 	});
 
 	async function getVaults() {
-		const fetchedVaults = await HttpService.get<Vault[]>('/vaults');
-		vaults = fetchedVaults;
+		const fetchedVaults = await HttpService.get<{ vaults: Vault[]; baseVaultDir: string }>(
+			'/vaults'
+		);
+		vaults = fetchedVaults.vaults;
+		newVaultPath = fetchedVaults.baseVaultDir;
+		baseVaultDir = fetchedVaults.baseVaultDir;
 	}
 
-	async function checkVaultPath() {
+	async function checkVaultPath(path: string, checkingForExistingVault?: boolean) {
 		if (vaultPathCheckTimeout) {
 			clearTimeout(vaultPathCheckTimeout);
 			vaultPathCheckTimeout = undefined;
 		}
 
-		if (newVaultPath != '') {
+		if (path != '') {
 			vaultPathCheckTimeout = setTimeout(async () => {
 				try {
-					await HttpService.post<{ message: string }>('/vaults/check-path', {
-						path: newVaultPath
+					const result = await HttpService.post<{ message: string }>('/vaults/check-path', {
+						path,
+						checkingForExistingVault
 					});
-					pathMessage = 'Directory is valid';
+					pathMessage = result.message;
 					isTherePathError = false;
 				} catch (error) {
 					pathMessage = (error as Error).message;
@@ -56,7 +72,12 @@
 	}
 
 	async function createVault() {
-		if (!newVaultName || !newVaultPath) {
+		if (!newVaultName) {
+			createToast('Vault name cannot be empty');
+			return;
+		}
+		if (!newVaultPath) {
+			createToast('Vault path cannot be empty');
 			return;
 		}
 
@@ -66,7 +87,8 @@
 				path: newVaultPath
 			});
 			newVaultName = '';
-			newVaultPath = '';
+			newVaultPath = baseVaultDir;
+			usingCustomVaultDir = false;
 			pathMessage = '';
 			isTherePathError = false;
 			vaultCreationOpen = false;
@@ -77,9 +99,26 @@
 		}
 	}
 
+	async function importVault() {
+		if (!vaultImportPath) {
+			createToast('Vault path cannot be empty');
+			return;
+		}
+
+		try {
+			const importedVault = await HttpService.post<Vault>(`/vaults/import`, {
+				path: vaultImportPath
+			});
+			vaultImportOpen = false;
+			vaults.push(importedVault);
+			createToast('Vault imported successfully!');
+		} catch {
+			createToast('Vault import failed');
+		}
+	}
+
 	function publishVaultToLocalStorage(vault: Vault) {
-		localStorage.setItem('currentVault', JSON.stringify(vault));
-		vaultStore.set(vault);
+		VaultService.setVault(vault);
 		goto('/');
 		WebsocketService.registerWebsocket();
 	}
@@ -112,15 +151,22 @@
 	<div class="flex flex-col rounded-tr-sm rounded-br-sm bg-zinc-900 h-full w-[60%]">
 		<h1 class="text-3xl mb-5 flex self-center mt-4">NoriBooru</h1>
 
-		{#if !vaultCreationOpen}
+		{#if !vaultCreationOpen && !vaultImportOpen}
 			<div class="flex p-4 justify-between">
 				<div class="flex flex-col">
-					<div>Create a media vault</div>
+					<div class="font-semibold">Create a media vault</div>
 					<div class="text-xs">Create a new media vault in a directory of your choice</div>
 				</div>
 				<Button onClick={() => (vaultCreationOpen = true)}>Create</Button>
 			</div>
-		{:else}
+			<div class="flex p-4 justify-between">
+				<div class="flex flex-col">
+					<div class="font-semibold">Import a media vault</div>
+					<div class="text-xs">Import an already existing nori-booru vault</div>
+				</div>
+				<Button onClick={() => (vaultImportOpen = true)}>Import</Button>
+			</div>
+		{:else if vaultCreationOpen}
 			<div class={`flex flex-col p-4 w-[80%] self-center overflow-scroll`}>
 				<button
 					class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent"
@@ -133,6 +179,12 @@
 						<input
 							class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white"
 							bind:value={newVaultName}
+							on:input={() => {
+								if (!usingCustomVaultDir) {
+									newVaultPath = `${baseVaultDir}/${newVaultName}`;
+									checkVaultPath(newVaultPath);
+								}
+							}}
 							name="vaultName"
 							type="text"
 							placeholder="name..."
@@ -140,20 +192,51 @@
 					</div>
 					<div class="flex flex-col gap-2">
 						<label for="vaultPath">Vault path</label>
-						<input
-							class="h-[40px] outline-none rounded-sm bg-surface-color indent-2 text-white"
-							bind:value={newVaultPath}
-							name="vaultPath"
-							type="text"
-							placeholder="path..."
-							on:input={checkVaultPath}
-						/>
+						<div class="flex flex-1 w-full">
+							<input
+								disabled={!usingCustomVaultDir}
+								class={`h-[40px] outline-none w-full rounded-sm bg-surface-color indent-2  ${!usingCustomVaultDir ? 'text-gray-600 cursor-not-allowed' : ''}`}
+								bind:value={newVaultPath}
+								name="vaultPath"
+								type="text"
+								placeholder="path..."
+								on:input={() => checkVaultPath(newVaultPath)}
+							/>
+							<Button onClick={() => (usingCustomVaultDir = !usingCustomVaultDir)}>
+								{#if usingCustomVaultDir}
+									<XIcon class="fill-white" />
+								{:else}
+									<PenIcon class="fill-white" />
+								{/if}
+							</Button>
+						</div>
 						<div class="min-h-[30px]" style={`color:${isTherePathError ? 'red' : 'lightgreen'}`}>
 							{pathMessage}
 						</div>
 					</div>
 				</div>
 				<Button class="w-[100px] h-[40px] self-end" onClick={createVault}>Create</Button>
+			</div>
+		{:else if vaultImportOpen}
+			<div class={`flex flex-col p-4 w-[80%] self-center overflow-scroll`}>
+				<button
+					class="w-[70px] h-[40px] hover:border-red-900 hover:fill-red-900 fill-white hover:text-red-900 border-b hover:transition flex items-center justify-between border-transparent"
+					on:click={() => (vaultImportOpen = false)}
+					><ArrowLeft class="fill-inherit" /> Back
+				</button>
+				<LabeledComponent>
+					<div slot="label">Path</div>
+					<TextInput
+						slot="content"
+						on:input={() => checkVaultPath(vaultImportPath, true)}
+						placeholder="Path to vault"
+						bind:value={vaultImportPath}
+					/>
+				</LabeledComponent>
+				<div class="min-h-[30px]" style={`color:${isTherePathError ? 'red' : 'lightgreen'}`}>
+					{pathMessage}
+				</div>
+				<Button class="w-[100px] h-[40px] self-end" onClick={importVault}>Import</Button>
 			</div>
 		{/if}
 	</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import SimpleTable from '$lib/SimpleTable.svelte';
+	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import EditIcon from '$lib/icons/editIcon.svelte';

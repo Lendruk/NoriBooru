@@ -2,7 +2,20 @@ import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import ws from '@fastify/websocket';
 import Fastify from 'fastify';
+import fs from 'fs/promises';
 import routes from './routes';
+import { getServerConfig } from './utils/getServerConfig';
+
+(async () => {
+	// Check if the base vault dir exists
+	const baseVaultDir = (await getServerConfig()).baseVaultDir;
+	try {
+		await fs.stat(baseVaultDir);
+	} catch {
+		console.log(`Base vault dir ${baseVaultDir} does not exist, creating it`);
+		await fs.mkdir(baseVaultDir);
+	}
+})();
 
 const app = Fastify({
 	logger: true,
