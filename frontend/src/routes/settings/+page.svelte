@@ -49,6 +49,16 @@
 		isPerformingDestructiveAction = false;
 	}
 
+	async function unlinkVault() {
+		isPerformingDestructiveAction = true;
+		currentAction = 'Unlinking vault...';
+		await HttpService.post(`/vaults/unlink`);
+		VaultService.removeVault();
+		goto('/vaults');
+		isPerformingDestructiveAction = false;
+		createToast('Vault unlinked successfully!');
+	}
+
 	$effect(() => {
 		vaultName = $vaultStore?.name ?? '';
 	});
@@ -80,6 +90,16 @@
 				class={`${!$vaultStore?.hasInstalledSD ? 'cursor-not-allowed bg-surface-color text-red-800 ' : ''}`}
 				onClick={uninstallSDUi}>Uninstall SDUI</Button
 			>
+		</div>
+		<div class="border-2 border-red-950 rounded-md p-4 flex items-center justify-between">
+			<div class="flex flex-col">
+				<div class="font-bold">Unlink this Vault</div>
+				<div>
+					This will unlink the vault from your NoriBooru instance. This won't however delete any of
+					the vault data. You can re-import the vault later.
+				</div>
+			</div>
+			<Button onClick={unlinkVault}>Unlink this Vault</Button>
 		</div>
 		<div class="border-2 border-red-950 rounded-md p-4 flex items-center justify-between">
 			<div class="flex flex-col">

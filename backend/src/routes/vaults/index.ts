@@ -4,4 +4,13 @@ import deleteVault from './deleteVault';
 import getVaults from './getVaults';
 import importVault from './importVault';
 import renameVault from './renameVault';
-export default [createVault, getVaults, checkVaultPath, renameVault, deleteVault, importVault];
+import unlinkVault from './unlinkVault';
+export default [
+	createVault,
+	getVaults,
+	checkVaultPath,
+	renameVault,
+	deleteVault,
+	importVault,
+	unlinkVault
+];
