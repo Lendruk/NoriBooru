@@ -1,4 +1,5 @@
 export type VaultConfig = {
+	version: string;
 	id: string;
 	name: string;
 	path: string;

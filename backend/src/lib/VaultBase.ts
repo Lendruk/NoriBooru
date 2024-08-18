@@ -17,6 +17,7 @@ export abstract class VaultBase implements VaultConfig {
 	public path: string;
 	public createdAt: number;
 	public hasInstalledSD: boolean;
+	public version: string;
 	public db: VaultDb;
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
@@ -26,6 +27,7 @@ export abstract class VaultBase implements VaultConfig {
 		this.id = vault.id;
 		this.name = vault.name;
 		this.path = vault.path;
+		this.version = vault.version;
 		this.createdAt = vault.createdAt;
 		this.hasInstalledSD = vault.hasInstalledSD;
 		this.civitaiApiKey = vault.civitaiApiKey;
@@ -144,7 +146,8 @@ export abstract class VaultBase implements VaultConfig {
 					path: this.path,
 					createdAt: this.createdAt,
 					hasInstalledSD: this.hasInstalledSD,
-					civitaiApiKey: this.civitaiApiKey
+					civitaiApiKey: this.civitaiApiKey,
+					version: this.version
 				} satisfies VaultConfig,
 				null,
 				2

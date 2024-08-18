@@ -47,6 +47,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 		name: body.name,
 		path: vaultPath,
 		createdAt: Date.now(),
+		version: process.env.npm_package_version ?? 'unknown',
 		hasInstalledSD: false,
 		civitaiApiKey: null
 	};

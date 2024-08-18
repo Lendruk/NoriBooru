@@ -55,7 +55,8 @@ export class VaultInstance extends VaultBase {
 			path: this.path,
 			createdAt: this.createdAt,
 			hasInstalledSD: this.hasInstalledSD,
-			civitaiApiKey: this.civitaiApiKey
+			civitaiApiKey: this.civitaiApiKey,
+			version: this.version
 		};
 	}
 
