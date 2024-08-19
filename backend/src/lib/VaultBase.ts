@@ -7,7 +7,7 @@ import * as vaultSchema from '../db/vault/schema';
 import { VaultConfig } from '../types/VaultConfig';
 import { WebSocketEvent } from '../types/WebSocketEvent';
 import { Job, JobAction, JobTag } from './Job';
-import { VaultMigrator } from './VaultMigrator';
+import { VaultMigrator, Version } from './VaultMigrator';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
@@ -17,7 +17,7 @@ export abstract class VaultBase implements VaultConfig {
 	public path: string;
 	public createdAt: number;
 	public hasInstalledSD: boolean;
-	public version: string;
+	public version: Version;
 	public db: VaultDb;
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
@@ -42,6 +42,7 @@ export abstract class VaultBase implements VaultConfig {
 	public async init(): Promise<void> {
 		const initSql = (await fs.readFile(VaultBase.initSqlPath)).toString();
 		VaultMigrator.executeSQLMigration(this.db, initSql);
+		await VaultMigrator.migrateVault(this);
 	}
 
 	public registerWebsocketConnection(socket: WebSocket): void {
@@ -137,6 +138,18 @@ export abstract class VaultBase implements VaultConfig {
 		}
 
 		job.isRunning = false;
+	}
+
+	public getConfig(): VaultConfig {
+		return {
+			id: this.id,
+			name: this.name,
+			path: this.path,
+			createdAt: this.createdAt,
+			hasInstalledSD: this.hasInstalledSD,
+			civitaiApiKey: this.civitaiApiKey,
+			version: this.version
+		};
 	}
 
 	public async saveConfig(): Promise<void> {

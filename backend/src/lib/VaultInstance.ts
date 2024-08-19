@@ -48,18 +48,6 @@ export class VaultInstance extends VaultBase {
 		);
 	}
 
-	public getConfig(): VaultConfig {
-		return {
-			id: this.id,
-			name: this.name,
-			path: this.path,
-			createdAt: this.createdAt,
-			hasInstalledSD: this.hasInstalledSD,
-			civitaiApiKey: this.civitaiApiKey,
-			version: this.version
-		};
-	}
-
 	public async setName(name: string): Promise<void> {
 		this.name = name;
 		await this.saveConfig();

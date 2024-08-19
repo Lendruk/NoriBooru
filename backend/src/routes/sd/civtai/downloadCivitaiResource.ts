@@ -70,6 +70,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 				await pump(imageRequest.body, createWriteStream(finalPath));
 				const mediaItem = await mediaService.createMediaItemFromFile(
 					vault,
+					modelId,
 					finalPath,
 					'image',
 					id,

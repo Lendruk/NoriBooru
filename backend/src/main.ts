@@ -3,6 +3,7 @@ import multipart from '@fastify/multipart';
 import ws from '@fastify/websocket';
 import Fastify from 'fastify';
 import fs from 'fs/promises';
+import { VaultMigrator } from './lib/VaultMigrator';
 import routes from './routes';
 import { getServerConfig } from './utils/getServerConfig';
 
@@ -15,6 +16,8 @@ import { getServerConfig } from './utils/getServerConfig';
 		console.log(`Base vault dir ${baseVaultDir} does not exist, creating it`);
 		await fs.mkdir(baseVaultDir);
 	}
+
+	await VaultMigrator.init();
 })();
 
 const app = Fastify({

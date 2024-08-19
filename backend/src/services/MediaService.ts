@@ -22,6 +22,7 @@ import TagService from './TagService';
 class MediaService {
 	public async createMediaItemFromFile(
 		vault: VaultInstance,
+		originalFileName: string,
 		filePath: string,
 		fileType: 'image' | 'video',
 		preCalculatedId: string | undefined = undefined,
@@ -45,6 +46,7 @@ class MediaService {
 				createdAt: Date.now(),
 				hash: hexHash,
 				sdCheckpoint: sdCheckPointId,
+				originalFileName,
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();

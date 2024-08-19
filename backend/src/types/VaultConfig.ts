@@ -1,5 +1,7 @@
+import { Version } from '../lib/VaultMigrator';
+
 export type VaultConfig = {
-	version: string;
+	version: Version;
 	id: string;
 	name: string;
 	path: string;

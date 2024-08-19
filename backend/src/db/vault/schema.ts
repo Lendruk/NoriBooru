@@ -26,6 +26,7 @@ export const mediaItems = sqliteTable('media_items', {
 	updatedAt: integer('updated_at'),
 	isArchived: integer('is_archived').notNull().default(0),
 	hash: text('hash').notNull(),
+	originalFileName: text('original_file_name'),
 	sdCheckpoint: text('sd_checkpoint').references(() => sdCheckpoints.id)
 });
 
