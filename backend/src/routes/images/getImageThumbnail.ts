@@ -35,7 +35,7 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 					'images',
 					`${item.fileName}.${item.extension}`
 				);
-				await mediaService.generateItemThumbnail(vault, filePath, item);
+				await mediaService.generateItemThumbnail(vault, item.extension, filePath, item);
 				image = await fs.readFile(thumbnailPath);
 			}
 		}

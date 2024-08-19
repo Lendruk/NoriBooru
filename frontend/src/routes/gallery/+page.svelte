@@ -467,7 +467,7 @@
 					{#if mediaItem.type === 'image'}
 						<img
 							class="h-full"
-							src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.jpg`}
+							src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}
 							alt="gallery-img"
 						/>
 					{/if}

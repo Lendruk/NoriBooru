@@ -23,25 +23,31 @@ class MediaService {
 	public async createMediaItemFromFile(
 		vault: VaultInstance,
 		originalFileName: string,
-		filePath: string,
+		fileExtension: string,
 		fileType: 'image' | 'video',
 		preCalculatedId: string | undefined = undefined,
 		sdCheckPointId: string | null = null,
 		loras: string[] = []
 	): Promise<MediaItem> {
 		const { db } = vault;
-		const [stats, buffer] = await Promise.all([fs.stat(filePath), fs.readFile(filePath)]);
+		const id = preCalculatedId ?? randomUUID();
+		const finalPath = path.join(
+			vault.path,
+			'media',
+			fileType === 'image' ? 'images' : 'videos',
+			`${id}.${fileExtension}`
+		);
+		const [stats, buffer] = await Promise.all([fs.stat(finalPath), fs.readFile(finalPath)]);
 		const hash = createHash('sha256');
 		hash.update(buffer);
 		const hexHash = hash.digest('hex').toString();
-		const id = preCalculatedId ?? randomUUID();
 		// Exif
 		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
 		const [newMediaItem] = await db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
-				extension: fileType === 'image' ? 'png' : filePath.split('.').pop()!,
+				extension: fileType === 'image' ? fileExtension : finalPath.split('.').pop()!,
 				type: fileType,
 				createdAt: Date.now(),
 				hash: hexHash,
@@ -55,7 +61,7 @@ class MediaService {
 			await this.processMediaItemExif(vault, newMediaItem.id, exif);
 		}
 
-		await this.generateItemThumbnail(vault, filePath, newMediaItem);
+		await this.generateItemThumbnail(vault, fileExtension, finalPath, newMediaItem);
 
 		for (const lora of loras) {
 			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
@@ -66,13 +72,20 @@ class MediaService {
 
 	public async generateItemThumbnail(
 		vault: VaultInstance,
+		fileExtension: string,
 		filePath: string,
 		mediaItem: MediaItem
 	): Promise<void> {
 		if (mediaItem.type === 'image') {
-			await sharp(filePath)
-				.jpeg({ quality: 80 })
-				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+			if (fileExtension === 'gif') {
+				await sharp(filePath, { animated: true })
+					.webp({ quality: 70, lossless: false })
+					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
+			} else {
+				await sharp(filePath)
+					.jpeg({ quality: 80 })
+					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+			}
 		} else if (mediaItem.type === 'video') {
 			const thumbnailPath = path.join(
 				vault.path,
