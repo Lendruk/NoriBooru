@@ -1,13 +1,13 @@
 import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import fs from 'fs/promises';
 import WebSocket from 'ws';
 import * as vaultSchema from '../db/vault/schema';
 import { VaultConfig } from '../types/VaultConfig';
 import { WebSocketEvent } from '../types/WebSocketEvent';
 import { Job, JobAction, JobTag } from './Job';
+import { VaultMigrator } from './VaultMigrator';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
@@ -22,6 +22,8 @@ export abstract class VaultBase implements VaultConfig {
 	public civitaiApiKey: string | null;
 	public sockets: Set<WebSocket>;
 	private jobs: Map<string, Job> = new Map();
+
+	private static initSqlPath = `${process.cwd()}/migrations/vault/init.sql`;
 
 	public constructor(vault: VaultConfig) {
 		this.id = vault.id;
@@ -38,7 +40,8 @@ export abstract class VaultBase implements VaultConfig {
 	}
 
 	public async init(): Promise<void> {
-		await migrate(this.db, { migrationsFolder: 'migrations/vault' });
+		const initSql = (await fs.readFile(VaultBase.initSqlPath)).toString();
+		VaultMigrator.executeSQLMigration(this.db, initSql);
 	}
 
 	public registerWebsocketConnection(socket: WebSocket): void {

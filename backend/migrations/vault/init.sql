@@ -1,12 +1,12 @@
-CREATE TABLE `loras_to_mediaItems` (
+CREATE TABLE IF NOT EXISTS `loras_to_mediaItems` (
 	`media_item_id` integer NOT NULL,
 	`lora_id` text NOT NULL,
 	PRIMARY KEY(`lora_id`, `media_item_id`),
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `media_items` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `media_items` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`file_name` text NOT NULL,
 	`type` text NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE `media_items` (
 	`sd_checkpoint` text,
 	FOREIGN KEY (`sd_checkpoint`) REFERENCES `sd_checkpoints`(`id`) ON UPDATE no action ON DELETE no action
 );
---> statement-breakpoint
-CREATE TABLE `media_items_metadata` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `media_items_metadata` (
 	`id` text PRIMARY KEY NOT NULL,
 	`media_item` integer,
 	`width` integer NOT NULL,
@@ -39,8 +39,8 @@ CREATE TABLE `media_items_metadata` (
 	`denoising_strength` real,
 	FOREIGN KEY (`media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `playlists` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `playlists` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`created_at` integer NOT NULL,
@@ -48,8 +48,8 @@ CREATE TABLE `playlists` (
 	`time_per_item` integer DEFAULT 0,
 	`updated_at` integer
 );
---> statement-breakpoint
-CREATE TABLE `playlists_media_items` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `playlists_media_items` (
 	`playlist_id` integer NOT NULL,
 	`media_item_id` integer NOT NULL,
 	`item_index` integer NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE `playlists_media_items` (
 	FOREIGN KEY (`playlist_id`) REFERENCES `playlists`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `sd_checkpoints` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `sd_checkpoints` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`path` text NOT NULL,
@@ -68,8 +68,8 @@ CREATE TABLE `sd_checkpoints` (
 	`sha256` text NOT NULL,
 	`preview_image` text
 );
---> statement-breakpoint
-CREATE TABLE `sd_loras` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `sd_loras` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`path` text NOT NULL,
@@ -80,8 +80,8 @@ CREATE TABLE `sd_loras` (
 	`preview_image` text,
 	`activation_words` text NOT NULL
 );
---> statement-breakpoint
-CREATE TABLE `sd_prompts` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `sd_prompts` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text,
 	`preview_image` text,
@@ -100,37 +100,37 @@ CREATE TABLE `sd_prompts` (
 	`high_res_upscale_by` real,
 	`created_at` integer NOT NULL
 );
---> statement-breakpoint
-CREATE TABLE `sd_wildcards` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `sd_wildcards` (
 	`id` text PRIMARY KEY NOT NULL,
 	`list_name` text NOT NULL,
 	`text` text NOT NULL
 );
---> statement-breakpoint
-CREATE TABLE `tags` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `tags` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`color` text NOT NULL,
 	`parent_id` integer
 );
---> statement-breakpoint
-CREATE TABLE `tags_to_loras` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `tags_to_loras` (
 	`tag_id` integer NOT NULL,
 	`lora_id` text NOT NULL,
 	PRIMARY KEY(`lora_id`, `tag_id`),
 	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`lora_id`) REFERENCES `sd_loras`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `tags_to_media_items` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `tags_to_media_items` (
 	`tag_id` integer NOT NULL,
 	`media_item_id` integer NOT NULL,
 	PRIMARY KEY(`media_item_id`, `tag_id`),
 	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `users` (
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL
 );

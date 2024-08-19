@@ -1,0 +1,1 @@
+ALTER TABLE `media_items` ADD COLUMN original_file_name TEXT DEFAULT NULL;
