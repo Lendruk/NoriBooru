@@ -71,7 +71,7 @@ class MediaService {
 	}
 
 	public async generateItemThumbnail(
-		vault: VaultInstance,
+		vault: VaultBase,
 		fileExtension: string,
 		filePath: string,
 		mediaItem: MediaItem

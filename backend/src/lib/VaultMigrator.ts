@@ -1,11 +1,14 @@
 import { sql } from 'drizzle-orm';
 import fs from 'fs/promises';
+import migrationFunctionMap from '../../migrations/vault';
 import { VaultBase } from './VaultBase';
+
+export type MigrationFunction = (vault: VaultBase) => Promise<void> | void;
 
 export type Migration = {
 	version: Version;
 	sql?: string;
-	js?: string;
+	migrationFunction?: MigrationFunction;
 };
 
 export type Version = `${number}.${number}.${number}`;
@@ -29,20 +32,22 @@ export class VaultMigrator {
 				// No sql file
 			}
 
-			let js: string | undefined;
+			let migrationFunction: MigrationFunction | undefined;
 			try {
-				js = (await fs.readFile(`${this.migrationDir}/${version}/migration.js`)).toString();
+				migrationFunction = migrationFunctionMap[version as keyof typeof migrationFunctionMap];
 			} catch {
 				// No js file
 			}
 
-			const migration: Migration = {
-				version: version as Version,
-				sql,
-				js
-			};
+			if (sql || migrationFunction) {
+				const migration: Migration = {
+					version: version as Version,
+					sql,
+					migrationFunction
+				};
 
-			this.availableMigrations.push(migration);
+				this.availableMigrations.push(migration);
+			}
 		}
 	}
 
@@ -72,11 +77,9 @@ export class VaultMigrator {
 			this.executeSQLMigration(vault.db, migration.sql);
 		}
 
-		// if (migration.js) {
-		// 	// eslint-disable-next-line @typescript-eslint/no-var-requires
-		// 	const migrationModule = require(migration.js);
-		// 	migrationModule(vault);
-		// }
+		if (migration.migrationFunction) {
+			await migration.migrationFunction(vault);
+		}
 
 		vault.version = migration.version;
 		await vault.saveConfig();
