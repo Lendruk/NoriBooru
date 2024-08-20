@@ -40,8 +40,6 @@ export abstract class VaultBase implements VaultConfig {
 	}
 
 	public async init(): Promise<void> {
-		const initSql = (await fs.readFile(VaultBase.initSqlPath)).toString();
-		VaultMigrator.executeSQLMigration(this.db, initSql);
 		await VaultMigrator.migrateVault(this);
 	}
 

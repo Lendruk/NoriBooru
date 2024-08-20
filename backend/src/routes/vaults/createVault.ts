@@ -10,8 +10,7 @@ import { getServerConfig } from '../../utils/getServerConfig';
 const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	const body = request.body as { path?: string; name: string };
 
-	// The first verison that can be migrated from
-	const starterVersion = '0.5.0';
+	const starterVersion = '0.0.0';
 
 	const vaultPath = body.path as string;
 

@@ -55,17 +55,24 @@ export class VaultMigrator {
 		const { version } = vault.getConfig();
 		let nextMigration = this.getNextMigration(version);
 
-		console.log(
-			`Migrating vault ${vault.name} (version ${vault.version}) to version ${nextMigration?.version}`
-		);
-
 		while (nextMigration) {
-			await this.applyMigration(vault, nextMigration);
-			nextMigration = this.getNextMigration(nextMigration.version);
+			console.log(
+				`Migrating vault ${vault.name} (version ${vault.version}) to version ${nextMigration?.version}`
+			);
+			try {
+				await this.applyMigration(vault, nextMigration);
+				nextMigration = this.getNextMigration(vault.version);
+			} catch (error) {
+				console.log(error);
+				console.log(`Failed to migrate vault ${vault.name} to version ${nextMigration?.version}`);
+				await vault.saveConfig();
+				break;
+			}
 		}
+		await vault.saveConfig();
 	}
 
-	public static executeSQLMigration(db: VaultBase['db'], sqlInput: string): void {
+	private static executeSQLMigration(db: VaultBase['db'], sqlInput: string): void {
 		const splitStatements = sqlInput.split('--- StatementBreak');
 		for (const statement of splitStatements) {
 			db.run(sql.raw(`${statement}`));
@@ -82,7 +89,6 @@ export class VaultMigrator {
 		}
 
 		vault.version = migration.version;
-		await vault.saveConfig();
 	}
 
 	private static getNextMigration(currentVersion: Version): Migration | undefined {
