@@ -367,6 +367,7 @@
 						appliedTags={appliedPositiveTags}
 						class="outline-none min-h-[40px] indent-2"
 						ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)}
+						createOnEnter={false}
 						onTagSearchSubmit={onPositiveTagSearchSubmit}
 						onAppliedTagClick={removePositiveTagFilter}
 					/>
@@ -398,6 +399,7 @@
 						appliedTags={appliedNegativeTags}
 						class="outline-none min-h-[40px] indent-2"
 						ignoredTags={appliedPositiveTags.concat(appliedNegativeTags)}
+						createOnEnter={false}
 						onTagSearchSubmit={onNegativeTagSearchSubmit}
 						onAppliedTagClick={removeNegativeTagFilter}
 					/>

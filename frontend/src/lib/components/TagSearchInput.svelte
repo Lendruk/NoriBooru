@@ -9,6 +9,7 @@
 	export let appliedTags: PopulatedTag[] = [];
 	export let ignoredTags: PopulatedTag[] = [];
 	export let limit: number = Number.MAX_SAFE_INTEGER;
+	export let createOnEnter: boolean = true;
 	export { cssClass as class };
 
 	let cssClass = '';
@@ -29,7 +30,7 @@
 				tagSuggestion = '';
 				tagSearchInputText = '';
 				input.style.width = '100%';
-			} else {
+			} else if (createOnEnter) {
 				if (value.length === 0) {
 					return;
 				}
@@ -130,7 +131,7 @@
 				}}
 				on:input={(e) => onTagSearch(e.currentTarget)}
 				class="bg-transparent ml-2 flex focus:outline-none w-full"
-				placeholder="Search tags (tab to autocomplete, enter to create new)"
+				placeholder={`Search tags ${createOnEnter ? '(tab to autocomplete, enter to create new)' : '(tab to autocomplete)'}`}
 				type="text"
 			/>
 			<span class="text-gray-400">{tagSuggestion}</span>

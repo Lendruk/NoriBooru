@@ -78,6 +78,7 @@
 					availableTags={tags}
 					limit={1}
 					appliedTags={appliedParent}
+					createOnEnter={false}
 					onAppliedTagClick={() => {
 						tagParentId = undefined;
 						appliedParent = [];
