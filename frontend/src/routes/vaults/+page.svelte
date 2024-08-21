@@ -11,6 +11,7 @@
 	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
+	import { runningJobs } from '../../store';
 
 	let vaults: Vault[] = $state([]);
 
@@ -33,6 +34,7 @@
 			VaultService.removeVault();
 			WebsocketService.unregisterWebsocket();
 		}
+		runningJobs.set([]);
 		getVaults();
 	});
 
