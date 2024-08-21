@@ -98,22 +98,26 @@ export abstract class VaultBase implements VaultConfig {
 
 	private async runWrappedJob(job: Job): Promise<void> {
 		job.isRunning = true;
-		let handler: NodeJS.Timeout;
+		let handler: NodeJS.Timeout | undefined;
 		try {
 			handler = setInterval(() => {
-				this.broadcastEvent({
-					event: 'job-update',
-					data: {
-						id: job.id,
-						name: job.name,
-						tag: job.tag,
-						payload: job.runtimeData
-					}
-				});
+				if (job.isRunning) {
+					this.broadcastEvent({
+						event: 'job-update',
+						data: {
+							id: job.id,
+							name: job.name,
+							tag: job.tag,
+							payload: job.runtimeData
+						}
+					});
+				}
 			}, job.updateEvery);
 			const result = await job.action(job);
 			// If the job was cancelled in the meantime, we won't emit a job complete event
 			if (job.isRunning) {
+				job.isRunning = false;
+				clearInterval(handler);
 				this.broadcastEvent({
 					event: 'job-done',
 					data: {
@@ -132,10 +136,11 @@ export abstract class VaultBase implements VaultConfig {
 				}
 			});
 		} finally {
-			clearInterval(handler!);
+			if (handler) {
+				clearInterval(handler);
+			}
+			job.isRunning = false;
 		}
-
-		job.isRunning = false;
 	}
 
 	public getConfig(): VaultConfig {

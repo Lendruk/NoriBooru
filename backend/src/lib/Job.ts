@@ -11,7 +11,7 @@ export class Job {
 	public isRunning: boolean;
 	public tag: JobTag;
 	public repeatEvery?: number;
-	public updateEvery: number = 250;
+	public updateEvery: number = 1000;
 
 	public runtimeData?: Record<string, unknown>;
 
