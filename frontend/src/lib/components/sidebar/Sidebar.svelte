@@ -2,6 +2,7 @@
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
+	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
@@ -11,7 +12,6 @@
 	import InboxIcon from '../../icons/InboxIcon.svelte';
 	import PaletteIcon from '../../icons/PaletteIcon.svelte';
 	import PenIcon from '../../icons/PenIcon.svelte';
-	import PlayIcon from '../../icons/PlayIcon.svelte';
 	import TagIcon from '../../icons/TagIcon.svelte';
 	import UploadIcon from '../../icons/UploadIcon.svelte';
 	import SdUiStatusDisplay from './SDUiStatusDisplay.svelte';
@@ -28,6 +28,8 @@
 		ignoreSubNavPaths?: (string | RegExp)[];
 		subRoutes?: Route[];
 	};
+
+	let pathName = $page.url.pathname.slice() + $page.url.search;
 
 	let stableDiffusionRoutes: Route[] = [];
 	let routes: Route[] = [
@@ -47,13 +49,12 @@
 			name: 'Gallery',
 			path: '/gallery',
 			navHref: '/gallery',
-			ignoreSubNavPaths: ['inbox'],
 			icon: ImagesIcon
 		},
 		{
 			name: 'Inbox',
-			path: /\/gallery\?inbox=true/g,
-			navHref: '/gallery?inbox=true',
+			path: '/gallery/inbox',
+			navHref: '/gallery/inbox',
 			icon: InboxIcon
 		},
 		{
@@ -79,6 +80,7 @@
 	];
 
 	$: {
+		pathName = $page.url.pathname.slice() + $page.url.search;
 		if ($vaultStore?.hasInstalledSD) {
 			stableDiffusionRoutes = [
 				{
@@ -115,12 +117,16 @@
 		if ($page.url.pathname === '/') {
 			return route.path === '/';
 		}
-		const pathName = $page.url.pathname.slice() + $page.url.search;
 
 		if (typeof route.path === 'string') {
+			const splitByQuery = pathName.split('?');
+
+			if (splitByQuery.length > 1) {
+				return splitByQuery[0] === route.path;
+			}
 			return route.path === pathName;
 		} else {
-			return route.path.test(pathName);
+			return !!route.path.exec(pathName);
 		}
 	}
 </script>
@@ -152,7 +158,7 @@
 										<a
 											href={subRoute.navHref}
 											class={`${
-												isCurrentPathSelected(subRoute) && 'bg-red-950 text-white'
+												isCurrentPathSelected(subRoute) ? 'bg-red-950 text-white' : ''
 											} pl-8 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
 										>
 											{#if subRoute.icon}
@@ -201,7 +207,7 @@
 			{:else}
 				<a
 					class={`${
-						isCurrentPathSelected(route) && 'bg-red-950 text-white'
+						isCurrentPathSelected(route) ? 'bg-red-950 text-white' : ''
 					} pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
 					href={route.navHref}
 				>
