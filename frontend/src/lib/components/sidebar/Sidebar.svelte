@@ -66,10 +66,9 @@
 		},
 		{
 			name: 'Playlists',
-			path: /\/playlists|playlists\/(\d)/g,
+			path: '/playlists',
 			navHref: '/playlists',
-			icon: PlayIcon,
-			subNavPaths: ['view', /(\d)/g]
+			icon: PlayIcon
 		},
 		{
 			name: 'Settings',
@@ -123,6 +122,11 @@
 
 			if (splitByQuery.length > 1) {
 				return splitByQuery[0] === route.path;
+			}
+
+			const splitByPath = pathName.split('/');
+			if (splitByPath.length > 1) {
+				return `/${splitByPath[1]}` === route.path;
 			}
 			return route.path === pathName;
 		} else {

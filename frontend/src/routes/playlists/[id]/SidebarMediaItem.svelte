@@ -22,9 +22,9 @@
 	style="height: fit-content;"
 	on:mouseenter={() => (showOptions = true)}
 	on:mouseleave={() => (showOptions = false)}
+	on:click={onButtonClick}
 >
 	<GalleryItemButton
-		onClick={onButtonClick}
 		class={`${!showOptions && !isAdded ? 'hidden' : 'flex'} absolute flex justify-center items-center self-center`}
 	>
 		{`${isAdded ? '-' : '+'}`}
