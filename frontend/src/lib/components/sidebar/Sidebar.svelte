@@ -49,6 +49,7 @@
 			name: 'Gallery',
 			path: '/gallery',
 			navHref: '/gallery',
+			ignoreSubNavPaths: ['/gallery/inbox'],
 			icon: ImagesIcon
 		},
 		{
@@ -118,20 +119,29 @@
 		}
 
 		if (typeof route.path === 'string') {
+			if (route.ignoreSubNavPaths?.includes(pathName)) {
+				return false;
+			}
+
 			const splitByQuery = pathName.split('?');
 
 			if (splitByQuery.length > 1) {
 				return splitByQuery[0] === route.path;
 			}
 
-			const splitByPath = pathName.split('/');
-			if (splitByPath.length > 1) {
-				return `/${splitByPath[1]}` === route.path;
+			if (route.path === pathName) {
+				return true;
+			} else {
+				const splitByPath = pathName.split('/');
+				if (splitByPath.length > 1) {
+					return `/${splitByPath[1]}` === route.path;
+				}
 			}
-			return route.path === pathName;
 		} else {
 			return !!route.path.exec(pathName);
 		}
+
+		return false;
 	}
 </script>
 
