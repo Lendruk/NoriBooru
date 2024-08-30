@@ -5,6 +5,7 @@ import sdRoutes from './sd';
 import tagRoutes from './tags';
 import vaultRoutes from './vaults';
 import videoRoutes from './videos';
+import watcherRoutes from './watchers';
 import websocketHandler from './websockets';
 export default [
 	websocketHandler,
@@ -14,5 +15,6 @@ export default [
 	...mediaItemRoutes,
 	...tagRoutes,
 	...playlistRoutes,
-	...sdRoutes
+	...sdRoutes,
+	...watcherRoutes
 ];

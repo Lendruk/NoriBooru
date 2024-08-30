@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
+	import CircleDown from '$lib/icons/CircleDown.svelte';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
@@ -70,6 +71,12 @@
 			path: '/playlists',
 			navHref: '/playlists',
 			icon: PlayIcon
+		},
+		{
+			name: 'Downloaders',
+			path: '/downloaders',
+			navHref: '/downloaders',
+			icon: CircleDown
 		},
 		{
 			name: 'Settings',
