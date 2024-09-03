@@ -199,18 +199,35 @@ export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;
 export const activeWatchers = sqliteTable('active_watchers', {
 	id: text('id').primaryKey(),
 	description: text('description'),
-	paused: integer('paused').notNull().default(0),
+	status: text('status').notNull(),
+	data: text('data'),
 	itemsPerRequest: integer('items_per_request').notNull().default(0),
 	itemsDownloaded: integer('items_downloaded').notNull().default(0),
 	totalItems: integer('total_items'),
 	type: text('type').notNull(),
 	url: text('url').notNull(),
 	requestInterval: integer('request_interval').notNull().default(0),
+	timeSinceNewItems: integer('time_since_new_items').notNull().default(0),
 	lastRequestedAt: integer('last_requested_at').notNull().default(0),
+	// How much time it needs to pass without new items for the watcher to be considered dead
+	inactivityTimeout: integer('inactivity_timeout').notNull().default(0),
 	createdAt: integer('created_at').notNull()
 });
 
-export const actriveWatchers_to_tags = sqliteTable(
+export const activeWatchers_to_mediaItems = sqliteTable(
+	'active_watchers_to_media_items',
+	{
+		activeWatcherId: text('active_watcher_id')
+			.notNull()
+			.references(() => activeWatchers.id, { onDelete: 'cascade' }),
+		mediaItemId: integer('media_item_id')
+			.notNull()
+			.references(() => mediaItems.id, { onDelete: 'cascade' })
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.activeWatcherId, t.mediaItemId] }) })
+);
+
+export const activeWatchers_to_tags = sqliteTable(
 	'active_watchers_to_tags',
 	{
 		activeWatcherId: text('active_watcher_id')
@@ -223,4 +240,4 @@ export const actriveWatchers_to_tags = sqliteTable(
 	(t) => ({ pk: primaryKey({ columns: [t.activeWatcherId, t.tagId] }) })
 );
 
-export type ActiveWatcher = InferSelectModel<typeof activeWatchers>;
+export type ActiveWatcherSchema = InferSelectModel<typeof activeWatchers>;

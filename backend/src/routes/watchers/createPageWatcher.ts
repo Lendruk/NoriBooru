@@ -1,18 +1,13 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { PageParserFactory } from '../../lib/watchers/PageParserFactory';
-import { WatcherSource } from '../../lib/watchers/WatcherSource';
 import { Request } from '../../types/Request';
 
 type RequestBody = {
 	url?: string;
-};
-
-const getSourceFromUrl = (url: string): WatcherSource => {
-	if (url.includes('4chan.org')) {
-		return '4chan';
-	}
-	throw new Error('Invalid url');
+	description?: string;
+	requestInterval: number;
+	itemsPerRequest: number;
+	inactivityTimeout: number;
 };
 
 const createWatcher = async (request: Request, reply: FastifyReply) => {
@@ -27,13 +22,30 @@ const createWatcher = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No url provided');
 	}
 
-	const { db } = vault;
+	if (!body.requestInterval) {
+		return reply.status(400).send('No request interval provided');
+	}
 
-	const source = getSourceFromUrl(body.url);
-	const parser = PageParserFactory.createParser(source);
+	if (!body.itemsPerRequest) {
+		return reply.status(400).send('No items per request provided');
+	}
 
-	await parser.queryPage({ url: body.url } as any);
-	return reply.send({ message: 'Watcher created successfully' });
+	if (!body.inactivityTimeout) {
+		return reply.status(400).send('No inactivity timeout provided');
+	}
+
+	if (vault.isThereWatcherWithUrl(body.url)) {
+		return reply.status(400).send('Watcher with this url already exists');
+	}
+
+	const watcher = await vault.registerWatcher(
+		body.url,
+		body.description ?? '',
+		body.requestInterval,
+		body.itemsPerRequest,
+		body.inactivityTimeout
+	);
+	return reply.send({ ...watcher.toSchema() });
 };
 
 export default {
