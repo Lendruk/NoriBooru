@@ -153,7 +153,7 @@
 </script>
 
 <aside
-	class={`bg-zinc-900 flex flex-col justify-between rounded-tr-md rounded-br-md max-w-[200px] relative ${isSidebarOpen ? 'w-2/12' : 'w-[50px]'} relative`}
+	class={`bg-zinc-900 flex flex-1 flex-col justify-between rounded-tr-md rounded-br-md max-w-[200px] relative ${isSidebarOpen ? 'w-2/12' : 'w-[50px]'} relative`}
 >
 	<div class="sticky top-0">
 		{#each routes as route}

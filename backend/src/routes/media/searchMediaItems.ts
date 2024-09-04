@@ -70,19 +70,23 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 	const hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
 	const page = parseInt(query.page ?? '0');
 
-	let mediaTypeQuery;
+	const mediaQueryArr = [];
 	if (mediaType === 'ALL') {
-		mediaTypeQuery = or(eq(mediaItems.type, 'image'), eq(mediaItems.type, 'video'));
+		mediaQueryArr.push(or(eq(mediaItems.type, 'image'), eq(mediaItems.type, 'video')));
 	} else if (mediaType === 'IMAGES') {
-		mediaTypeQuery = eq(mediaItems.type, 'image');
+		mediaQueryArr.push(eq(mediaItems.type, 'image'));
 	} else {
-		mediaTypeQuery = eq(mediaItems.type, 'video');
+		mediaQueryArr.push(eq(mediaItems.type, 'video'));
+	}
+
+	if (query.archived) {
+		mediaQueryArr.push(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0));
 	}
 
 	const rows = await db
 		.select()
 		.from(mediaItems)
-		.where(and(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0), mediaTypeQuery))
+		.where(and(...mediaQueryArr))
 		.orderBy(sortMethod === 'newest' ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt));
 
 	let finalMedia: MediaItem[] = [];

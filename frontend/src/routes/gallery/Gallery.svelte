@@ -40,7 +40,10 @@
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
-	export let isInbox: boolean;
+	export let showReviewButton = true;
+	export let showFilterButton = true;
+	export let scrollOnOverflow = false;
+	export let isInbox: boolean | undefined = undefined;
 	export let usesQueryParams: boolean;
 	export let watcherId: string | undefined = undefined;
 	export let appliedPositiveTags: PopulatedTag[] = [];
@@ -157,6 +160,7 @@
 	}): Promise<MediaItem[]> {
 		fetchingItems = true;
 		const { appendResults, watcherId } = options;
+
 		const params = new URLSearchParams({
 			negativeTags: JSON.stringify(appliedNegativeTags.map((tag) => tag.id)),
 			positiveTags: JSON.stringify(appliedPositiveTags.map((tag) => tag.id)),
@@ -164,10 +168,12 @@
 			negativeQueryType,
 			mediaType,
 			sortMethod,
-			archived: isInbox ? 'false' : 'true',
 			page: currentPage.toString(),
 			watcherId: watcherId ?? ''
 		});
+		if (isInbox !== undefined) {
+			params.set('archived', isInbox ? 'false' : 'true');
+		}
 		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + params);
 
 		if (appendResults) {
@@ -219,12 +225,12 @@
 		);
 	}
 
-	async function toggleSelectedItems() {
+	async function toggleSelectedItems(archived: boolean) {
 		let itemIds: number[] = [];
 		for (const id of selectedItems.keys()) {
 			itemIds.push(id);
 		}
-		await toggleArchivedStatus(itemIds, isInbox ? true : false);
+		await toggleArchivedStatus(itemIds, archived);
 		selectedItems = new Map();
 		await search({ appendResults: false });
 	}
@@ -287,9 +293,11 @@
 	}
 </script>
 
-<div class="relative flex flex-1 flex-col">
-	{#if mediaItems.length > 0}
-		<div class="flex flex-1 mr-2 justify-between min-h-[60px] sticky top-10 z-[10]">
+<div
+	class={`relative flex flex-1 flex-col max-h-full ${scrollOnOverflow ? 'overflow-scroll' : ''}`}
+>
+	{#if mediaItems.length > 0 && (isSelectionModeActive || showFilterButton || showReviewButton)}
+		<div class="flex flex-1 mr-2 justify-between min-h-[60px] sticky z-[10]">
 			{#if isSelectionModeActive}
 				<div class="flex ml-2 mt-2 mb-2 p-2 bg-zinc-900 rounded-lg items-center fill-white">
 					<div class="flex gap-8">
@@ -310,16 +318,22 @@
 							>
 								<TrashIcon />
 							</button>
-							<button
-								on:click={() => toggleSelectedItems()}
-								class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition"
-							>
-								{#if isInbox}
+							{#if isInbox || isInbox === undefined}
+								<button
+									on:click={() => toggleSelectedItems(true)}
+									class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition"
+								>
 									<ArchiveIcon />
-								{:else}
+								</button>
+							{/if}
+							{#if !isInbox}
+								<button
+									on:click={() => toggleSelectedItems(false)}
+									class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition"
+								>
 									<InboxIcon />
-								{/if}
-							</button>
+								</button>
+							{/if}
 							<button
 								on:click={() => (showMassTagEditModal = true)}
 								class="bg-red-900 rounded-sm w-[25px] h-[25px] flex items-center justify-center hover:bg-red-950 hover:transition"
@@ -330,25 +344,29 @@
 					</div>
 				</div>
 			{/if}
-			<div class="flex w-fit p-2 mt-2 mb-2 self-end bg-zinc-900 rounded-lg">
-				<button
-					class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`}
-					on:click={() => (isFilterSelectionVisible = !isFilterSelectionVisible)}
-				>
-					<FilterIcon />
-				</button>
+			{#if showFilterButton || showReviewButton}
+				<div class="flex w-fit p-2 mt-2 mb-2 self-end bg-zinc-900 rounded-lg">
+					{#if showFilterButton}
+						<button
+							class={`${isFilterSelectionVisible ? 'fill-red-900' : 'fill-white'}`}
+							on:click={() => (isFilterSelectionVisible = !isFilterSelectionVisible)}
+						>
+							<FilterIcon />
+						</button>
+					{/if}
 
-				{#if isInbox}
-					<Link
-						href={mediaItems.length > 0 ? '/gallery/review' : ''}
-						class={`${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'} ml-2`}
-						>Start review</Link
-					>
-				{/if}
-			</div>
+					{#if isInbox && showReviewButton}
+						<Link
+							href={mediaItems.length > 0 ? '/gallery/review' : ''}
+							class={`${mediaItems.length > 0 ? 'cursor-pointer' : 'cursor-not-allowed'} ml-2`}
+							>Start review</Link
+						>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	{/if}
-	<div class="flex flex-1 h-full relative">
+	<div class="flex flex-1 relative">
 		{#if isFilterSelectionVisible}
 			<div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
 				<div class="text-3xl mb-4 sticky">Filters</div>
