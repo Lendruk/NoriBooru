@@ -2,4 +2,4 @@
 	import Gallery from '../Gallery.svelte';
 </script>
 
-<Gallery isInbox={true} />
+<Gallery usesQueryParams={true} isInbox={true} />

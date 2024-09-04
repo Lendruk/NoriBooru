@@ -73,9 +73,9 @@
 			icon: PlayIcon
 		},
 		{
-			name: 'Downloaders',
-			path: '/downloaders',
-			navHref: '/downloaders',
+			name: 'Page Watchers',
+			path: '/watchers',
+			navHref: '/watchers',
 			icon: CircleDown
 		},
 		{

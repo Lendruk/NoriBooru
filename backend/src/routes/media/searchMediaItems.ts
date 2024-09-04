@@ -3,6 +3,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import {
 	MediaItemMetadataSchema,
 	TagSchema,
+	activeWatchers_to_mediaItems,
 	mediaItems,
 	mediaItemsMetadata,
 	tagsToMediaItems
@@ -43,6 +44,8 @@ export type MediaSearchQuery = {
 	positiveQueryType?: QueryType;
 	negativeQueryType?: QueryType;
 	mediaType?: MediaTypes;
+	watcherId?: string;
+	pageSize?: number;
 };
 
 const PAGE_SIZE = 50;
@@ -104,6 +107,19 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			// Nothing
 		}
 
+		// Very unoptimized
+		// Will be changed with the remake of the search function
+		if (query.watcherId) {
+			const result = await db.query.activeWatchers_to_mediaItems.findFirst({
+				where: and(
+					eq(activeWatchers_to_mediaItems.activeWatcherId, query.watcherId),
+					eq(activeWatchers_to_mediaItems.mediaItemId, row.id)
+				)
+			});
+
+			if (!result) continue;
+		}
+
 		finalMedia.push({
 			createdAt: row.createdAt,
 			extension: row.extension,
@@ -141,8 +157,9 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 		});
 	}
 
+	const pageSize = query.pageSize ?? PAGE_SIZE;
 	return reply.send({
-		mediaItems: finalMedia.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+		mediaItems: finalMedia.slice(page * pageSize, page * pageSize + pageSize + 1)
 	});
 };
 

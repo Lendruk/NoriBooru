@@ -41,24 +41,25 @@
 	import GalleryItem from './GalleryItem.svelte';
 
 	export let isInbox: boolean;
+	export let usesQueryParams: boolean;
+	export let watcherId: string | undefined = undefined;
+	export let appliedPositiveTags: PopulatedTag[] = [];
+	export let positiveQueryType: CombinationalLogicType = 'AND';
+	export let appliedNegativeTags: PopulatedTag[] = [];
+	export let negativeQueryType: CombinationalLogicType = 'AND';
+	export let sortMethod: SortMethod = 'newest';
+	export let mediaType: MediaTypes = 'ALL';
+	export let showMediaTagEditModal = false;
+	export let showMassTagEditModal = false;
+	export let currentPage = 0;
+	export let hasMoreItems = true;
+	export let fetchingItems = false;
+	export let isFilterSelectionVisible = false;
 
-	let mediaItems: MediaItem[] = [];
-	let appliedPositiveTags: PopulatedTag[] = [];
-	let positiveQueryType: CombinationalLogicType = 'AND';
-	let appliedNegativeTags: PopulatedTag[] = [];
-	let negativeQueryType: CombinationalLogicType = 'AND';
-	let tags: PopulatedTag[] = [];
-	let sortMethod: SortMethod = 'newest';
-	let mediaType: MediaTypes = 'ALL';
-	let showMediaTagEditModal = false;
-	let showMassTagEditModal = false;
-	let currentPage = 0;
-	let hasMoreItems = true;
-	let fetchingItems = false;
-	let isFilterSelectionVisible = false;
 	let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
-
 	let searchParams: URLSearchParams = new URLSearchParams();
+	let tags: PopulatedTag[] = [];
+	let mediaItems: MediaItem[] = [];
 	let galleryDiv: HTMLDivElement;
 
 	let selectedItems: Map<number, MediaItem> = new Map();
@@ -66,38 +67,56 @@
 
 	$: isSelectionModeActive = selectedItems.size > 0;
 
+	$: {
+		if (usesQueryParams) {
+		} else {
+			currentPage = 0;
+			search({ appendResults: false, watcherId });
+		}
+	}
+
+	function updateSearchParams(key: string, value: string) {
+		if (usesQueryParams) {
+			searchParams.set(key, value);
+			goto(`?${searchParams.toString()}`);
+		}
+	}
+
 	onMount(async () => {
-		searchParams = $page.url.searchParams;
 		currentPage = 0;
 		hasMoreItems = true;
-		if (searchParams.size > 0) {
-			sortMethod = (searchParams.get('sortMethod') as SortMethod) ?? 'newest';
-			mediaType = (searchParams.get('mediaType') as MediaType) ?? 'ALL';
-			positiveQueryType =
-				(searchParams.get('positiveQueryType') as CombinationalLogicType) ?? 'AND';
-			negativeQueryType =
-				(searchParams.get('negativeQueryType') as CombinationalLogicType) ?? 'AND';
-			appliedPositiveTags = searchParams.has('positiveTags')
-				? JSON.parse(searchParams.get('positiveTags')!)
-				: [];
-			appliedNegativeTags = searchParams.has('negativeTags')
-				? JSON.parse(searchParams.get('negativeTags')!)
-				: [];
+
+		if (usesQueryParams) {
+			searchParams = $page.url.searchParams;
+			if (searchParams.size > 0) {
+				sortMethod = (searchParams.get('sortMethod') as SortMethod) ?? 'newest';
+				mediaType = (searchParams.get('mediaType') as MediaType) ?? 'ALL';
+				positiveQueryType =
+					(searchParams.get('positiveQueryType') as CombinationalLogicType) ?? 'AND';
+				negativeQueryType =
+					(searchParams.get('negativeQueryType') as CombinationalLogicType) ?? 'AND';
+				appliedPositiveTags = searchParams.has('positiveTags')
+					? JSON.parse(searchParams.get('positiveTags')!)
+					: [];
+				appliedNegativeTags = searchParams.has('negativeTags')
+					? JSON.parse(searchParams.get('negativeTags')!)
+					: [];
+			}
+			page.subscribe(async (val) => {
+				selectedItems = new Map();
+				currentPage = 0;
+				mediaItems = [];
+				await populateScreen();
+			});
 		}
-		page.subscribe(async (val) => {
-			selectedItems = new Map();
-			currentPage = 0;
-			mediaItems = [];
-			await populateScreen();
-		});
 		tags = await HttpService.get<PopulatedTag[]>('/tags');
 	});
 
 	async function populateScreen() {
-		await search(true);
+		await search({ appendResults: true });
 		currentPage = currentPage + 1;
 		while (galleryDiv.scrollHeight <= window.innerHeight) {
-			const res = await search(true);
+			const res = await search({ appendResults: true });
 			currentPage = currentPage + 1;
 			if (res.length === 0) {
 				break;
@@ -109,16 +128,14 @@
 		appliedPositiveTags = [...appliedPositiveTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-		searchParams.set('positiveTags', JSON.stringify(appliedPositiveTags));
-		goto(`?${searchParams.toString()}`);
+		updateSearchParams('positiveTags', JSON.stringify(appliedPositiveTags));
 	}
 
 	async function applyNegativeTagFilter(tag: PopulatedTag) {
 		appliedNegativeTags = [...appliedNegativeTags, tag];
 		currentPage = 0;
 		hasMoreItems = true;
-		searchParams.set('negativeTags', JSON.stringify(appliedNegativeTags));
-		goto(`?${searchParams.toString()}`);
+		updateSearchParams('negativeTags', JSON.stringify(appliedNegativeTags));
 	}
 
 	async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
@@ -134,27 +151,24 @@
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
 
-	async function cleanSearch(appendResults = false): Promise<MediaItem[]> {
-		currentPage = 0;
-		hasMoreItems = true;
-		return await search(appendResults);
-	}
-
-	async function search(appendResults: boolean = false): Promise<MediaItem[]> {
+	async function search(options: {
+		appendResults: boolean;
+		watcherId?: string;
+	}): Promise<MediaItem[]> {
 		fetchingItems = true;
-		const res = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			'/mediaItems?' +
-				new URLSearchParams({
-					negativeTags: JSON.stringify(appliedNegativeTags.map((tag) => tag.id)),
-					positiveTags: JSON.stringify(appliedPositiveTags.map((tag) => tag.id)),
-					positiveQueryType,
-					negativeQueryType,
-					mediaType,
-					sortMethod,
-					archived: isInbox ? 'false' : 'true',
-					page: currentPage.toString()
-				})
-		);
+		const { appendResults, watcherId } = options;
+		const params = new URLSearchParams({
+			negativeTags: JSON.stringify(appliedNegativeTags.map((tag) => tag.id)),
+			positiveTags: JSON.stringify(appliedPositiveTags.map((tag) => tag.id)),
+			positiveQueryType,
+			negativeQueryType,
+			mediaType,
+			sortMethod,
+			archived: isInbox ? 'false' : 'true',
+			page: currentPage.toString(),
+			watcherId: watcherId ?? ''
+		});
+		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + params);
 
 		if (appendResults) {
 			if (res.mediaItems.length > 0) {
@@ -172,18 +186,16 @@
 
 	async function removePositiveTagFilter(tag: PopulatedTag) {
 		appliedPositiveTags = appliedPositiveTags.filter((t) => t.id !== tag.id);
-		searchParams.set('positiveTags', JSON.stringify(appliedPositiveTags));
+		updateSearchParams('positiveTags', JSON.stringify(appliedPositiveTags));
 		currentPage = 0;
 		hasMoreItems = true;
-		goto(`?${searchParams.toString()}`);
 	}
 
 	async function removeNegativeTagFilter(tag: PopulatedTag) {
 		appliedNegativeTags = appliedNegativeTags.filter((t) => t.id !== tag.id);
-		searchParams.set('negativeTags', JSON.stringify(appliedPositiveTags));
+		updateSearchParams('negativeTags', JSON.stringify(appliedPositiveTags));
 		currentPage = 0;
 		hasMoreItems = true;
-		goto(`?${searchParams.toString()}`);
 	}
 
 	async function deleteItems(mediaItemIds: number[]) {
@@ -214,7 +226,7 @@
 		}
 		await toggleArchivedStatus(itemIds, isInbox ? true : false);
 		selectedItems = new Map();
-		await search();
+		await search({ appendResults: false });
 	}
 
 	async function fetchMediaItemTags(mediaItemId: number) {
@@ -263,7 +275,7 @@
 		) {
 			if (hasMoreItems && !fetchingItems) {
 				currentPage = currentPage + 1;
-				await search(true);
+				await search({ appendResults: true });
 			}
 		}
 	}
@@ -275,7 +287,7 @@
 	}
 </script>
 
-<div class="relative">
+<div class="relative flex flex-1 flex-col">
 	{#if mediaItems.length > 0}
 		<div class="flex flex-1 mr-2 justify-between min-h-[60px] sticky top-10 z-[10]">
 			{#if isSelectionModeActive}
@@ -348,16 +360,14 @@
 								class={`${positiveQueryType === 'AND' ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition'} w-1/2 rounded-tl-md rounded-bl-md`}
 								on:click={() => {
 									positiveQueryType = 'AND';
-									searchParams.set('positiveQueryType', positiveQueryType);
-									goto(`?${searchParams.toString()}`);
+									updateSearchParams('positiveQueryType', positiveQueryType);
 								}}>AND</button
 							>
 							<button
 								class={`${positiveQueryType === 'OR' ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition'}  w-1/2 rounded-tr-md rounded-br-md`}
 								on:click={() => {
 									positiveQueryType = 'OR';
-									searchParams.set('positiveQueryType', positiveQueryType);
-									goto(`?${searchParams.toString()}`);
+									updateSearchParams('positiveQueryType', positiveQueryType);
 								}}>OR</button
 							>
 						</div>
@@ -380,16 +390,14 @@
 								class={`${negativeQueryType === 'AND' ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition'} w-1/2 rounded-tl-md rounded-bl-md`}
 								on:click={() => {
 									negativeQueryType = 'AND';
-									searchParams.set('negativeQueryType', negativeQueryType);
-									goto(`?${searchParams.toString()}`);
+									updateSearchParams('negativeQueryType', negativeQueryType);
 								}}>AND</button
 							>
 							<button
 								class={`${negativeQueryType === 'OR' ? 'bg-red-900' : 'bg-surface-color hover:bg-zinc-800 hover:transition'}  w-1/2 rounded-tr-md rounded-br-md`}
 								on:click={() => {
 									negativeQueryType = 'OR';
-									searchParams.set('negativeQueryType', negativeQueryType);
-									goto(`?${searchParams.toString()}`);
+									updateSearchParams('negativeQueryType', negativeQueryType);
 								}}>OR</button
 							>
 						</div>
@@ -409,8 +417,7 @@
 					<select
 						bind:value={sortMethod}
 						on:change={() => {
-							searchParams.set('sortMethod', sortMethod);
-							goto(`?${searchParams.toString()}`);
+							updateSearchParams('sortMethod', sortMethod);
 						}}
 						class="text-black"
 					>
@@ -421,16 +428,15 @@
 				<LabeledComponent>
 					<div slot="label">Media Type</div>
 					<Select
-						bind:value={mediaType}
+						class="h-[40px]"
+						slot="content"
+						bind:value={mediaType as string}
 						on:change={() => {
 							// TODO: Figure out why i need the timeout here
 							setTimeout(() => {
-								searchParams.set('mediaType', mediaType);
-								goto(`?${searchParams.toString()}`);
+								updateSearchParams('mediaType', mediaType);
 							}, 10);
 						}}
-						class="h-[40px]"
-						slot="content"
 					>
 						<option value="ALL">All</option>
 						<option value="IMAGES">Images</option>
