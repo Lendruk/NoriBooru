@@ -80,6 +80,10 @@ export class VaultInstance extends VaultBase {
 		await this.watcherService.pauseWatcher(watcherId);
 	}
 
+	public async resumeWatcher(watcherId: string): Promise<void> {
+		await this.watcherService.resumeWatcher(watcherId);
+	}
+
 	public async deleteWatcher(watcherId: string): Promise<void> {
 		await this.watcherService.deleteWatcher(watcherId);
 	}

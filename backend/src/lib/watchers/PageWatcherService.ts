@@ -91,6 +91,13 @@ export class PageWatcherService {
 		}
 	}
 
+	public async resumeWatcher(watcherId: string): Promise<void> {
+		const watcher = this.watchers.find((watcher) => watcher.id === watcherId);
+		if (watcher && watcher.status === 'paused') {
+			await watcher.start();
+		}
+	}
+
 	public async deleteWatcher(watcherId: string): Promise<void> {
 		const index = this.watchers.findIndex((watcher) => watcher.id === watcherId);
 		if (index !== -1) {

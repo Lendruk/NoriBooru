@@ -2,7 +2,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
 import { Request } from '../../types/Request';
 
-const pauseWatcher = async (request: Request, reply: FastifyReply) => {
+const resumePageWatcher = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {
@@ -10,13 +10,13 @@ const pauseWatcher = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { id } = request.params as { id: string };
-	vault.pauseWatcher(id);
-	return reply.send({ message: 'Watcher paused successfully' });
+	vault.resumeWatcher(id);
+	return reply.send({ message: 'Watcher resumed successfully' });
 };
 
 export default {
 	method: 'PATCH',
-	url: '/watchers/:id/pause',
-	handler: pauseWatcher,
+	url: '/watchers/:id/resume',
+	handler: resumePageWatcher,
 	onRequest: checkVault
 } as RouteOptions;

@@ -62,6 +62,10 @@ export class FourChanWatcher extends ActiveWatcher {
 						break;
 					}
 					await pause(1500);
+
+					if (this.status !== 'running') {
+						break;
+					}
 				}
 			}
 		}
