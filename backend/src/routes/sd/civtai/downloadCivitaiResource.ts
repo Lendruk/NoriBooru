@@ -17,7 +17,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 		return reply.status(400).send('No vault provided');
 	}
 
-	const civitaiImportJob = new Job('civitai-import', 'Civitai import', async (emitter) => {
+	const civitaiImportJob = new Job('civitai-import', 'Civitai import', async () => {
 		const { url } = request.body as { url: string };
 		const splitUrl = url.split('/');
 		console.log(splitUrl);
@@ -66,11 +66,11 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 				await pipeline(imageRequest.body!, createWriteStream(finalPath));
 				const mediaItem = await mediaService.createMediaItemFromFile(
 					vault,
-					modelId,
 					'png',
-					'image',
+					undefined,
 					id,
-					null
+					modelId,
+					[]
 				);
 
 				if (modelInfo.type === 'LORA') {

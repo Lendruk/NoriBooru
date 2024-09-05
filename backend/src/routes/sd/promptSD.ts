@@ -43,12 +43,15 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 
 	for (const image of body.images) {
-		const { fileName, id, metadata } = await mediaService.createImageFromBase64(
+		const { fileName, id } = await mediaService.createItemFromBase64(
 			image,
+			'png',
 			vault,
+			undefined,
 			checkpointId,
 			loras
 		);
+		const metadata = await mediaService.getItemMetadata(vault, id);
 		items.push({ fileName, id, metadata, isArchived: false });
 	}
 

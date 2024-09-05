@@ -44,8 +44,9 @@ export class FourChanWatcher extends ActiveWatcher {
 					const itemUrl = `${FourChanWatcher.BASE_URL}${board}/${fileName}`;
 					const itemBuffer = Buffer.from(await (await fetch(itemUrl)).arrayBuffer());
 
-					const { id: mediaItemId } = await mediaService.createImageFromBase64(
+					const { id: mediaItemId } = await mediaService.createItemFromBase64(
 						itemBuffer.toString('base64'),
+						fileName.split('.').pop()!,
 						this.vault
 					);
 					await this.vault.db.insert(activeWatchers_to_mediaItems).values({

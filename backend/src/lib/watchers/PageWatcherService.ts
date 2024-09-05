@@ -19,6 +19,7 @@ export class PageWatcherService {
 	public constructor(private vault: VaultInstance) {}
 
 	public async init(): Promise<void> {
+		console.log('PageWatcherService::init: called...');
 		const { db } = this.vault;
 		const rawWatchers = await db.query.activeWatchers.findMany();
 		for (const rawWatcher of rawWatchers) {
@@ -30,7 +31,9 @@ export class PageWatcherService {
 			this.watchers.push(activeWatcher);
 
 			if (activeWatcher.status === 'running') {
-				await activeWatcher.start();
+				// We dont need to wait for the watcher startup
+				// That would block the first request done to this vault
+				void activeWatcher.start();
 			}
 		}
 	}

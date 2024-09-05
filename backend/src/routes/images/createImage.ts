@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { TagSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { mediaService } from '../../services/MediaService';
+import { Request } from '../../types/Request';
 
 const createImage = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -13,7 +13,7 @@ const createImage = async (request: Request, reply: FastifyReply) => {
 
 	const body = request.body as { image: string; tags: TagSchema[] };
 	const imageBase64 = body.image;
-	const { id } = await mediaService.createImageFromBase64(imageBase64, vault);
+	const { id } = await mediaService.createItemFromBase64(imageBase64, 'png', vault);
 
 	return reply.send({ message: 'Image registered', id });
 };
