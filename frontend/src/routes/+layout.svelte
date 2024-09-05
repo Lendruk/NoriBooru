@@ -24,12 +24,12 @@
 	});
 </script>
 
-<div class="flex flex-1 w-full">
+<div class="flex flex-1 w-full max-h-full">
 	{#if !$page.url.pathname.includes('/vaults')}
 		<Sidebar />
 		<main>
 			<Topbar />
-			<div class="slot m-2">
+			<div class="slot m-2 overflow-scroll">
 				<slot />
 			</div>
 		</main>
@@ -59,7 +59,7 @@
 		margin: 0;
 		display: flex;
 		flex: 1;
-		min-height: 100vh;
+		height: 100vh;
 	}
 
 	:global(input) {
