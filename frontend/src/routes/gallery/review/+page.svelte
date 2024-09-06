@@ -28,7 +28,7 @@
 	let hasUnsavedChanges = $state(false);
 	let showUnsavedChangesModal = $state(false);
 
-	const inboxUrl = '/gallery?inbox=true';
+	const inboxUrl = '/gallery/inbox';
 	$effect(() => {
 		HttpService.get<number[]>('/mediaItems/review').then(async (items) => {
 			mediaIds = items.reverse();

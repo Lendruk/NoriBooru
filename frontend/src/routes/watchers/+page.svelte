@@ -1,8 +1,10 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
+	import DurationPicker from '$lib/components/DurationPicker.svelte';
 	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import Link from '$lib/components/Link.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import NumberInput from '$lib/components/NumberInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import LinkIcon from '$lib/icons/LinkIcon.svelte';
@@ -20,6 +22,9 @@
 	let showModal = $state(false);
 	let newWatcherUrl = $state('');
 	let isUrlValid = $state(true);
+	let requestInterval = $state(60000); // ms
+	let itemsPerRequest = $state(10);
+	let inactivityTimeout = $state(3600000); // ms
 
 	async function deleteWatcher(watcherId: string) {
 		await HttpService.delete(`/watchers/${watcherId}`);
@@ -36,12 +41,18 @@
 	}
 
 	async function createWatcher() {
+		if (!isUrlValid) return;
+
 		const newWatcher = await HttpService.post<Watcher>(`/watchers`, {
-			url: newWatcherUrl
+			url: newWatcherUrl,
+			requestInterval,
+			inactivityTimeout,
+			itemsPerRequest
 		});
 
 		watchers = [...watchers, newWatcher];
 		selectedWatcher = newWatcher;
+		showModal = false;
 		createToast('Watcher created successfully');
 	}
 
@@ -178,6 +189,24 @@
 						<div class="text-red-900">Invalid URL</div>
 					{/if}
 				{/if}
+			</div>
+		</LabeledComponent>
+		<LabeledComponent>
+			<div slot="label">Items per request</div>
+			<div slot="content">
+				<NumberInput bind:value={itemsPerRequest} />
+			</div>
+		</LabeledComponent>
+		<LabeledComponent>
+			<div slot="label">Request Interval</div>
+			<div slot="content">
+				<DurationPicker bind:value={requestInterval} timeScale="seconds" />
+			</div>
+		</LabeledComponent>
+		<LabeledComponent>
+			<div slot="label">Request Inactivity Timeout</div>
+			<div slot="content">
+				<DurationPicker bind:value={inactivityTimeout} timeScale="hours" />
 			</div>
 		</LabeledComponent>
 		<Button onClick={createWatcher}>Create</Button>

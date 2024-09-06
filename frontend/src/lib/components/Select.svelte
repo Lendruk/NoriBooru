@@ -10,11 +10,11 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="relative">
+<div class="relative flex flex-1 items-center justify-center h-full mt-2 mb-2">
 	<select
 		on:change={(e) => dispatch('change', e)}
 		bind:value
-		class={` bg-surface-color border-red-950 border-2 rounded-md shadow-xl pl-2 cursor-pointer ${cssClass}`}
+		class={` bg-surface-color border-red-950 border-2 flex flex-1 h-[40px] rounded-md shadow-xl pl-2 cursor-pointer ${cssClass}`}
 	>
 		<slot />
 	</select>
