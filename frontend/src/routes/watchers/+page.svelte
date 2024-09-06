@@ -166,7 +166,6 @@
 				<div class="text-xl flex items-center h-[40px]">Downloaded Items</div>
 				<Gallery
 					watcherId={selectedWatcher.id}
-					scrollOnOverflow={true}
 					usesQueryParams={false}
 					showFilterButton={false}
 					showReviewButton={false}

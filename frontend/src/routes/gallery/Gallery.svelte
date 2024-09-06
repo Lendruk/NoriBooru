@@ -42,7 +42,6 @@
 
 	export let showReviewButton = true;
 	export let showFilterButton = true;
-	export let scrollOnOverflow = false;
 	export let isInbox: boolean | undefined = undefined;
 	export let usesQueryParams: boolean;
 	export let watcherId: string | undefined = undefined;
@@ -67,6 +66,7 @@
 
 	let selectedItems: Map<number, MediaItem> = new Map();
 	let isSelectionModeActive = false;
+	let scrollLocked = false;
 
 	$: isSelectionModeActive = selectedItems.size > 0;
 
@@ -270,20 +270,23 @@
 		}
 	}
 
-	async function onWindowScroll(
+	async function onGalleryScroll(
 		e: UIEvent & {
-			currentTarget: EventTarget & Window;
+			currentTarget: HTMLDivElement;
 		}
 	) {
+		if (scrollLocked) return;
+		scrollLocked = true;
 		if (
-			e.currentTarget.scrollY + e.currentTarget.innerHeight >=
-			document.documentElement.scrollHeight - 50
+			e.currentTarget.scrollHeight - e.currentTarget.scrollTop - e.currentTarget.clientHeight <=
+			200
 		) {
 			if (hasMoreItems && !fetchingItems) {
 				currentPage = currentPage + 1;
 				await search({ appendResults: true });
 			}
 		}
+		scrollLocked = false;
 	}
 
 	function goToGenerator(metadata?: MediaItemMetadata) {
@@ -293,9 +296,7 @@
 	}
 </script>
 
-<div
-	class={`relative flex flex-1 flex-col max-h-full ${scrollOnOverflow ? 'overflow-scroll' : ''}`}
->
+<div class={`relative flex flex-1 flex-col max-h-full overflow-scroll`} on:scroll={onGalleryScroll}>
 	{#if mediaItems.length > 0 && (isSelectionModeActive || showFilterButton || showReviewButton)}
 		<div class="flex flex-1 mr-2 justify-between min-h-[60px] sticky z-[10]">
 			{#if isSelectionModeActive}
@@ -527,7 +528,7 @@
 	availableTags={tags}
 />
 
-<svelte:window on:scroll={onWindowScroll} on:keypress={onKeyPress} />
+<svelte:window on:keypress={onKeyPress} />
 
 <svelte:head>
 	<title>NoriBooru - Gallery</title>
