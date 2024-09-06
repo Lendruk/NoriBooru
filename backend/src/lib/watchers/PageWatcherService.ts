@@ -84,6 +84,26 @@ export class PageWatcherService {
 		return activeWatcher;
 	}
 
+	public async updateWatcher(
+		watcherId: string,
+		description: string,
+		requestInterval: number,
+		itemsPerRequest: number,
+		inactivityTimeout: number
+	): Promise<ActiveWatcher> {
+		const watcher = this.watchers.find((watcher) => watcher.id === watcherId);
+		if (watcher) {
+			watcher.description = description;
+			watcher.requestInterval = requestInterval;
+			watcher.itemsPerRequest = itemsPerRequest;
+			watcher.inactivityTimeout = inactivityTimeout;
+			await watcher.save();
+			return watcher;
+		} else {
+			throw new Error('Watcher not found');
+		}
+	}
+
 	public async pauseWatcher(watcherId: string): Promise<void> {
 		const watcher = this.watchers.find((watcher) => watcher.id === watcherId);
 		if (watcher) {

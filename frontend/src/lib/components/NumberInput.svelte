@@ -15,7 +15,7 @@
 		<div slot="content" class="flex gap-2">
 			<input
 				class="h-[40px] flex focus:outline-none w-full bg-surface-color border-red-950 border-2 rounded-md inset-2 shadow-xl pl-2"
-				type="numeric"
+				type="number"
 				placeholder={placeholder ?? ''}
 				{min}
 				{max}
@@ -29,7 +29,7 @@
 	<div class="flex gap-2">
 		<input
 			class="h-[40px] flex focus:outline-none w-full bg-surface-color border-red-950 border-2 rounded-md inset-2 shadow-xl pl-2"
-			type="numeric"
+			type="number"
 			placeholder={placeholder ?? ''}
 			{min}
 			{max}

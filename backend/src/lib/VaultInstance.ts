@@ -76,6 +76,22 @@ export class VaultInstance extends VaultBase {
 		);
 	}
 
+	public async updateWatcher(
+		watcherId: string,
+		description: string,
+		requestInterval: number,
+		itemsPerRequest: number,
+		inactivityTimeout: number
+	): Promise<ActiveWatcher> {
+		return await this.watcherService.updateWatcher(
+			watcherId,
+			description,
+			requestInterval,
+			itemsPerRequest,
+			inactivityTimeout
+		);
+	}
+
 	public async pauseWatcher(watcherId: string): Promise<void> {
 		await this.watcherService.pauseWatcher(watcherId);
 	}

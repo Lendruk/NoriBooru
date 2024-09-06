@@ -9,6 +9,7 @@
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import LinkIcon from '$lib/icons/LinkIcon.svelte';
 	import PauseIcon from '$lib/icons/PauseIcon.svelte';
+	import PenIcon from '$lib/icons/PenIcon.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
@@ -18,13 +19,18 @@
 	let watchers: Watcher[] = $state([]);
 	let selectedWatcher: Watcher | undefined = $state(undefined);
 
-	// Creation
+	const REQUEST_INTERVAL_DEFAULT = 60000;
+	const ITEMS_PER_REQUEST_DEFAULT = 10;
+	const INACTIVITY_TIMEOUT_DEFAULT = 3600000;
+
+	// Modal
+	let isCreatingWatcher = $state(false);
 	let showModal = $state(false);
-	let newWatcherUrl = $state('');
+	let modalWatcherUrl = $state('');
 	let isUrlValid = $state(true);
-	let requestInterval = $state(60000); // ms
-	let itemsPerRequest = $state(10);
-	let inactivityTimeout = $state(3600000); // ms
+	let requestInterval = $state(REQUEST_INTERVAL_DEFAULT); // ms
+	let itemsPerRequest = $state(ITEMS_PER_REQUEST_DEFAULT);
+	let inactivityTimeout = $state(INACTIVITY_TIMEOUT_DEFAULT); // ms
 
 	async function deleteWatcher(watcherId: string) {
 		await HttpService.delete(`/watchers/${watcherId}`);
@@ -40,11 +46,30 @@
 		createToast('Watcher deleted successfully');
 	}
 
+	function openWatcherCreation() {
+		isCreatingWatcher = true;
+		showModal = true;
+		modalWatcherUrl = '';
+		requestInterval = REQUEST_INTERVAL_DEFAULT;
+		itemsPerRequest = ITEMS_PER_REQUEST_DEFAULT;
+		inactivityTimeout = INACTIVITY_TIMEOUT_DEFAULT;
+	}
+
+	function openWatcherEdit(watcher: Watcher) {
+		isCreatingWatcher = false;
+		showModal = true;
+		modalWatcherUrl = watcher.url;
+		isUrlValid = true;
+		requestInterval = watcher.requestInterval;
+		itemsPerRequest = watcher.itemsPerRequest;
+		inactivityTimeout = watcher.inactivityTimeout;
+	}
+
 	async function createWatcher() {
 		if (!isUrlValid) return;
 
 		const newWatcher = await HttpService.post<Watcher>(`/watchers`, {
-			url: newWatcherUrl,
+			url: modalWatcherUrl,
 			requestInterval,
 			inactivityTimeout,
 			itemsPerRequest
@@ -54,6 +79,28 @@
 		selectedWatcher = newWatcher;
 		showModal = false;
 		createToast('Watcher created successfully');
+	}
+
+	async function updateWatcher() {
+		if (!isUrlValid) return;
+
+		const updatedWatcher = await HttpService.put<Watcher>(`/watchers/${selectedWatcher?.id}`, {
+			requestInterval,
+			inactivityTimeout,
+			itemsPerRequest
+		});
+
+		watchers = watchers.map((watcher) => {
+			if (watcher.id === updatedWatcher.id) {
+				watcher.url = updatedWatcher.url;
+				watcher.requestInterval = updatedWatcher.requestInterval;
+				watcher.inactivityTimeout = updatedWatcher.inactivityTimeout;
+				watcher.itemsPerRequest = updatedWatcher.itemsPerRequest;
+			}
+			return watcher;
+		});
+		showModal = false;
+		createToast('Watcher updated successfully');
 	}
 
 	async function pauseWatcher(watcherId: string) {
@@ -79,7 +126,7 @@
 	}
 
 	function validateUrl(): void {
-		const match = newWatcherUrl.match(/boards.4chan.org\/(.+)\/thread\/(.+)/g);
+		const match = modalWatcherUrl.match(/boards.4chan.org\/(.+)\/thread\/(.+)/g);
 		if (match && match.length > 0) {
 			isUrlValid = true;
 		} else {
@@ -103,7 +150,7 @@
 		<div class="flex flex-[0.5] flex-col gap-4 border-r-2 border-red-950 pr-2 top-0">
 			<div class="flex justify-between items-center">
 				<div class="text-xl">Page Watchers</div>
-				<Button onClick={() => (showModal = true)}>New</Button>
+				<Button onClick={openWatcherCreation}>New</Button>
 			</div>
 			{#if watchers.length > 0}
 				<div class="flex flex-col gap-2 overflow-scroll">
@@ -150,6 +197,12 @@
 									</Button>
 									<Button
 										isSelected={watcher.id === selectedWatcher?.id}
+										onClick={() => openWatcherEdit(watcher)}
+									>
+										<PenIcon />
+									</Button>
+									<Button
+										isSelected={watcher.id === selectedWatcher?.id}
 										onClick={() => deleteWatcher(watcher.id)}><TrashIcon /></Button
 									>
 								</div>
@@ -180,8 +233,12 @@
 		<LabeledComponent>
 			<div slot="label">Watcher URL</div>
 			<div slot="content" class="flex flex-col gap-2">
-				<TextInput bind:value={newWatcherUrl} on:input={validateUrl} />
-				{#if newWatcherUrl.length > 0}
+				<TextInput
+					disabled={!isCreatingWatcher}
+					bind:value={modalWatcherUrl}
+					on:input={validateUrl}
+				/>
+				{#if modalWatcherUrl.length > 0}
 					{#if isUrlValid}
 						<div class="text-green-800">Valid URL</div>
 					{:else}
@@ -208,7 +265,11 @@
 				<DurationPicker bind:value={inactivityTimeout} timeScale="hours" />
 			</div>
 		</LabeledComponent>
-		<Button onClick={createWatcher}>Create</Button>
+		{#if isCreatingWatcher}
+			<Button onClick={createWatcher}>Create</Button>
+		{:else}
+			<Button onClick={updateWatcher}>Update</Button>
+		{/if}
 		<div>
 			<div>Supported sites:</div>
 			<div class="flex gap-2">
