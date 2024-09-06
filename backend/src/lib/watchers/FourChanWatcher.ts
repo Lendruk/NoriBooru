@@ -31,6 +31,24 @@ export class FourChanWatcher extends ActiveWatcher {
 		const parsedHtml = parse(body);
 		console.log('Querying 4chan');
 		const board = this.url.split('/')[3];
+		let isClosed = false;
+
+		const imgs = parsedHtml.querySelectorAll('img');
+		for (const img of imgs) {
+			if (img.getAttribute('alt') === '404 Not Found') {
+				this.totalItems = 0;
+				this.status = 'dead';
+				await this.save();
+				return;
+			}
+		}
+
+		const closedElement = parsedHtml.querySelector('.closed');
+
+		if (closedElement) {
+			isClosed = true;
+		}
+
 		const thumbs = parsedHtml.querySelectorAll('.fileThumb');
 
 		this.totalItems = thumbs.length;
@@ -80,6 +98,11 @@ export class FourChanWatcher extends ActiveWatcher {
 			this.timeSinceNewItems = 0;
 		}
 		this.lastRequestedAt = Date.now();
+
+		if (this.itemsDownloaded === this.totalItems && isClosed) {
+			this.status = 'finished';
+		}
+
 		await this.save();
 	}
 

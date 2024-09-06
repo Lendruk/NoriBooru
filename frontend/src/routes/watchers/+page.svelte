@@ -196,6 +196,7 @@
 										{/if}
 									</Button>
 									<Button
+										disabled={watcher.status === 'finished' || watcher.status === 'dead'}
 										isSelected={watcher.id === selectedWatcher?.id}
 										onClick={() => openWatcherEdit(watcher)}
 									>
