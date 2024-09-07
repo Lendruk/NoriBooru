@@ -1,13 +1,13 @@
 import { RunningJob } from '$lib/types/RunningJob';
 import { get } from 'svelte/store';
-import { runningJobs, sdUiStatus } from '../../store';
+import { runningJobs, sdUiStatus, socketEvents$ } from '../../store';
 import { HttpService } from './HttpService';
 
 type SDWebsocketEventData = {
 	status: 'RUNNING' | 'NOT_RUNNING';
 };
 
-type WebSocketEvent = {
+export type WebSocketEvent = {
 	event: string;
 	data: Record<string, unknown>;
 };
@@ -68,6 +68,7 @@ export class WebsocketService {
 	private static async processWebsocketMessages() {
 		const message = WebsocketService.messageQueue.shift()!;
 		const parsedMessage = JSON.parse(message.data) as WebSocketEvent;
+		socketEvents$.set(parsedMessage);
 		let runningJobsCopy = get(runningJobs);
 		switch (parsedMessage.event) {
 			case 'SD':

@@ -1,5 +1,6 @@
 import createPageWatcher from './createPageWatcher';
 import deletePageWatcher from './deletePageWatcher';
+import getWatcher from './getWatcher';
 import getWatchers from './getWatchers';
 import pausePageWatcher from './pausePageWatcher';
 import resumePageWatcher from './resumePageWatcher';
@@ -11,5 +12,6 @@ export default [
 	getWatchers,
 	deletePageWatcher,
 	resumePageWatcher,
-	updatePageWatcher
+	updatePageWatcher,
+	getWatcher
 ];

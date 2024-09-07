@@ -119,6 +119,7 @@ export class FourChanWatcher extends ActiveWatcher {
 				totalItems: this.totalItems
 			})
 			.where(eq(activeWatchers.id, this.id));
+		this.notity();
 	}
 
 	public override toSchema(): ActiveWatcherSchema {

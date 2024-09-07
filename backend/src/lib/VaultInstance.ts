@@ -56,6 +56,10 @@ export class VaultInstance extends VaultBase {
 		return this.watcherService.getWatchers();
 	}
 
+	public getWatcher(watcherId: string): ActiveWatcherSchema {
+		return this.watcherService.getWatcher(watcherId);
+	}
+
 	public isThereWatcherWithUrl(url: string): boolean {
 		return this.watcherService.isThereWatcherWithUrl(url);
 	}

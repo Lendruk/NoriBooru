@@ -45,7 +45,7 @@ export type MediaSearchQuery = {
 	negativeQueryType?: QueryType;
 	mediaType?: MediaTypes;
 	watcherId?: string;
-	pageSize?: number;
+	pageSize?: string;
 };
 
 const PAGE_SIZE = 50;
@@ -161,7 +161,7 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 		});
 	}
 
-	const pageSize = query.pageSize ?? PAGE_SIZE;
+	const pageSize = query.pageSize ? Number.parseInt(query.pageSize) : PAGE_SIZE;
 	return reply.send({
 		mediaItems: finalMedia.slice(page * pageSize, page * pageSize + pageSize + 1)
 	});

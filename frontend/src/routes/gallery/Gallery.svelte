@@ -36,7 +36,6 @@
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import { pause } from '$lib/utils/time';
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
@@ -57,6 +56,13 @@
 	export let hasMoreItems = true;
 	export let fetchingItems = false;
 	export let isFilterSelectionVisible = false;
+
+	let pageSize = 50;
+
+	export const refreshGallery = async () => {
+		currentPage = 0;
+		await search({ appendResults: false, watcherId });
+	};
 
 	let mediaItemInTagEdit: { id: number; tags: PopulatedTag[] } | undefined;
 	let searchParams: URLSearchParams = new URLSearchParams();
@@ -116,10 +122,10 @@
 	});
 
 	async function populateScreen() {
-		await search({ appendResults: true });
+		await search({ appendResults: true, watcherId });
 		currentPage = currentPage + 1;
 		while (galleryDiv.scrollHeight <= window.innerHeight) {
-			const res = await search({ appendResults: true });
+			const res = await search({ appendResults: true, watcherId });
 			currentPage = currentPage + 1;
 			if (res.length === 0) {
 				break;
@@ -168,6 +174,7 @@
 			negativeQueryType,
 			mediaType,
 			sortMethod,
+			pageSize: pageSize.toString(),
 			page: currentPage.toString(),
 			watcherId: watcherId ?? ''
 		});
@@ -175,7 +182,7 @@
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
 		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + params);
-
+		let fetchedMediaItems = res.mediaItems;
 		if (appendResults) {
 			if (res.mediaItems.length > 0) {
 				mediaItems = mediaItems.concat(res.mediaItems);
@@ -183,11 +190,21 @@
 				hasMoreItems = false;
 			}
 		} else {
-			mediaItems = res.mediaItems;
+			mediaItems = fetchedMediaItems;
 		}
-		await pause(1000);
+
+		// Pro-actively fetch more items if we have reached the end of the current page
+		if (fetchedMediaItems.length === pageSize) {
+			currentPage = currentPage + 1;
+			fetchedMediaItems = await search({ appendResults: true, watcherId });
+
+			if (fetchedMediaItems.length === 0) {
+				hasMoreItems = false;
+			}
+		}
+
 		fetchingItems = false;
-		return res.mediaItems;
+		return fetchedMediaItems;
 	}
 
 	async function removePositiveTagFilter(tag: PopulatedTag) {
@@ -232,7 +249,7 @@
 		}
 		await toggleArchivedStatus(itemIds, archived);
 		selectedItems = new Map();
-		await search({ appendResults: false });
+		await search({ appendResults: false, watcherId });
 	}
 
 	async function fetchMediaItemTags(mediaItemId: number) {
@@ -283,7 +300,7 @@
 		) {
 			if (hasMoreItems && !fetchingItems) {
 				currentPage = currentPage + 1;
-				await search({ appendResults: true });
+				await search({ appendResults: true, watcherId });
 			}
 		}
 		scrollLocked = false;

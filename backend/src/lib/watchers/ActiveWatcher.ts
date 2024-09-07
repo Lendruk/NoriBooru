@@ -70,6 +70,10 @@ export abstract class ActiveWatcher implements ActiveWatcherSchema {
 
 	public abstract save(): Promise<void>;
 
+	protected notity(): void {
+		this.vault.broadcastEvent({ event: 'watcher-update', data: { id: this.id } });
+	}
+
 	public toSchema(): ActiveWatcherSchema {
 		return {
 			id: this.id,

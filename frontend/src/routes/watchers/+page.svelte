@@ -13,8 +13,16 @@
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import type { WebSocketEvent } from '$lib/services/WebsocketService';
 	import type { Watcher } from '$lib/types/Watcher';
+	import { onDestroy } from 'svelte';
+	import type { Unsubscriber } from 'svelte/store';
+	import { socketEvents$ } from '../../store';
 	import Gallery from '../gallery/Gallery.svelte';
+
+	type WatcherUpdateSocketEvent = {
+		id: string;
+	};
 
 	let watchers: Watcher[] = $state([]);
 	let selectedWatcher: Watcher | undefined = $state(undefined);
@@ -22,6 +30,9 @@
 	const REQUEST_INTERVAL_DEFAULT = 60000;
 	const ITEMS_PER_REQUEST_DEFAULT = 10;
 	const INACTIVITY_TIMEOUT_DEFAULT = 3600000;
+
+	let refreshGallery: () => Promise<void>;
+	let wsUnsubscriber: Unsubscriber | undefined = $state(undefined);
 
 	// Modal
 	let isCreatingWatcher = $state(false);
@@ -96,6 +107,10 @@
 				watcher.requestInterval = updatedWatcher.requestInterval;
 				watcher.inactivityTimeout = updatedWatcher.inactivityTimeout;
 				watcher.itemsPerRequest = updatedWatcher.itemsPerRequest;
+				watcher.itemsDownloaded = updatedWatcher.itemsDownloaded;
+				watcher.totalItems = updatedWatcher.totalItems;
+				watcher.lastRequestedAt = updatedWatcher.lastRequestedAt;
+				watcher.status = updatedWatcher.status;
 			}
 			return watcher;
 		});
@@ -142,7 +157,36 @@
 				selectedWatcher = watchers[0];
 			}
 		});
+
+		wsUnsubscriber = socketEvents$.subscribe((event) => {
+			if (event) {
+				onSocketEvent(event);
+			}
+		});
 	});
+
+	onDestroy(() => {
+		if (wsUnsubscriber) {
+			wsUnsubscriber();
+		}
+	});
+	async function onSocketEvent(wsEvent: WebSocketEvent) {
+		if (wsEvent.event === 'watcher-update' && refreshGallery) {
+			const watcherUpdateEvent = wsEvent.data as WatcherUpdateSocketEvent;
+			const updatedWatcher = await HttpService.get<Watcher>(`/watchers/${watcherUpdateEvent.id}`);
+			watchers = watchers.map((watcher) => {
+				if (watcher.id === updatedWatcher.id) {
+					watcher.url = updatedWatcher.url;
+					watcher.requestInterval = updatedWatcher.requestInterval;
+					watcher.inactivityTimeout = updatedWatcher.inactivityTimeout;
+					watcher.itemsPerRequest = updatedWatcher.itemsPerRequest;
+				}
+				return watcher;
+			});
+
+			await refreshGallery();
+		}
+	}
 </script>
 
 <div class=" bg-zinc-900 rounded-md h-full p-4">
@@ -219,6 +263,7 @@
 			<div class="flex flex-1 flex-col pl-2">
 				<div class="text-xl flex items-center h-[40px]">Downloaded Items</div>
 				<Gallery
+					bind:refreshGallery
 					watcherId={selectedWatcher.id}
 					usesQueryParams={false}
 					showFilterButton={false}

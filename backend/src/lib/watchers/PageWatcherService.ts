@@ -46,6 +46,15 @@ export class PageWatcherService {
 		return mappedWatchers;
 	}
 
+	public getWatcher(watcherId: string): ActiveWatcherSchema {
+		const watcher = this.watchers.find((watcher) => watcher.id === watcherId)?.toSchema();
+
+		if (!watcher) {
+			throw new Error('Watcher not found');
+		}
+
+		return watcher;
+	}
 	public isThereWatcherWithUrl(url: string): boolean {
 		return this.watchers.find((watcher) => watcher.url === url) !== undefined;
 	}
