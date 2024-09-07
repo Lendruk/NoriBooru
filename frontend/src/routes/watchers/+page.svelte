@@ -174,12 +174,17 @@
 		if (wsEvent.event === 'watcher-update' && refreshGallery) {
 			const watcherUpdateEvent = wsEvent.data as WatcherUpdateSocketEvent;
 			const updatedWatcher = await HttpService.get<Watcher>(`/watchers/${watcherUpdateEvent.id}`);
+			console.log('event for watcher', watcherUpdateEvent.id);
 			watchers = watchers.map((watcher) => {
 				if (watcher.id === updatedWatcher.id) {
 					watcher.url = updatedWatcher.url;
 					watcher.requestInterval = updatedWatcher.requestInterval;
 					watcher.inactivityTimeout = updatedWatcher.inactivityTimeout;
 					watcher.itemsPerRequest = updatedWatcher.itemsPerRequest;
+					watcher.itemsDownloaded = updatedWatcher.itemsDownloaded;
+					watcher.totalItems = updatedWatcher.totalItems;
+					watcher.lastRequestedAt = updatedWatcher.lastRequestedAt;
+					watcher.status = updatedWatcher.status;
 				}
 				return watcher;
 			});

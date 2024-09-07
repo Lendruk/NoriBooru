@@ -29,7 +29,7 @@
 		<Sidebar />
 		<main>
 			<Topbar />
-			<div class="slot m-2 overflow-scroll">
+			<div class="slot m-2 overflow-y-scroll overflow-x-clip">
 				<slot />
 			</div>
 		</main>
