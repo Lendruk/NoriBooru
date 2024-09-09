@@ -13,7 +13,11 @@ const createImage = async (request: Request, reply: FastifyReply) => {
 
 	const body = request.body as { image: string; tags: TagSchema[] };
 	const imageBase64 = body.image;
-	const { id } = await mediaService.createItemFromBase64(imageBase64, 'png', vault);
+	const { id } = await mediaService.createItemFromBase64({
+		base64EncodedImage: imageBase64,
+		fileExtension: 'png',
+		vault
+	});
 
 	return reply.send({ message: 'Image registered', id });
 };

@@ -1,8 +1,10 @@
-import { ActiveWatcherSchema } from '../../db/vault/schema';
+import { eq } from 'drizzle-orm';
+import { activeWatchers, ActiveWatcherSchema } from '../../db/vault/schema';
 import { VaultInstance } from '../VaultInstance';
 import { WatcherSource } from './WatcherSource';
 
-export abstract class ActiveWatcher implements ActiveWatcherSchema {
+export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema {
+	protected instanceData!: T extends undefined ? undefined : T;
 	public id: string;
 	public description: string | null;
 	public data: string | null;
@@ -68,7 +70,21 @@ export abstract class ActiveWatcher implements ActiveWatcherSchema {
 
 	public abstract queryPage(): Promise<void>;
 
-	public abstract save(): Promise<void>;
+	public async save(): Promise<void> {
+		await this.vault.db
+			.update(activeWatchers)
+			.set({
+				data: JSON.stringify(this.instanceData),
+				status: this.status,
+				description: this.description,
+				lastRequestedAt: this.lastRequestedAt,
+				itemsDownloaded: this.itemsDownloaded,
+				timeSinceNewItems: this.timeSinceNewItems,
+				totalItems: this.totalItems
+			})
+			.where(eq(activeWatchers.id, this.id));
+		this.notity();
+	}
 
 	protected notity(): void {
 		this.vault.broadcastEvent({ event: 'watcher-update', data: { id: this.id } });

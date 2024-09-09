@@ -58,7 +58,12 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				try {
 					await pipeline(part.file, createWriteStream(finalPath));
 
-					await mediaService.createMediaItemFromFile(vault, finalExtension, part.filename, id);
+					await mediaService.createMediaItemFromFile({
+						vault,
+						fileExtension: finalExtension,
+						originalFileName: part.filename,
+						preCalculatedId: id
+					});
 				} catch (error) {
 					console.log(`Failed to upload file - ${part.filename}`);
 					console.log(error);

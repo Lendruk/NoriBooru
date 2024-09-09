@@ -1,10 +1,5 @@
-import { eq } from 'drizzle-orm';
 import { parse } from 'node-html-parser';
-import {
-	activeWatchers,
-	activeWatchers_to_mediaItems,
-	ActiveWatcherSchema
-} from '../../db/vault/schema';
+import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vault/schema';
 import { mediaService } from '../../services/MediaService';
 import { pause } from '../../utils/pause';
 import { VaultInstance } from '../VaultInstance';
@@ -14,9 +9,8 @@ export type FourChanWatcherData = {
 	filesDownloaded: string[];
 };
 
-export class FourChanWatcher extends ActiveWatcher {
-	private static readonly BASE_URL = 'https://i.4cdn.org/';
-	private instanceData: FourChanWatcherData;
+export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
+	private static readonly BASE_ITEM_URL = 'https://i.4cdn.org/';
 	public constructor(rawWatcher: ActiveWatcherSchema, vault: VaultInstance) {
 		super(rawWatcher, vault);
 
@@ -59,14 +53,15 @@ export class FourChanWatcher extends ActiveWatcher {
 			if (href) {
 				const fileName = href.split('/').pop()!;
 				if (!this.instanceData.filesDownloaded.includes(fileName)) {
-					const itemUrl = `${FourChanWatcher.BASE_URL}${board}/${fileName}`;
+					const itemUrl = `${FourChanWatcher.BASE_ITEM_URL}${board}/${fileName}`;
 					const itemBuffer = Buffer.from(await (await fetch(itemUrl)).arrayBuffer());
 
-					const { id: mediaItemId } = await mediaService.createItemFromBase64(
-						itemBuffer.toString('base64'),
-						fileName.split('.').pop()!,
-						this.vault
-					);
+					const { id: mediaItemId } = await mediaService.createItemFromBase64({
+						base64EncodedImage: itemBuffer.toString('base64'),
+						fileExtension: fileName.split('.').pop()!,
+						vault: this.vault,
+						source: itemUrl
+					});
 					await this.vault.db.insert(activeWatchers_to_mediaItems).values({
 						activeWatcherId: this.id,
 						mediaItemId
@@ -104,22 +99,6 @@ export class FourChanWatcher extends ActiveWatcher {
 		}
 
 		await this.save();
-	}
-
-	public async save(): Promise<void> {
-		await this.vault.db
-			.update(activeWatchers)
-			.set({
-				data: JSON.stringify(this.instanceData),
-				status: this.status,
-				description: this.description,
-				lastRequestedAt: this.lastRequestedAt,
-				itemsDownloaded: this.itemsDownloaded,
-				timeSinceNewItems: this.timeSinceNewItems,
-				totalItems: this.totalItems
-			})
-			.where(eq(activeWatchers.id, this.id));
-		this.notity();
 	}
 
 	public override toSchema(): ActiveWatcherSchema {

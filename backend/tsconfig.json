@@ -11,5 +11,5 @@
 		"outDir": "./dist",
 		"rootDir": "./"
 	},
-	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts"]
+	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts", "node_modules", "vaults"]
 }

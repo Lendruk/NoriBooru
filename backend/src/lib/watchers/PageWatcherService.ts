@@ -9,6 +9,8 @@ import { WatcherSource } from './WatcherSource';
 const getSourceFromUrl = (url: string): WatcherSource => {
 	if (url.includes('4chan.org')) {
 		return '4chan';
+	} else if (url.includes('reddit.com')) {
+		return 'reddit';
 	}
 	throw new Error('Invalid url');
 };

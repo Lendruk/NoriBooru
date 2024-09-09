@@ -141,7 +141,9 @@
 	}
 
 	function validateUrl(): void {
-		const match = modalWatcherUrl.match(/boards.4chan.org\/(.+)\/thread\/(.+)/g);
+		const match = modalWatcherUrl.match(
+			/boards.4chan.org\/(.+)\/thread\/(.+)|(old|www).reddit.com\/r\/(.+)/g
+		);
 		if (match && match.length > 0) {
 			isUrlValid = true;
 		} else {
@@ -323,8 +325,9 @@
 		{/if}
 		<div>
 			<div>Supported sites:</div>
-			<div class="flex gap-2">
+			<div class="flex flex-col gap-2">
 				<div>4chan threads</div>
+				<div>Reddit subreddits</div>
 			</div>
 		</div>
 	</div>

@@ -51,14 +51,33 @@ class MediaService {
 		return metadata;
 	}
 
-	public async createMediaItemFromFile(
-		vault: VaultInstance,
-		fileExtension: string,
-		originalFileName: string | undefined,
-		preCalculatedId: string | undefined = undefined,
-		sdCheckPointId: string | null = null,
-		loras: string[] = []
-	): Promise<MediaItem> {
+	public async isThereMediaItemWithSource(vault: VaultInstance, source: string): Promise<boolean> {
+		const { db } = vault;
+		const mediaItem = await db.query.mediaItems.findFirst({
+			where: eq(mediaItems.source, source)
+		});
+
+		return !!mediaItem;
+	}
+
+	public async createMediaItemFromFile(options: {
+		vault: VaultInstance;
+		fileExtension: string;
+		originalFileName?: string;
+		preCalculatedId?: string;
+		sdCheckPointId?: string;
+		loras?: string[];
+		source?: string;
+	}): Promise<MediaItem> {
+		const {
+			vault,
+			fileExtension,
+			originalFileName,
+			preCalculatedId,
+			sdCheckPointId,
+			loras,
+			source
+		} = options;
 		const { db } = vault;
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const id = preCalculatedId ?? randomUUID();
@@ -84,6 +103,7 @@ class MediaService {
 				hash: hexHash,
 				sdCheckpoint: sdCheckPointId,
 				originalFileName,
+				source,
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();
@@ -94,8 +114,10 @@ class MediaService {
 
 		await this.generateItemThumbnail(vault, fileExtension, finalPath, newMediaItem);
 
-		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+		if (loras) {
+			for (const lora of loras) {
+				await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+			}
 		}
 
 		return newMediaItem;
@@ -142,14 +164,24 @@ class MediaService {
 		}
 	}
 
-	public async createItemFromBase64(
-		base64EncodedImage: string,
-		fileExtension: string,
-		vault: VaultInstance,
-		originalFileName?: string,
-		sdCheckPointId: string | null = null,
-		loras: string[] = []
-	): Promise<{ id: number; fileName: string }> {
+	public async createItemFromBase64(options: {
+		base64EncodedImage: string;
+		fileExtension: string;
+		vault: VaultInstance;
+		originalFileName?: string;
+		sdCheckPointId?: string;
+		loras?: string[];
+		source?: string;
+	}): Promise<{ id: number; fileName: string }> {
+		const {
+			base64EncodedImage,
+			fileExtension,
+			vault,
+			originalFileName,
+			sdCheckPointId,
+			loras,
+			source
+		} = options;
 		const id = randomUUID();
 		const imageBuffer = Buffer.from(
 			base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''),
@@ -167,18 +199,16 @@ class MediaService {
 		console.log(hash);
 		await fs.writeFile(itemPath, imageBuffer);
 
-		const newMediaItem = await this.createMediaItemFromFile(
+		const newMediaItem = await this.createMediaItemFromFile({
 			vault,
-			finalExtension,
+			fileExtension: finalExtension,
 			originalFileName,
-			id,
+			preCalculatedId: id,
 			sdCheckPointId,
-			loras
-		);
+			loras,
+			source
+		});
 
-		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
-		}
 		return {
 			id: newMediaItem.id,
 			fileName: newMediaItem.fileName
