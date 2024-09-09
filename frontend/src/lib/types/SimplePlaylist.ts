@@ -5,5 +5,5 @@ export type SimplePlaylist = {
 	updatedAt: number | null;
 	randomizeOrder: number;
 	timePerItem: number | null;
-	items: number;
+	items: number[];
 };

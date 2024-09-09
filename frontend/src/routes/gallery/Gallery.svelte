@@ -19,12 +19,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import Button from '$lib/components/Button.svelte';
 	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import Link from '$lib/components/Link.svelte';
 	import MassTagEditModal from '$lib/components/MassTagEditModal.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import TextInput from '$lib/components/TextInput.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Video from '$lib/components/Video.svelte';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
@@ -35,6 +38,7 @@
 	import XIcon from '$lib/icons/XIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
+	import type { Playlist } from '$lib/types/Playlist';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
@@ -56,6 +60,13 @@
 	export let hasMoreItems = true;
 	export let fetchingItems = false;
 	export let isFilterSelectionVisible = false;
+
+	// Playlist modal
+	let isPlaylistModalOpen = false;
+	let playlists: Playlist[] = [];
+	let mediaItemToAddToPlaylist: MediaItem | undefined = undefined;
+	let isPlaylistCreationModalOpen = false;
+	let playlistCreationName = '';
 
 	let pageSize = 50;
 
@@ -120,6 +131,20 @@
 		}
 		tags = await HttpService.get<PopulatedTag[]>('/tags');
 	});
+
+	async function createPlaylist() {
+		const newPlaylist = await HttpService.post<Playlist>('/playlists', {
+			name: playlistCreationName,
+			randomizeOrder: false,
+			timePerItem: 0,
+			items: [mediaItemToAddToPlaylist!.id]
+		});
+
+		playlists = [...playlists, newPlaylist];
+		playlistCreationName = '';
+		isPlaylistCreationModalOpen = false;
+		createToast('Playlist created successfully');
+	}
 
 	async function populateScreen() {
 		await search({ appendResults: true, watcherId });
@@ -311,6 +336,23 @@
 			`/stablediffusion/generator?inputMetadata=${encodeURIComponent(JSON.stringify(metadata ?? {}))}`
 		);
 	}
+
+	async function onAddToPlaylistClick(mediaItem: MediaItem) {
+		playlists = await HttpService.get<Playlist[]>('/playlists');
+		mediaItemToAddToPlaylist = mediaItem;
+		isPlaylistModalOpen = true;
+	}
+
+	async function addMediaItemToPlaylist(playlistId: number, mediaItemId: number) {
+		await HttpService.patch(`/playlists/${playlistId}/add-item`, { item: mediaItemId });
+		playlists = playlists.map((playlist) => {
+			if (playlist.id === playlistId) {
+				playlist.items.push(mediaItemId);
+			}
+			return playlist;
+		});
+		createToast('Media item added successfully');
+	}
 </script>
 
 <div class={`relative flex flex-1 flex-col max-h-full overflow-scroll`} on:scroll={onGalleryScroll}>
@@ -495,6 +537,7 @@
 					onConfirmDelete={() => deleteItems([mediaItem.id])}
 					onTagButtonClick={() => onTagButtonClick(mediaItem.id)}
 					onSelectClick={() => onMediaItemSelect(mediaItem)}
+					onAddToPlaylistClick={() => onAddToPlaylistClick(mediaItem)}
 					onGotoGeneratorClick={() => goToGenerator(mediaItem.metadata)}
 					isSelected={selectedItems.has(mediaItem.id)}
 					{isSelectionModeActive}
@@ -544,6 +587,44 @@
 	itemsInEdit={selectedItems}
 	availableTags={tags}
 />
+<Modal bind:showModal={isPlaylistModalOpen}>
+	<div class="flex flex-col items-center justify-between flex-1 p-4">
+		<div class="text-xl">Add to playlist</div>
+		<div class="flex w-full flex-col gap-4 overflow-y-scroll mb-4">
+			{#if playlists.length > 0}
+				{#each playlists as playlist}
+					<Button
+						disabled={!!playlist.items.find((item) => item === mediaItemToAddToPlaylist?.id)}
+						class={`${!!playlist.items.find((item) => item === mediaItemToAddToPlaylist?.id) ? 'bg-zinc-900' : ''} flex p-4 flex-1 flex-col `}
+						onClick={async () => {
+							isPlaylistModalOpen = false;
+							await addMediaItemToPlaylist(playlist.id, mediaItemToAddToPlaylist!.id);
+						}}
+						>{playlist.name}</Button
+					>
+				{/each}
+			{:else}
+				<div class="text-2xl flex self-center">No playlists found</div>
+			{/if}
+		</div>
+		<Button
+			onClick={() => {
+				isPlaylistCreationModalOpen = true;
+				playlistCreationName = '';
+			}}
+			class="self-end flex w-full">Add to new Playlist</Button
+		>
+	</div>
+	<Modal bind:showModal={isPlaylistCreationModalOpen}>
+		<div class="flex flex-col gap-4 flex-1 p-4 justify-between">
+			<LabeledComponent>
+				<div slot="label">Playlist name</div>
+				<TextInput slot="content" bind:value={playlistCreationName} />
+			</LabeledComponent>
+			<Button onClick={createPlaylist}>Create</Button>
+		</div>
+	</Modal>
+</Modal>
 
 <svelte:window on:keypress={onKeyPress} />
 

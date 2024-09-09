@@ -3,6 +3,7 @@
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 	import InboxIcon from '$lib/icons/InboxIcon.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
+	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import TagIcon from '$lib/icons/TagIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { vaultStore } from '../../store';
@@ -13,6 +14,7 @@
 	export let onMoveToArchive = () => {};
 	export let onMoveToInbox = () => {};
 	export let onTagButtonClick = () => {};
+	export let onAddToPlaylistClick = () => {};
 	export let onGotoGeneratorClick: () => void;
 	export let isArchived = false;
 	export let style = '';
@@ -91,6 +93,9 @@
 						<PenIcon />
 					</GalleryItemButton>
 				{/if}
+				<GalleryItemButton onClick={onAddToPlaylistClick}>
+					<PlayIcon />
+				</GalleryItemButton>
 				<GalleryItemButton onClick={onTagButtonClick}>
 					<TagIcon />
 				</GalleryItemButton>

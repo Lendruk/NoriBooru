@@ -36,7 +36,8 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 				isArchived: mediaItems.isArchived,
 				hash: mediaItems.hash,
 				originalFileName: mediaItems.originalFileName,
-				index: playlists_mediaItems_table.itemIndex
+				index: playlists_mediaItems_table.itemIndex,
+				source: mediaItems.source
 			}
 		})
 		.from(playlists)
@@ -72,7 +73,8 @@ const getPlaylist = async (request: Request, reply: FastifyReply) => {
 					type: item.type!,
 					hash: item.hash!,
 					updatedAt: item.updatedAt,
-					originalFileName: item.originalFileName
+					originalFileName: item.originalFileName,
+					source: item.source
 				};
 			}
 
