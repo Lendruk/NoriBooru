@@ -39,7 +39,7 @@
 				rows={playlists}
 				actions={[
         { icon: EditIcon, name: "Edit", onClick: (id) => { goto(`/playlists/${id}`)}},
-        { icon: PlayIcon, name: 'Play', onClick: (id) => { goto(`/playlists/view/${id}`)}, condition: (row) =>  (row as SimplePlaylist).items > 0},
+        { icon: PlayIcon, name: 'Play', onClick: (id) => { goto(`/playlists/view/${id}`)}, condition: (row) =>  (row as SimplePlaylist).items.length > 0},
         { icon: TrashIcon, name: 'Delete', onClick: (id) => { deletePlaylist(id as number)} }
       ]}
 			/>

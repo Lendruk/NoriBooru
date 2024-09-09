@@ -1,8 +1,8 @@
+import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { eq, sql } from 'drizzle-orm';
 import { playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 export type SimplePlaylist = {
 	id: number;
@@ -11,7 +11,7 @@ export type SimplePlaylist = {
 	updatedAt: number | null;
 	randomizeOrder: number;
 	timePerItem: number | null;
-	items: number;
+	items: number[];
 };
 
 const getPlaylists = async (request: Request, reply: FastifyReply) => {
@@ -25,13 +25,10 @@ const getPlaylists = async (request: Request, reply: FastifyReply) => {
 	const playlists = (await db.query.playlists.findMany()) as SimplePlaylist[];
 
 	for (const playlist of playlists) {
-		const amtOfMedia = await db
-			.select({
-				count: sql<number>`cast(count(${playlists_mediaItems_table.playlistId}) as int)`
-			})
-			.from(playlists_mediaItems_table)
-			.where(eq(playlists_mediaItems_table.playlistId, playlist.id));
-		playlist.items = amtOfMedia[0].count;
+		const itemIds = await db.query.playlists_mediaItems_table.findMany({
+			where: eq(playlists_mediaItems_table.playlistId, playlist.id)
+		});
+		playlist.items = itemIds.map((item) => item.mediaItemId);
 	}
 	return reply.send(playlists);
 };

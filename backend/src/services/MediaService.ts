@@ -20,31 +20,90 @@ import { generateRandomColor } from '../utils/generateRandomColor';
 import TagService from './TagService';
 
 class MediaService {
-	public async createMediaItemFromFile(
-		vault: VaultInstance,
-		filePath: string,
-		fileType: 'image' | 'video',
-		preCalculatedId: string | undefined = undefined,
-		sdCheckPointId: string | null = null,
-		loras: string[] = []
-	): Promise<MediaItem> {
+	private getTypeFromExtension(fileExtension: string): 'image' | 'video' {
+		if (['jpg', 'webp', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+			return 'image';
+		}
+
+		if (['mp4', 'webm'].includes(fileExtension)) {
+			return 'video';
+		}
+
+		throw new Error('Invalid file extension');
+	}
+
+	private getFinalExtension(fileExtension: string): string {
+		if (['jpg', 'webp', 'jpeg', 'png'].includes(fileExtension)) {
+			return 'png';
+		}
+		return fileExtension;
+	}
+
+	public async getItemMetadata(vault: VaultInstance, id: number): Promise<MediaItemMetadataSchema> {
 		const { db } = vault;
-		const [stats, buffer] = await Promise.all([fs.stat(filePath), fs.readFile(filePath)]);
+		const metadata = await db.query.mediaItemsMetadata.findFirst({
+			where: eq(mediaItemsMetadata.mediaItem, id)
+		});
+
+		if (!metadata) {
+			throw new Error('Metadata not found');
+		}
+		return metadata;
+	}
+
+	public async isThereMediaItemWithSource(vault: VaultInstance, source: string): Promise<boolean> {
+		const { db } = vault;
+		const mediaItem = await db.query.mediaItems.findFirst({
+			where: eq(mediaItems.source, source)
+		});
+
+		return !!mediaItem;
+	}
+
+	public async createMediaItemFromFile(options: {
+		vault: VaultInstance;
+		fileExtension: string;
+		originalFileName?: string;
+		preCalculatedId?: string;
+		sdCheckPointId?: string;
+		loras?: string[];
+		source?: string;
+	}): Promise<MediaItem> {
+		const {
+			vault,
+			fileExtension,
+			originalFileName,
+			preCalculatedId,
+			sdCheckPointId,
+			loras,
+			source
+		} = options;
+		const { db } = vault;
+		const fileType = this.getTypeFromExtension(fileExtension);
+		const id = preCalculatedId ?? randomUUID();
+		const finalPath = path.join(
+			vault.path,
+			'media',
+			fileType === 'image' ? 'images' : 'videos',
+			`${id}.${fileExtension}`
+		);
+		const [stats, buffer] = await Promise.all([fs.stat(finalPath), fs.readFile(finalPath)]);
 		const hash = createHash('sha256');
 		hash.update(buffer);
 		const hexHash = hash.digest('hex').toString();
-		const id = preCalculatedId ?? randomUUID();
 		// Exif
 		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
 		const [newMediaItem] = await db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
-				extension: fileType === 'image' ? 'png' : filePath.split('.').pop()!,
+				extension: fileType === 'image' ? fileExtension : finalPath.split('.').pop()!,
 				type: fileType,
 				createdAt: Date.now(),
 				hash: hexHash,
 				sdCheckpoint: sdCheckPointId,
+				originalFileName,
+				source,
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();
@@ -53,24 +112,33 @@ class MediaService {
 			await this.processMediaItemExif(vault, newMediaItem.id, exif);
 		}
 
-		await this.generateItemThumbnail(vault, filePath, newMediaItem);
+		await this.generateItemThumbnail(vault, fileExtension, finalPath, newMediaItem);
 
-		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+		if (loras) {
+			for (const lora of loras) {
+				await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+			}
 		}
 
 		return newMediaItem;
 	}
 
 	public async generateItemThumbnail(
-		vault: VaultInstance,
+		vault: VaultBase,
+		fileExtension: string,
 		filePath: string,
 		mediaItem: MediaItem
 	): Promise<void> {
 		if (mediaItem.type === 'image') {
-			await sharp(filePath)
-				.jpeg({ quality: 80 })
-				.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+			if (fileExtension === 'gif') {
+				await sharp(filePath, { animated: true })
+					.webp({ quality: 70, lossless: false })
+					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
+			} else {
+				await sharp(filePath)
+					.jpeg({ quality: 80 })
+					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+			}
 		} else if (mediaItem.type === 'video') {
 			const thumbnailPath = path.join(
 				vault.path,
@@ -96,50 +164,54 @@ class MediaService {
 		}
 	}
 
-	public async createImageFromBase64(
-		base64EncodedImage: string,
-		vault: VaultInstance,
-		sdCheckPointId: string | null = null,
-		loras: string[] = []
-	): Promise<{ id: number; fileName: string; metadata: MediaItemMetadataSchema }> {
-		const { db } = vault;
+	public async createItemFromBase64(options: {
+		base64EncodedImage: string;
+		fileExtension: string;
+		vault: VaultInstance;
+		originalFileName?: string;
+		sdCheckPointId?: string;
+		loras?: string[];
+		source?: string;
+	}): Promise<{ id: number; fileName: string }> {
+		const {
+			base64EncodedImage,
+			fileExtension,
+			vault,
+			originalFileName,
+			sdCheckPointId,
+			loras,
+			source
+		} = options;
 		const id = randomUUID();
 		const imageBuffer = Buffer.from(
 			base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''),
 			'base64'
 		);
-		const imagePath = path.join(vault.path, 'media', 'images', `${id}.png`);
-
+		const fileType = this.getTypeFromExtension(fileExtension);
+		const finalExtension = this.getFinalExtension(fileExtension);
+		const itemPath = path.join(
+			vault.path,
+			'media',
+			fileType === 'image' ? 'images' : 'videos',
+			`${id}.${finalExtension}`
+		);
 		const hash = createHash('sha256').update(imageBuffer).digest('hex').toString();
 		console.log(hash);
-		await fs.writeFile(imagePath, imageBuffer);
-		await sharp(imagePath)
-			.jpeg({ quality: 80 })
-			.toFile(`${vault.path}/media/images/.thumb/${id}.jpg`);
+		await fs.writeFile(itemPath, imageBuffer);
 
-		const fileSize = imageBuffer.byteLength;
-		const exif = (await ExifReader.load(imageBuffer)) as ParsedExif;
-		const [newMediaItem] = await db
-			.insert(mediaItems)
-			.values({
-				fileName: id,
-				extension: 'png',
-				type: 'image',
-				fileSize,
-				createdAt: Date.now(),
-				sdCheckpoint: sdCheckPointId,
-				hash
-			})
-			.returning();
-		const metadata = await this.processMediaItemExif(vault, newMediaItem.id, exif);
+		const newMediaItem = await this.createMediaItemFromFile({
+			vault,
+			fileExtension: finalExtension,
+			originalFileName,
+			preCalculatedId: id,
+			sdCheckPointId,
+			loras,
+			source
+		});
 
-		for (const lora of loras) {
-			await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
-		}
 		return {
 			id: newMediaItem.id,
-			fileName: newMediaItem.fileName,
-			metadata
+			fileName: newMediaItem.fileName
 		};
 	}
 

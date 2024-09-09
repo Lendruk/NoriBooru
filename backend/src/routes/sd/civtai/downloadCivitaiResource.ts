@@ -1,19 +1,15 @@
 import { randomUUID } from 'crypto';
 import { FastifyReply, RouteOptions } from 'fastify';
 import fs, { createWriteStream } from 'fs';
-import util from 'node:util';
 import path from 'path';
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
+import { finished, pipeline } from 'stream/promises';
 import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
 import { Job } from '../../../lib/Job';
 import { mediaService } from '../../../services/MediaService';
 import { Request } from '../../../types/Request';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { pipeline } = require('node:stream');
-const pump = util.promisify(pipeline);
 
 const downloadCivitaiResource = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -21,7 +17,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 		return reply.status(400).send('No vault provided');
 	}
 
-	const civitaiImportJob = new Job('civitai-import', 'Civitai import', async (emitter) => {
+	const civitaiImportJob = new Job('civitai-import', 'Civitai import', async () => {
 		const { url } = request.body as { url: string };
 		const splitUrl = url.split('/');
 		console.log(splitUrl);
@@ -67,13 +63,14 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 				const imageRequest = await fetch(modelVersion.images[0].url);
 				const id = randomUUID();
 				const finalPath = path.join(vault.path, 'media', 'images', `${id}.png`);
-				await pump(imageRequest.body, createWriteStream(finalPath));
+				await pipeline(imageRequest.body!, createWriteStream(finalPath));
 				const mediaItem = await mediaService.createMediaItemFromFile(
 					vault,
-					finalPath,
-					'image',
+					'png',
+					undefined,
 					id,
-					null
+					modelId,
+					[]
 				);
 
 				if (modelInfo.type === 'LORA') {

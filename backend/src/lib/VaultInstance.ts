@@ -7,12 +7,20 @@ import { createConnection } from 'net';
 import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
-import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
+import {
+	ActiveWatcherSchema,
+	sdCheckpoints,
+	sdLoras,
+	sdPrompts,
+	sdWildcards
+} from '../db/vault/schema';
 import TagService from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
 import { VaultConfig } from '../types/VaultConfig';
 import { VaultBase } from './VaultBase';
+import { ActiveWatcher } from './watchers/ActiveWatcher';
+import { PageWatcherService } from './watchers/PageWatcherService';
 
 const execAsync = promisify(exec);
 type ProcessEntry = {
@@ -24,6 +32,7 @@ type ProcessEntry = {
 export class VaultInstance extends VaultBase {
 	private sdProcess?: ProcessEntry;
 	private inactiveProcessTimer?: NodeJS.Timeout;
+	private watcherService: PageWatcherService;
 
 	/**
 	 * Current SD ui link
@@ -35,6 +44,68 @@ export class VaultInstance extends VaultBase {
 
 	public constructor(vault: VaultConfig) {
 		super(vault);
+		this.watcherService = new PageWatcherService(this);
+	}
+
+	public override async init(): Promise<void> {
+		await super.init();
+		await this.watcherService.init();
+	}
+
+	public getWatchers(): ActiveWatcherSchema[] {
+		return this.watcherService.getWatchers();
+	}
+
+	public getWatcher(watcherId: string): ActiveWatcherSchema {
+		return this.watcherService.getWatcher(watcherId);
+	}
+
+	public isThereWatcherWithUrl(url: string): boolean {
+		return this.watcherService.isThereWatcherWithUrl(url);
+	}
+
+	public async registerWatcher(
+		url: string,
+		description: string,
+		requestInterval: number,
+		itemsPerRequest: number,
+		inactivityTimeout: number
+	): Promise<ActiveWatcher> {
+		return await this.watcherService.createWatcher(
+			url,
+			description,
+			requestInterval,
+			itemsPerRequest,
+			inactivityTimeout
+		);
+	}
+
+	public async updateWatcher(
+		watcherId: string,
+		description: string,
+		requestInterval: number,
+		itemsPerRequest: number,
+		inactivityTimeout: number
+	): Promise<ActiveWatcher> {
+		return await this.watcherService.updateWatcher(
+			watcherId,
+			description,
+			requestInterval,
+			itemsPerRequest,
+			inactivityTimeout
+		);
+	}
+
+	public async pauseWatcher(watcherId: string): Promise<void> {
+		await this.watcherService.pauseWatcher(watcherId);
+	}
+
+	public async resumeWatcher(watcherId: string): Promise<void> {
+		await this.watcherService.resumeWatcher(watcherId);
+	}
+
+	public async deleteWatcher(watcherId: string): Promise<void> {
+		await this.watcherService.deleteWatcher(watcherId);
 	}
 
 	public getSdPort(): number | undefined {
@@ -46,17 +117,6 @@ export class VaultInstance extends VaultBase {
 			`${path}/stable-diffusion-webui/webui-user.sh`,
 			`export COMMANDLINE_ARGS="--api --nowebui --port ${port}"`
 		);
-	}
-
-	public getConfig(): VaultConfig {
-		return {
-			id: this.id,
-			name: this.name,
-			path: this.path,
-			createdAt: this.createdAt,
-			hasInstalledSD: this.hasInstalledSD,
-			civitaiApiKey: this.civitaiApiKey
-		};
 	}
 
 	public async setName(name: string): Promise<void> {

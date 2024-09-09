@@ -1,3 +1,4 @@
+import type { WebSocketEvent } from '$lib/services/WebsocketService';
 import type { RunningJob } from '$lib/types/RunningJob';
 import type { Vault } from '$lib/types/Vault';
 import { writable } from 'svelte/store';
@@ -11,3 +12,5 @@ export const sdUiStatus = writable<SDUIStatus>('UNKNOWN');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const runningJobs = writable<RunningJob<any>[]>([]);
+
+export const socketEvents$ = writable<WebSocketEvent | undefined>(undefined);

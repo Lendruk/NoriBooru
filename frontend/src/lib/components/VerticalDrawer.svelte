@@ -1,9 +1,11 @@
 <script lang="ts">
 	export let isDrawerOpen = false;
+	export let onDrawerClose: () => void | Promise<void> = () => {};
 
 	function onKeyPress(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			isDrawerOpen = false;
+			onDrawerClose();
 		}
 	}
 </script>

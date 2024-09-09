@@ -15,6 +15,13 @@ type MediaItemJobUpdatePayload = {
 	currentFileName: string;
 };
 
+const getExtensionForImage = (currentExtension: string): string => {
+	if (currentExtension === 'gif') {
+		return 'gif';
+	}
+	return 'png';
+};
+
 const createMediaItems = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
 
@@ -39,7 +46,8 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				const id = randomUUID();
 				const fileType = part.mimetype.includes('image') ? 'image' : 'video';
 				const currentFileExtension = part.mimetype.split('/')[1];
-				const finalExtension = fileType === 'image' ? 'png' : currentFileExtension;
+				const finalExtension =
+					fileType === 'image' ? getExtensionForImage(currentFileExtension) : currentFileExtension;
 				const finalPath = path.join(
 					vault.path,
 					'media',
@@ -50,7 +58,12 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				try {
 					await pipeline(part.file, createWriteStream(finalPath));
 
-					await mediaService.createMediaItemFromFile(vault, finalPath, fileType, id);
+					await mediaService.createMediaItemFromFile({
+						vault,
+						fileExtension: finalExtension,
+						originalFileName: part.filename,
+						preCalculatedId: id
+					});
 				} catch (error) {
 					console.log(`Failed to upload file - ${part.filename}`);
 					console.log(error);

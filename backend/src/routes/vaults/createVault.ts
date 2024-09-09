@@ -10,6 +10,8 @@ import { getServerConfig } from '../../utils/getServerConfig';
 const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	const body = request.body as { path?: string; name: string };
 
+	const starterVersion = '0.0.0';
+
 	const vaultPath = body.path as string;
 
 	if (vaultPath) {
@@ -47,6 +49,7 @@ const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 		name: body.name,
 		path: vaultPath,
 		createdAt: Date.now(),
+		version: starterVersion,
 		hasInstalledSD: false,
 		civitaiApiKey: null
 	};

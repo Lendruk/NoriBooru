@@ -34,7 +34,7 @@ const getVideoThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 					'videos',
 					`${item.fileName}.${item.extension}`
 				);
-				await mediaService.generateItemThumbnail(vault, filePath, item);
+				await mediaService.generateItemThumbnail(vault, item.extension, filePath, item);
 				video = await fs.readFile(thumbnailPath);
 			}
 		}

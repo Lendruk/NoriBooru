@@ -5,6 +5,7 @@
 	import Checkbox from '$lib/components/Checkbox.svelte';
 	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import VerticalDrawer from '$lib/components/VerticalDrawer.svelte';
 	import Video from '$lib/components/Video.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
@@ -129,6 +130,7 @@
 			items: playlistItems.map((item) => item.id)
 		});
 		goto(`/playlists/${newPlaylist.id}`);
+		createToast('Playlist created successfully!');
 	}
 
 	async function updatePlaylist() {
@@ -138,17 +140,28 @@
 			timePerItem,
 			items: playlistItems.map((item) => item.id)
 		});
+		createToast('Playlist updated successfully!');
+	}
+
+	function onDrawerClose() {
+		sidebarMediaItems = [];
+		filterTags = [];
 	}
 </script>
 
 <div class="flex flex-col flex-1 justify-between bg-zinc-900 rounded-md">
-	<Button
-		class="w-[150px] h-[40px] self-end mr-4 mt-4"
-		onClick={() => ($page.params.id !== 'new' ? updatePlaylist() : createPlaylist())}
-		>{$page.params.id !== 'new' ? 'Update' : 'Create'}</Button
-	>
+	<div class="flex flex-1 justify-end p-4 gap-4">
+		<div class="flex">
+			<Checkbox bind:checked={randomizeOrder} inlineLabel={'Randomize order'} />
+		</div>
+		<Button
+			class="w-[150px] h-[40px] self-end"
+			onClick={() => ($page.params.id !== 'new' ? updatePlaylist() : createPlaylist())}
+			>{$page.params.id !== 'new' ? 'Update' : 'Create'}</Button
+		>
+	</div>
 	<div class="flex flex-1 flex-col p-4">
-		<div>
+		<div class="flex flex-col gap-4 mb-4">
 			<div class="flex flex-col gap-4">
 				<label for="playlistName">Name</label>
 				<input
@@ -169,7 +182,6 @@
 					bind:value={timePerItem}
 				/>
 			</div>
-			<Checkbox bind:checked={randomizeOrder} inlineLabel={'Randomize order'} />
 		</div>
 
 		<div>
@@ -199,12 +211,16 @@
 			</div>
 		</div>
 	</div>
-	<VerticalDrawer isDrawerOpen={mediaSearchSidebarOpen}>
-		<div class="flex flex-1 flex-col">
+	<VerticalDrawer {onDrawerClose} isDrawerOpen={mediaSearchSidebarOpen}>
+		<div class="flex flex-1 flex-col m-4 gap-4">
+			<div>
+				Search for media items via tags. Only media items that have all the tags applied will be
+				shown. Only archived media items will be shown.
+			</div>
 			<TagSearchInput
 				{availableTags}
+				createOnEnter={false}
 				appliedTags={filterTags}
-				class="outline-none min-h-[40px] indent-2 m-2 w-auto"
 				onTagSearchSubmit={async (tag) => {
 					filterTags.push(tag);
 
@@ -235,14 +251,14 @@
 						{#if mediaItem.type === 'image'}
 							<img
 								class="bg-cover"
-								src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+								src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}
 								alt="gallery-img"
 							/>
 						{/if}
 						{#if mediaItem.type === 'video'}
 							<Video
 								cssClass="bg-cover w-full h-full"
-								src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+								src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension}`}
 							/>
 						{/if}
 					</SidebarMediaItem>

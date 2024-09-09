@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 type RequestBody = {
 	name: string;
@@ -44,7 +44,7 @@ const createPlaylist = async (request: Request, reply: FastifyReply) => {
 			)
 			.returning();
 	}
-	return reply.send({ ...playlist, items });
+	return reply.send({ ...playlist, items: items.map((item) => item.mediaItemId) });
 };
 
 export default {

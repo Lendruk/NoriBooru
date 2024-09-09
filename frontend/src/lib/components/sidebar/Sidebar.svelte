@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
+	import CircleDown from '$lib/icons/CircleDown.svelte';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
+	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
@@ -11,7 +13,6 @@
 	import InboxIcon from '../../icons/InboxIcon.svelte';
 	import PaletteIcon from '../../icons/PaletteIcon.svelte';
 	import PenIcon from '../../icons/PenIcon.svelte';
-	import PlayIcon from '../../icons/PlayIcon.svelte';
 	import TagIcon from '../../icons/TagIcon.svelte';
 	import UploadIcon from '../../icons/UploadIcon.svelte';
 	import SdUiStatusDisplay from './SDUiStatusDisplay.svelte';
@@ -28,6 +29,8 @@
 		ignoreSubNavPaths?: (string | RegExp)[];
 		subRoutes?: Route[];
 	};
+
+	let pathName = $page.url.pathname.slice() + $page.url.search;
 
 	let stableDiffusionRoutes: Route[] = [];
 	let routes: Route[] = [
@@ -47,13 +50,13 @@
 			name: 'Gallery',
 			path: '/gallery',
 			navHref: '/gallery',
-			ignoreSubNavPaths: ['inbox'],
+			ignoreSubNavPaths: ['/gallery/inbox'],
 			icon: ImagesIcon
 		},
 		{
 			name: 'Inbox',
-			path: /\/gallery\?inbox=true/g,
-			navHref: '/gallery?inbox=true',
+			path: '/gallery/inbox',
+			navHref: '/gallery/inbox',
 			icon: InboxIcon
 		},
 		{
@@ -65,10 +68,15 @@
 		},
 		{
 			name: 'Playlists',
-			path: /\/playlists|playlists\/(\d)/g,
+			path: '/playlists',
 			navHref: '/playlists',
-			icon: PlayIcon,
-			subNavPaths: ['view', /(\d)/g]
+			icon: PlayIcon
+		},
+		{
+			name: 'Page Watchers',
+			path: '/watchers',
+			navHref: '/watchers',
+			icon: CircleDown
 		},
 		{
 			name: 'Settings',
@@ -79,6 +87,7 @@
 	];
 
 	$: {
+		pathName = $page.url.pathname.slice() + $page.url.search;
 		if ($vaultStore?.hasInstalledSD) {
 			stableDiffusionRoutes = [
 				{
@@ -115,18 +124,36 @@
 		if ($page.url.pathname === '/') {
 			return route.path === '/';
 		}
-		const pathName = $page.url.pathname.slice() + $page.url.search;
 
 		if (typeof route.path === 'string') {
-			return route.path === pathName;
+			if (route.ignoreSubNavPaths?.includes(pathName)) {
+				return false;
+			}
+
+			const splitByQuery = pathName.split('?');
+
+			if (splitByQuery.length > 1) {
+				return splitByQuery[0] === route.path;
+			}
+
+			if (route.path === pathName) {
+				return true;
+			} else {
+				const splitByPath = pathName.split('/');
+				if (splitByPath.length > 1) {
+					return `/${splitByPath[1]}` === route.path;
+				}
+			}
 		} else {
-			return route.path.test(pathName);
+			return !!route.path.exec(pathName);
 		}
+
+		return false;
 	}
 </script>
 
 <aside
-	class={`bg-zinc-900 flex flex-col justify-between rounded-tr-md rounded-br-md max-w-[200px] relative ${isSidebarOpen ? 'w-2/12' : 'w-[50px]'} relative`}
+	class={`bg-zinc-900 flex flex-1 flex-col justify-between rounded-tr-md rounded-br-md max-w-[200px] relative ${isSidebarOpen ? 'w-2/12' : 'w-[50px]'} relative`}
 >
 	<div class="sticky top-0">
 		{#each routes as route}
@@ -152,7 +179,7 @@
 										<a
 											href={subRoute.navHref}
 											class={`${
-												isCurrentPathSelected(subRoute) && 'bg-red-950 text-white'
+												isCurrentPathSelected(subRoute) ? 'bg-red-950 text-white' : ''
 											} pl-8 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
 										>
 											{#if subRoute.icon}
@@ -201,7 +228,7 @@
 			{:else}
 				<a
 					class={`${
-						isCurrentPathSelected(route) && 'bg-red-950 text-white'
+						isCurrentPathSelected(route) ? 'bg-red-950 text-white' : ''
 					} pl-4 pr-4 pt-2 pb-2 text-md flex items-center gap-4 hover:bg-red-950 hover:bg-slate-300 hover:text-white hover:text-zinc-800 hover:transition-all`}
 					href={route.navHref}
 				>

@@ -3,12 +3,13 @@
 		"strict": true,
 		"noImplicitAny": true,
 		"target": "ESNext",
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
 		"skipLibCheck": true,
 		"esModuleInterop": true,
+		"allowJs": true,
 		"outDir": "./dist",
-		"rootDir": "./src"
+		"rootDir": "./"
 	},
-	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts"]
+	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts", "node_modules", "vaults"]
 }

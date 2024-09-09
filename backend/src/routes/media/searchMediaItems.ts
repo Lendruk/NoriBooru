@@ -3,6 +3,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import {
 	MediaItemMetadataSchema,
 	TagSchema,
+	activeWatchers_to_mediaItems,
 	mediaItems,
 	mediaItemsMetadata,
 	tagsToMediaItems
@@ -43,6 +44,8 @@ export type MediaSearchQuery = {
 	positiveQueryType?: QueryType;
 	negativeQueryType?: QueryType;
 	mediaType?: MediaTypes;
+	watcherId?: string;
+	pageSize?: string;
 };
 
 const PAGE_SIZE = 50;
@@ -67,19 +70,23 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 	const hasFilters = positiveTags.length > 0 || negativeTags.length > 0;
 	const page = parseInt(query.page ?? '0');
 
-	let mediaTypeQuery;
+	const mediaQueryArr = [];
 	if (mediaType === 'ALL') {
-		mediaTypeQuery = or(eq(mediaItems.type, 'image'), eq(mediaItems.type, 'video'));
+		mediaQueryArr.push(or(eq(mediaItems.type, 'image'), eq(mediaItems.type, 'video')));
 	} else if (mediaType === 'IMAGES') {
-		mediaTypeQuery = eq(mediaItems.type, 'image');
+		mediaQueryArr.push(eq(mediaItems.type, 'image'));
 	} else {
-		mediaTypeQuery = eq(mediaItems.type, 'video');
+		mediaQueryArr.push(eq(mediaItems.type, 'video'));
+	}
+
+	if (query.archived) {
+		mediaQueryArr.push(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0));
 	}
 
 	const rows = await db
 		.select()
 		.from(mediaItems)
-		.where(and(eq(mediaItems.isArchived, query.archived === 'true' ? 1 : 0), mediaTypeQuery))
+		.where(and(...mediaQueryArr))
 		.orderBy(sortMethod === 'newest' ? desc(mediaItems.createdAt) : asc(mediaItems.createdAt));
 
 	let finalMedia: MediaItem[] = [];
@@ -102,6 +109,19 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 			});
 		} catch {
 			// Nothing
+		}
+
+		// Very unoptimized
+		// Will be changed with the remake of the search function
+		if (query.watcherId) {
+			const result = await db.query.activeWatchers_to_mediaItems.findFirst({
+				where: and(
+					eq(activeWatchers_to_mediaItems.activeWatcherId, query.watcherId),
+					eq(activeWatchers_to_mediaItems.mediaItemId, row.id)
+				)
+			});
+
+			if (!result) continue;
 		}
 
 		finalMedia.push({
@@ -141,8 +161,9 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 		});
 	}
 
+	const pageSize = query.pageSize ? Number.parseInt(query.pageSize) : PAGE_SIZE;
 	return reply.send({
-		mediaItems: finalMedia.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+		mediaItems: finalMedia.slice(page * pageSize, page * pageSize + pageSize + 1)
 	});
 };
 

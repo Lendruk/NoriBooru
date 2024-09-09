@@ -26,7 +26,8 @@ export const mediaItems = sqliteTable('media_items', {
 	updatedAt: integer('updated_at'),
 	isArchived: integer('is_archived').notNull().default(0),
 	hash: text('hash').notNull(),
-	// metadata: text('metadata').references(() => mediaItemsMetadata.id),
+	originalFileName: text('original_file_name'),
+	source: text('source'),
 	sdCheckpoint: text('sd_checkpoint').references(() => sdCheckpoints.id)
 });
 
@@ -194,3 +195,49 @@ export const sdWildcards = sqliteTable('sd_wildcards', {
 	values: text('text').notNull()
 });
 export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;
+
+export const activeWatchers = sqliteTable('active_watchers', {
+	id: text('id').primaryKey(),
+	description: text('description'),
+	status: text('status').notNull(),
+	data: text('data'),
+	itemsPerRequest: integer('items_per_request').notNull().default(0),
+	itemsDownloaded: integer('items_downloaded').notNull().default(0),
+	totalItems: integer('total_items'),
+	type: text('type').notNull(),
+	url: text('url').notNull(),
+	requestInterval: integer('request_interval').notNull().default(0),
+	timeSinceNewItems: integer('time_since_new_items').notNull().default(0),
+	lastRequestedAt: integer('last_requested_at').notNull().default(0),
+	// How much time it needs to pass without new items for the watcher to be considered dead
+	inactivityTimeout: integer('inactivity_timeout').notNull().default(0),
+	createdAt: integer('created_at').notNull()
+});
+
+export const activeWatchers_to_mediaItems = sqliteTable(
+	'active_watchers_to_media_items',
+	{
+		activeWatcherId: text('active_watcher_id')
+			.notNull()
+			.references(() => activeWatchers.id, { onDelete: 'cascade' }),
+		mediaItemId: integer('media_item_id')
+			.notNull()
+			.references(() => mediaItems.id, { onDelete: 'cascade' })
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.activeWatcherId, t.mediaItemId] }) })
+);
+
+export const activeWatchers_to_tags = sqliteTable(
+	'active_watchers_to_tags',
+	{
+		activeWatcherId: text('active_watcher_id')
+			.notNull()
+			.references(() => activeWatchers.id, { onDelete: 'cascade' }),
+		tagId: text('tag_id')
+			.notNull()
+			.references(() => tags.id, { onDelete: 'cascade' })
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.activeWatcherId, t.tagId] }) })
+);
+
+export type ActiveWatcherSchema = InferSelectModel<typeof activeWatchers>;

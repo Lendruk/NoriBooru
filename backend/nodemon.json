@@ -1,4 +1,7 @@
 {
 	"verbose": false,
-	"ignore": ["**/dist/**", "./vaults/**", "database.sqlite"]
+	"ignore": ["**/dist/**", "./vaults/**", "database.sqlite"],
+	"execMap": {
+		"ts": "tsx"
+	}
 }

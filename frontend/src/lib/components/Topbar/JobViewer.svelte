@@ -2,11 +2,8 @@
 	import JobViewerIcon from '$lib/icons/JobViewerIcon.svelte';
 	import { runningJobs } from '../../../store';
 
-	let amtOfRunningJobs = $state(0);
+	let amtOfRunningJobs = $derived($runningJobs.length);
 	let isViewPanelOpen = $state(false);
-	$effect(() => {
-		amtOfRunningJobs = $runningJobs.length;
-	});
 </script>
 
 <button
