@@ -61,7 +61,6 @@ export class RedditWatcher extends ActiveWatcher<RedditWatcherData> {
 		let itemsFetchedThisRun = 0;
 		for (let i = 0; i < body.data.children.length; i++) {
 			const post = body.data.children[i];
-			// console.log(post);
 			this.instanceData.listingItemIndex = i;
 
 			const itemsToProcess: { url: string; fileName: string }[] = [];
