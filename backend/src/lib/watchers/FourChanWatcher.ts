@@ -20,6 +20,10 @@ export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
 	}
 
 	public async queryPage(): Promise<void> {
+		if (this.status !== 'running') {
+			return;
+		}
+
 		const response = await fetch(this.url);
 		const body = await response.text();
 		const parsedHtml = parse(body);
