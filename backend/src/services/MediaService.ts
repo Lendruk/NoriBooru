@@ -131,11 +131,11 @@ class MediaService {
 	): Promise<void> {
 		if (mediaItem.type === 'image') {
 			if (fileExtension === 'gif') {
-				await sharp(filePath, { animated: true })
+				await sharp(filePath, { animated: true, limitInputPixels: false })
 					.webp({ quality: 70, lossless: false })
 					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
 			} else {
-				await sharp(filePath)
+				await sharp(filePath, { limitInputPixels: false })
 					.jpeg({ quality: 80 })
 					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
 			}
