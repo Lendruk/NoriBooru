@@ -5,6 +5,7 @@
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
+	import WorldIcon from '$lib/icons/WorldIcon.svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
 	import ArrowRight from '../../icons/ArrowRight.svelte';
@@ -77,6 +78,12 @@
 			path: '/watchers',
 			navHref: '/watchers',
 			icon: CircleDown
+		},
+		{
+			name: 'World Building',
+			path: '/world-building',
+			navHref: '/world-building',
+			icon: WorldIcon
 		},
 		{
 			name: 'Settings',
