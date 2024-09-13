@@ -33,7 +33,7 @@ const removeTagFromMediaItem = async (request: Request, reply: FastifyReply) => 
 
 export default {
 	method: 'DELETE',
-	url: '/mediaItems/:id/tags',
+	url: '/media-items/:id/tags',
 	handler: removeTagFromMediaItem,
 	onRequest: checkVault
 } as RouteOptions;

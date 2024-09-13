@@ -78,7 +78,7 @@
 
 	async function searchMedia() {
 		const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			'/mediaItems?' +
+			'/media-items?' +
 				new URLSearchParams({
 					// negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)),
 					positiveTags: JSON.stringify(filterTags.map((tag) => tag.id)),

@@ -50,7 +50,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/mediaItems/${$page.params.id}?${$page.url.search}`).then((res) => {
+		}>(`/media-items/${$page.params.id}?${$page.url.search}`).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
@@ -60,26 +60,26 @@
 	});
 
 	async function addTagToMedia(tag: PopulatedTag) {
-		await HttpService.put(`/mediaItems/${JSON.stringify([mediaItem?.id])}/tags`, tag);
+		await HttpService.put(`/media-items/${JSON.stringify([mediaItem?.id])}/tags`, tag);
 		mediaItem!.tags = [...mediaItem!.tags, { ...tag }];
 		tagSearchText = '';
 		foundTags = [];
 	}
 
 	async function removeTagFromMedia(tag: PopulatedTag) {
-		await HttpService.delete(`/mediaItems/${mediaItem?.id}/tags`, tag);
+		await HttpService.delete(`/media-items/${mediaItem?.id}/tags`, tag);
 		mediaItem!.tags = mediaItem!.tags.filter((t) => t.id !== tag.id);
 	}
 
 	async function attemptAutoTag() {
 		if (mediaItem) {
-			await HttpService.patch(`/mediaItems/${mediaItem.id}/auto-tag`);
+			await HttpService.patch(`/media-items/${mediaItem.id}/auto-tag`);
 			const updatedItem = await HttpService.get<{
 				mediaItem: MediaItemWithTags;
 				next?: string;
 				previous?: string;
 				tags: PopulatedTag[];
-			}>(`/mediaItems/${$page.params.id}`);
+			}>(`/media-items/${$page.params.id}`);
 
 			mediaItem = updatedItem.mediaItem;
 			tags = updatedItem.tags;

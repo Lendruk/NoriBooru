@@ -79,7 +79,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'DELETE',
-	url: '/mediaItems/:ids',
+	url: '/media-items/:ids',
 	handler: deleteMediaItem,
 	onRequest: checkVault
 } as RouteOptions;

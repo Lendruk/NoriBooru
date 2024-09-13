@@ -264,7 +264,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'GET',
-	url: '/mediaItems/:id',
+	url: '/media-items/:id',
 	handler: getMediaItem,
 	onRequest: checkVault
 } as RouteOptions;

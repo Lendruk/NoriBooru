@@ -26,7 +26,7 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 			for (const tag of tagsToInsert) {
 				for (const id of parsedIdArray) {
 					const parsedMediaId = Number.parseInt(id);
-					await mediaService.addTagToMediaItem(vault, parsedMediaId , tag.id);
+					await mediaService.addTagToMediaItem(vault, parsedMediaId, tag.id);
 				}
 			}
 		}
@@ -39,7 +39,7 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'PUT',
-	url: '/mediaItems/:ids/tags',
+	url: '/media-items/:ids/tags',
 	handler: addTagToMediaItems,
 	onRequest: checkVault
 } as RouteOptions;

@@ -94,7 +94,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'POST',
-	url: '/mediaItems',
+	url: '/media-items',
 	handler: createMediaItems,
 	onRequest: checkVault
 } as RouteOptions;

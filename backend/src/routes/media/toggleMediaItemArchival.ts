@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { mediaItems } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { mediaItems } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { Request } from '../../types/Request';
 
 const toggleMediaItemArchival = async (request: Request, reply: FastifyReply) => {
 	const vault = request.vault;
@@ -32,7 +32,7 @@ const toggleMediaItemArchival = async (request: Request, reply: FastifyReply) =>
 
 export default {
 	method: 'PATCH',
-	url: '/mediaItems/:ids',
+	url: '/media-items/:ids',
 	handler: toggleMediaItemArchival,
 	onRequest: checkVault
 } as RouteOptions;

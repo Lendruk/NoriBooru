@@ -31,7 +31,7 @@ const tagFromPrompt = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'PATCH',
-	url: '/mediaItems/:id/auto-tag',
+	url: '/media-items/:id/auto-tag',
 	handler: tagFromPrompt,
 	onRequest: checkVault
 } as RouteOptions;

@@ -27,7 +27,7 @@
 
 	async function deleteItem() {
 		const { id } = images[currentIndex];
-		await HttpService.delete(`/mediaItems/${JSON.stringify([id])}`);
+		await HttpService.delete(`/media-items/${JSON.stringify([id])}`);
 
 		if (images.length === 1) {
 			images = [];
@@ -46,7 +46,7 @@
 		const { id } = images[currentIndex];
 		const isArchived = !images[currentIndex].isArchived;
 		images[currentIndex].isArchived = isArchived;
-		await HttpService.patch(`/mediaItems/${JSON.stringify([id])}`, { isArchived: isArchived });
+		await HttpService.patch(`/media-items/${JSON.stringify([id])}`, { isArchived: isArchived });
 		images = images;
 		createToast(`Image ${isArchived ? 'archived' : 'un-archived'} successfully!`);
 	}

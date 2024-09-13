@@ -13,7 +13,7 @@
 	let appliedTags: PopulatedTag[] = [];
 
 	async function modifyMediaItemTags() {
-		await HttpService.put(`/mediaItems/${JSON.stringify(Array.from(itemsInEdit.keys()))}/tags`, {
+		await HttpService.put(`/media-items/${JSON.stringify(Array.from(itemsInEdit.keys()))}/tags`, {
 			tags: appliedTags
 		});
 		showModal = false;
