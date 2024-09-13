@@ -91,7 +91,7 @@
 
 	async function deleteMediaItem() {
 		if (mediaItem) {
-			await HttpService.delete(`/mediaItems/${JSON.stringify([mediaItem.id])}`);
+			await HttpService.delete(`/media-items/${JSON.stringify([mediaItem.id])}`);
 			let idToFetch: string = '';
 			if (previous) {
 				idToFetch = previous;
