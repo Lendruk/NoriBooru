@@ -6,7 +6,6 @@ import path from 'node:path';
 import { pipeline } from 'stream/promises';
 import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../lib/Job';
-import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 
 type MediaItemJobUpdatePayload = {
@@ -58,7 +57,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				try {
 					await pipeline(part.file, createWriteStream(finalPath));
 
-					await mediaService.createMediaItemFromFile({
+					await vault.media.createMediaItemFromFile({
 						vault,
 						fileExtension: finalExtension,
 						originalFileName: part.filename,

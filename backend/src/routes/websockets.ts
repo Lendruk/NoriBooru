@@ -1,7 +1,7 @@
 import { WebSocket } from '@fastify/websocket';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { VaultController } from '../db/VaultController';
-import { VaultInstance } from '../lib/VaultInstance';
+import type { VaultInstance } from '../lib/VaultInstance';
 
 type WebSocketRegisterEvent = {
 	type: 'register';

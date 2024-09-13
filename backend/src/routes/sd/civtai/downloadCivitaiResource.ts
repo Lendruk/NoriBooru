@@ -7,7 +7,6 @@ import { finished, pipeline } from 'stream/promises';
 import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
 import { Job } from '../../../lib/Job';
-import { mediaService } from '../../../services/MediaService';
 import { Request } from '../../../types/Request';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
 
@@ -64,14 +63,12 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 				const id = randomUUID();
 				const finalPath = path.join(vault.path, 'media', 'images', `${id}.png`);
 				await pipeline(imageRequest.body!, createWriteStream(finalPath));
-				const mediaItem = await mediaService.createMediaItemFromFile(
-					vault,
-					'png',
-					undefined,
-					id,
-					modelId,
-					[]
-				);
+				const mediaItem = await vault.media.createMediaItemFromFile({
+					fileExtension: 'png',
+					sdCheckPointId: modelId,
+					loras: [],
+					preCalculatedId: id
+				});
 
 				if (modelInfo.type === 'LORA') {
 					const newLora = await db
@@ -88,7 +85,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 							metadata: ''
 						})
 						.returning();
-					await mediaService.addLoraToMediaItem(vault, mediaItem.id, newLora[0].id);
+					await vault.media.addLoraToMediaItem(mediaItem.id, newLora[0].id);
 				} else if (modelInfo.type === 'Checkpoint') {
 					const newCheckpoint = await db
 						.insert(sdCheckpoints)
@@ -103,7 +100,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 							sha256: ''
 						})
 						.returning();
-					await mediaService.setMediaItemSDCheckpoint(vault, mediaItem.id, newCheckpoint[0].id);
+					await vault.media.setMediaItemSDCheckpoint(mediaItem.id, newCheckpoint[0].id);
 				}
 
 				if (vault.isSDUiRunning()) {

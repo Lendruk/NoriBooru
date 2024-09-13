@@ -1,5 +1,5 @@
 import { ActiveWatcherSchema } from '../../db/vault/schema';
-import { VaultInstance } from '../VaultInstance';
+import type { VaultInstance } from '../VaultInstance';
 import { ActiveWatcher } from './ActiveWatcher';
 import { FourChanWatcher } from './FourChanWatcher';
 import { RedditWatcher } from './RedditWatcher';

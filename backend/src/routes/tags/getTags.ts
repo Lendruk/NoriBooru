@@ -1,17 +1,17 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import TagService, { PopulatedTag } from '../../services/TagService';
+import { PopulatedTag } from '../../services/TagService';
 import { Request } from '../../types/Request';
 
 const getTags = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
+	const { vault } = request;
 	const query = request.query as { name: string };
-	if (!vaultInstance) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
 	const { name } = query;
-	const finalTags: PopulatedTag[] = await TagService.getAllTags(vaultInstance, name);
+	const finalTags: PopulatedTag[] = await vault.tags.getAllTags(name);
 	return reply.send(finalTags);
 };
 

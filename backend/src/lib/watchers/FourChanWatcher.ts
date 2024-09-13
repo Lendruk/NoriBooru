@@ -1,6 +1,5 @@
 import { parse } from 'node-html-parser';
 import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vault/schema';
-import { mediaService } from '../../services/MediaService';
 import { pause } from '../../utils/pause';
 import { VaultInstance } from '../VaultInstance';
 import { ActiveWatcher } from './ActiveWatcher';
@@ -60,10 +59,9 @@ export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
 					const itemUrl = `${FourChanWatcher.BASE_ITEM_URL}${board}/${fileName}`;
 					const itemBuffer = Buffer.from(await (await fetch(itemUrl)).arrayBuffer());
 
-					const { id: mediaItemId } = await mediaService.createItemFromBase64({
+					const { id: mediaItemId } = await this.vault.media.createItemFromBase64({
 						base64EncodedImage: itemBuffer.toString('base64'),
 						fileExtension: fileName.split('.').pop()!,
-						vault: this.vault,
 						source: itemUrl
 					});
 					await this.vault.db.insert(activeWatchers_to_mediaItems).values({

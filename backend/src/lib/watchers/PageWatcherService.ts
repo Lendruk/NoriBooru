@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { activeWatchers, ActiveWatcherSchema } from '../../db/vault/schema';
-import { VaultInstance } from '../VaultInstance';
+import type { VaultInstance } from '../VaultInstance';
 import { ActiveWatcher } from './ActiveWatcher';
 import { PageParserFactory } from './WatcherFactory';
 import { WatcherSource } from './WatcherSource';

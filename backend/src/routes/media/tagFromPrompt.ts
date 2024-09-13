@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { mediaItemsMetadata } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 
 const tagFromPrompt = async (request: Request, reply: FastifyReply) => {
@@ -20,7 +19,7 @@ const tagFromPrompt = async (request: Request, reply: FastifyReply) => {
 			where: eq(mediaItemsMetadata.mediaItem, id)
 		});
 		if (metadata?.positivePrompt) {
-			await mediaService.tagMediaItemFromPrompt(vault, [id], metadata.positivePrompt);
+			await vault.media.tagMediaItemFromPrompt([id], metadata.positivePrompt);
 		}
 	} catch (error) {
 		return reply.status(400).send({ message: error });

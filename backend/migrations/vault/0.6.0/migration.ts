@@ -2,14 +2,13 @@ import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import path from 'path';
 import { mediaItems } from '../../../src/db/vault/schema';
-import { VaultBase } from '../../../src/lib/VaultBase';
-import { mediaService } from '../../../src/services/MediaService';
+import { VaultInstance } from '../../../src/lib/VaultInstance';
 
 /**
  * Migrates 0.5.0 vaults to 0.6.0
  * - Regenerates all .gif thumbnails
  */
-export default async (vault: VaultBase) => {
+export default async (vault: VaultInstance) => {
 	// Regenerate all .gif thumbnails
 
 	const images = await vault.db.query.mediaItems.findMany({
@@ -35,7 +34,7 @@ export default async (vault: VaultBase) => {
 				.where(eq(mediaItems.id, potentialGif.id));
 
 			potentialGif.extension = 'gif';
-			mediaService.generateItemThumbnail(vault, 'webp', filePath, potentialGif);
+			vault.media.generateItemThumbnail('webp', filePath, potentialGif);
 		}
 	}
 };

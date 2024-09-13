@@ -1,12 +1,16 @@
 import { WebSocket } from '@fastify/websocket';
+import Database from 'better-sqlite3';
 import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
+import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import fs from 'fs/promises';
+import { inject, injectable } from 'inversify';
 import { createConnection } from 'net';
 import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
+import * as vaultSchema from '../db/vault/schema';
 import {
 	ActiveWatcherSchema,
 	sdCheckpoints,
@@ -14,13 +18,18 @@ import {
 	sdPrompts,
 	sdWildcards
 } from '../db/vault/schema';
-import TagService from '../services/TagService';
+import { MediaService } from '../services/MediaService';
+import { TagService } from '../services/TagService';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
 import { VaultConfig } from '../types/VaultConfig';
-import { VaultBase } from './VaultBase';
+import { WebSocketEvent } from '../types/WebSocketEvent';
+import { Job, JobAction, JobTag } from './Job';
+import { Version } from './VaultMigrator';
 import { ActiveWatcher } from './watchers/ActiveWatcher';
 import { PageWatcherService } from './watchers/PageWatcherService';
+
+export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
 const execAsync = promisify(exec);
 type ProcessEntry = {
@@ -29,7 +38,19 @@ type ProcessEntry = {
 	port: number;
 };
 
-export class VaultInstance extends VaultBase {
+@injectable()
+export class VaultInstance implements VaultConfig {
+	public id: string;
+	public name: string;
+	public path: string;
+	public createdAt: number;
+	public hasInstalledSD: boolean;
+	public version: Version;
+	public db: VaultDb;
+	public civitaiApiKey: string | null;
+	public sockets: Set<WebSocket>;
+	private jobs: Map<string, Job> = new Map();
+
 	private sdProcess?: ProcessEntry;
 	private inactiveProcessTimer?: NodeJS.Timeout;
 	private watcherService: PageWatcherService;
@@ -42,13 +63,26 @@ export class VaultInstance extends VaultBase {
 		'https://github.com/AUTOMATIC1111/stable-diffusion-webui.git';
 	private static readonly PROCESS_INACTIVE_TTL = 60 * 1000 * 10; // 10 Minutes
 
-	public constructor(vault: VaultConfig) {
-		super(vault);
+	public constructor(
+		@inject('config') vault: VaultConfig,
+		@inject(TagService) public tags: TagService,
+		@inject(MediaService) public media: MediaService
+	) {
+		this.id = vault.id;
+		this.name = vault.name;
+		this.path = vault.path;
+		this.version = vault.version;
+		this.createdAt = vault.createdAt;
+		this.hasInstalledSD = vault.hasInstalledSD;
+		this.civitaiApiKey = vault.civitaiApiKey;
+		// Create db connection
+		const newDb = new Database(`${vault.path}/vault.sqlite`);
+		this.db = drizzle(newDb, { schema: vaultSchema });
+		this.sockets = new Set();
 		this.watcherService = new PageWatcherService(this);
 	}
 
-	public override async init(): Promise<void> {
-		await super.init();
+	public async init(): Promise<void> {
 		await this.watcherService.init();
 	}
 
@@ -140,8 +174,8 @@ export class VaultInstance extends VaultBase {
 			);
 
 			this.hasInstalledSD = true;
-			if (!(await TagService.doesTagExist(this, 'AI'))) {
-				await TagService.createTag(this, 'AI', '#3264a8');
+			if (!(await this.tags.doesTagExist('AI'))) {
+				await this.tags.createTag('AI', '#3264a8');
 			}
 			console.log(stderr);
 			console.log(stdout);
@@ -340,9 +374,19 @@ export class VaultInstance extends VaultBase {
 		}
 	}
 
-	public override registerWebsocketConnection(connection: WebSocket) {
-		super.registerWebsocketConnection(connection);
-		connection.send(
+	public registerWebsocketConnection(socket: WebSocket) {
+		this.sockets.add(socket);
+
+		if (this.jobs.size > 0) {
+			this.broadcastEvent({
+				event: 'current-jobs',
+				data: { jobs: Array.from(this.jobs.values()) }
+			});
+		}
+		socket.on('close', () => {
+			this.sockets.delete(socket);
+		});
+		socket.send(
 			JSON.stringify({
 				event: 'SD',
 				data: { status: this.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' }
@@ -375,5 +419,122 @@ export class VaultInstance extends VaultBase {
 		}
 
 		throw new Error('No available port');
+	}
+
+	public async registerJob(job: Job): Promise<void> {
+		this.jobs.set(job.id, job);
+	}
+
+	public async registerNewJob(
+		name: string,
+		action: JobAction,
+		tag: JobTag,
+		repeatEvery?: number
+	): Promise<void> {
+		const id = randomUUID();
+		const newJob: Job = new Job(tag, name, action, repeatEvery);
+		this.jobs.set(id, newJob);
+	}
+
+	public async runJob(jobId: string): Promise<void> {
+		if (this.jobs.has(jobId)) {
+			const job = this.jobs.get(jobId)!;
+			if (!job.isRunning) {
+				job.isRunning = true;
+				void this.runWrappedJob(job);
+			}
+		}
+	}
+
+	public broadcastEvent<E extends string, P extends Record<string, unknown>>(
+		event: WebSocketEvent<E, P>
+	): void {
+		for (const socket of this.sockets) {
+			socket.send(JSON.stringify(event));
+		}
+	}
+
+	public async unregisterJob(jobId: string): Promise<void> {
+		if (this.jobs.has(jobId)) {
+			this.jobs.delete(jobId);
+		}
+	}
+
+	private async runWrappedJob(job: Job): Promise<void> {
+		job.isRunning = true;
+		let handler: NodeJS.Timeout | undefined;
+		try {
+			handler = setInterval(() => {
+				if (job.isRunning) {
+					this.broadcastEvent({
+						event: 'job-update',
+						data: {
+							id: job.id,
+							name: job.name,
+							tag: job.tag,
+							payload: job.runtimeData
+						}
+					});
+				}
+			}, job.updateEvery);
+			const result = await job.action(job);
+			// If the job was cancelled in the meantime, we won't emit a job complete event
+			if (job.isRunning) {
+				job.isRunning = false;
+				clearInterval(handler);
+				this.broadcastEvent({
+					event: 'job-done',
+					data: {
+						id: job.id,
+						result
+					}
+				});
+				this.unregisterJob(job.id);
+			}
+		} catch (error) {
+			this.broadcastEvent({
+				event: 'job-execution-error',
+				data: {
+					id: job.id,
+					error: (error as Error).message
+				}
+			});
+		} finally {
+			if (handler) {
+				clearInterval(handler);
+			}
+			job.isRunning = false;
+		}
+	}
+
+	public getConfig(): VaultConfig {
+		return {
+			id: this.id,
+			name: this.name,
+			path: this.path,
+			createdAt: this.createdAt,
+			hasInstalledSD: this.hasInstalledSD,
+			civitaiApiKey: this.civitaiApiKey,
+			version: this.version
+		};
+	}
+
+	public async saveConfig(): Promise<void> {
+		await fs.writeFile(
+			`${this.path}/vault.config.json`,
+			JSON.stringify(
+				{
+					id: this.id,
+					name: this.name,
+					path: this.path,
+					createdAt: this.createdAt,
+					hasInstalledSD: this.hasInstalledSD,
+					civitaiApiKey: this.civitaiApiKey,
+					version: this.version
+				} satisfies VaultConfig,
+				null,
+				2
+			)
+		);
 	}
 }

@@ -1,10 +1,9 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
-import TagService from '../../services/TagService';
+import { Request } from '../../types/Request';
 
 const updateTag = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
+	const { vault } = request;
 	const params = request.params as { id: string };
 	const body = request.body as {
 		parentId?: number;
@@ -12,7 +11,7 @@ const updateTag = async (request: Request, reply: FastifyReply) => {
 		name: string;
 	};
 
-	if (!vaultInstance) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
@@ -21,7 +20,7 @@ const updateTag = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('Invalid tag id sent');
 	}
 
-	const updatedTag = await TagService.updateTag(vaultInstance, parsedId, body);
+	const updatedTag = await vault.tags.updateTag(parsedId, body);
 
 	return reply.send(updatedTag);
 };

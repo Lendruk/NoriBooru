@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { activeWatchers, ActiveWatcherSchema } from '../../db/vault/schema';
-import { VaultInstance } from '../VaultInstance';
+import type { VaultInstance } from '../VaultInstance';
 import { WatcherSource } from './WatcherSource';
 
 export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema {

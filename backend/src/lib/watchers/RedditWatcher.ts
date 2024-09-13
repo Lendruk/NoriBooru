@@ -1,7 +1,6 @@
 import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vault/schema';
-import { mediaService } from '../../services/MediaService';
 import { pause } from '../../utils/pause';
-import { VaultInstance } from '../VaultInstance';
+import type { VaultInstance } from '../VaultInstance';
 import { ActiveWatcher } from './ActiveWatcher';
 
 type RedditJsonPost = {
@@ -86,17 +85,16 @@ export class RedditWatcher extends ActiveWatcher<RedditWatcherData> {
 				if (!url.includes('i.redd.it')) {
 					continue;
 				}
-				if (await mediaService.isThereMediaItemWithSource(this.vault, url)) {
+				if (await this.vault.media.isThereMediaItemWithSource(url)) {
 					this.instanceData.duplicatesSkipped++;
 					continue;
 				}
 
 				const itemBuffer = Buffer.from(await (await fetch(url)).arrayBuffer());
 
-				const { id: mediaItemId } = await mediaService.createItemFromBase64({
+				const { id: mediaItemId } = await this.vault.media.createItemFromBase64({
 					base64EncodedImage: itemBuffer.toString('base64'),
 					fileExtension: fileName.split('.').pop()!,
-					vault: this.vault,
 					source: url
 				});
 				await this.vault.db.insert(activeWatchers_to_mediaItems).values({

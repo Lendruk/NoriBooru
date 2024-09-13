@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
 import fs from 'fs/promises';
 import migrationFunctionMap from '../../migrations/vault';
-import { VaultBase } from './VaultBase';
+import type { VaultInstance } from './VaultInstance';
 
-export type MigrationFunction = (vault: VaultBase) => Promise<void> | void;
+export type MigrationFunction = (vault: VaultInstance) => Promise<void> | void;
 
 export type Migration = {
 	version: Version;
@@ -51,7 +51,7 @@ export class VaultMigrator {
 		}
 	}
 
-	public static async migrateVault(vault: VaultBase): Promise<void> {
+	public static async migrateVault(vault: VaultInstance): Promise<void> {
 		const { version } = vault.getConfig();
 		let nextMigration = this.getNextMigration(version);
 
@@ -72,14 +72,14 @@ export class VaultMigrator {
 		await vault.saveConfig();
 	}
 
-	private static executeSQLMigration(db: VaultBase['db'], sqlInput: string): void {
+	private static executeSQLMigration(db: VaultInstance['db'], sqlInput: string): void {
 		const splitStatements = sqlInput.split('--- StatementBreak');
 		for (const statement of splitStatements) {
 			db.run(sql.raw(`${statement}`));
 		}
 	}
 
-	private static async applyMigration(vault: VaultBase, migration: Migration): Promise<void> {
+	private static async applyMigration(vault: VaultInstance, migration: Migration): Promise<void> {
 		if (migration.sql) {
 			this.executeSQLMigration(vault.db, migration.sql);
 		}
