@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import ItemPreview from '$lib/components/ItemPreview.svelte';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import ToastContainer from '$lib/components/toast/ToastContainer.svelte';
 	import Topbar from '$lib/components/Topbar/index.svelte';
@@ -37,6 +38,7 @@
 		<slot />
 	{/if}
 </div>
+<ItemPreview />
 <ToastContainer />
 
 <style lang="postcss">

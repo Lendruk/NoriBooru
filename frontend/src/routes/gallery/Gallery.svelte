@@ -530,6 +530,7 @@
 		>
 			{#each mediaItems as mediaItem}
 				<GalleryItem
+					{mediaItem}
 					isAiGen={!!mediaItem.metadata?.model}
 					isArchived={mediaItem.isArchived}
 					onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}

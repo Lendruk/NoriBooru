@@ -3,7 +3,7 @@
 	export let cssClass = '';
 	export let autoplay = true;
 
-	let muted = true;
+	export let muted = true;
 	let videoElement: HTMLVideoElement;
 
 	function videoMouseOver() {
