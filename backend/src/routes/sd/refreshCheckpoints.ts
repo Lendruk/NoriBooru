@@ -7,8 +7,8 @@ const refreshCheckpoints = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	
-	await vault.refreshCheckpoints();
+
+	await vault.stableDiffusion.refreshCheckpoints();
 
 	reply.status(200).send({ message: 'Checkpoints regenerated successfully' });
 };

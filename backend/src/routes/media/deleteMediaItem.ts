@@ -47,7 +47,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 						await Promise.all([
 							fs.unlink(
 								path.join(
-									vault.path,
+									vault.config.path,
 									'media',
 									mediaItem.type + 's',
 									`${mediaItem.fileName}.${mediaItem.extension}`
@@ -55,7 +55,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 							),
 							fs.unlink(
 								path.join(
-									vault.path,
+									vault.config.path,
 									'media',
 									mediaItem.type + 's',
 									'.thumb',
@@ -79,7 +79,7 @@ const deleteMediaItem = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'DELETE',
-	url: '/mediaItems/:ids',
+	url: '/media-items/:ids',
 	handler: deleteMediaItem,
 	onRequest: checkVault
 } as RouteOptions;

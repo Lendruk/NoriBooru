@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import ExifReader from 'exifreader';
 import Ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs/promises';
+import { inject, injectable } from 'inversify';
 import path from 'path';
 import sharp from 'sharp';
 import {
@@ -13,13 +14,23 @@ import {
 	mediaItemsMetadata,
 	tagsToMediaItems
 } from '../db/vault/schema';
-import { VaultBase } from '../lib/VaultBase';
-import { VaultInstance } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultInstance';
+import { VaultService } from '../lib/VaultService';
 import { ParsedExif } from '../types/Exif';
+import { VaultConfig } from '../types/VaultConfig';
 import { generateRandomColor } from '../utils/generateRandomColor';
-import TagService from './TagService';
+import { TagService } from './TagService';
 
-class MediaService {
+@injectable()
+export class MediaService extends VaultService {
+	public constructor(
+		@inject('db') protected db: VaultDb,
+		@inject('config') private config: VaultConfig,
+		@inject(TagService) private tagService: TagService
+	) {
+		super(db);
+	}
+
 	private getTypeFromExtension(fileExtension: string): 'image' | 'video' {
 		if (['jpg', 'webp', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
 			return 'image';
@@ -39,9 +50,8 @@ class MediaService {
 		return fileExtension;
 	}
 
-	public async getItemMetadata(vault: VaultInstance, id: number): Promise<MediaItemMetadataSchema> {
-		const { db } = vault;
-		const metadata = await db.query.mediaItemsMetadata.findFirst({
+	public async getItemMetadata(id: number): Promise<MediaItemMetadataSchema> {
+		const metadata = await this.db.query.mediaItemsMetadata.findFirst({
 			where: eq(mediaItemsMetadata.mediaItem, id)
 		});
 
@@ -51,9 +61,8 @@ class MediaService {
 		return metadata;
 	}
 
-	public async isThereMediaItemWithSource(vault: VaultInstance, source: string): Promise<boolean> {
-		const { db } = vault;
-		const mediaItem = await db.query.mediaItems.findFirst({
+	public async isThereMediaItemWithSource(source: string): Promise<boolean> {
+		const mediaItem = await this.db.query.mediaItems.findFirst({
 			where: eq(mediaItems.source, source)
 		});
 
@@ -61,7 +70,6 @@ class MediaService {
 	}
 
 	public async createMediaItemFromFile(options: {
-		vault: VaultInstance;
 		fileExtension: string;
 		originalFileName?: string;
 		preCalculatedId?: string;
@@ -69,20 +77,12 @@ class MediaService {
 		loras?: string[];
 		source?: string;
 	}): Promise<MediaItem> {
-		const {
-			vault,
-			fileExtension,
-			originalFileName,
-			preCalculatedId,
-			sdCheckPointId,
-			loras,
-			source
-		} = options;
-		const { db } = vault;
+		const { fileExtension, originalFileName, preCalculatedId, sdCheckPointId, loras, source } =
+			options;
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const id = preCalculatedId ?? randomUUID();
 		const finalPath = path.join(
-			vault.path,
+			this.config.path,
 			'media',
 			fileType === 'image' ? 'images' : 'videos',
 			`${id}.${fileExtension}`
@@ -93,7 +93,7 @@ class MediaService {
 		const hexHash = hash.digest('hex').toString();
 		// Exif
 		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
-		const [newMediaItem] = await db
+		const [newMediaItem] = await this.db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
@@ -109,14 +109,14 @@ class MediaService {
 			.returning();
 
 		if (exif) {
-			await this.processMediaItemExif(vault, newMediaItem.id, exif);
+			await this.processMediaItemExif(newMediaItem.id, exif);
 		}
 
-		await this.generateItemThumbnail(vault, fileExtension, finalPath, newMediaItem);
+		await this.generateItemThumbnail(fileExtension, finalPath, newMediaItem);
 
 		if (loras) {
 			for (const lora of loras) {
-				await this.addLoraToMediaItem(vault, newMediaItem.id, lora);
+				await this.addLoraToMediaItem(newMediaItem.id, lora);
 			}
 		}
 
@@ -124,7 +124,6 @@ class MediaService {
 	}
 
 	public async generateItemThumbnail(
-		vault: VaultBase,
 		fileExtension: string,
 		filePath: string,
 		mediaItem: MediaItem
@@ -133,15 +132,15 @@ class MediaService {
 			if (fileExtension === 'gif') {
 				await sharp(filePath, { animated: true, limitInputPixels: false })
 					.webp({ quality: 70, lossless: false })
-					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
+					.toFile(`${this.config.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
 			} else {
 				await sharp(filePath, { limitInputPixels: false })
 					.jpeg({ quality: 80 })
-					.toFile(`${vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+					.toFile(`${this.config.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
 			}
 		} else if (mediaItem.type === 'video') {
 			const thumbnailPath = path.join(
-				vault.path,
+				this.config.path,
 				'media',
 				'videos',
 				'.thumb',
@@ -167,21 +166,13 @@ class MediaService {
 	public async createItemFromBase64(options: {
 		base64EncodedImage: string;
 		fileExtension: string;
-		vault: VaultInstance;
 		originalFileName?: string;
 		sdCheckPointId?: string;
 		loras?: string[];
 		source?: string;
 	}): Promise<{ id: number; fileName: string }> {
-		const {
-			base64EncodedImage,
-			fileExtension,
-			vault,
-			originalFileName,
-			sdCheckPointId,
-			loras,
-			source
-		} = options;
+		const { base64EncodedImage, fileExtension, originalFileName, sdCheckPointId, loras, source } =
+			options;
 		const id = randomUUID();
 		const imageBuffer = Buffer.from(
 			base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''),
@@ -190,7 +181,7 @@ class MediaService {
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const finalExtension = this.getFinalExtension(fileExtension);
 		const itemPath = path.join(
-			vault.path,
+			this.config.path,
 			'media',
 			fileType === 'image' ? 'images' : 'videos',
 			`${id}.${finalExtension}`
@@ -200,7 +191,6 @@ class MediaService {
 		await fs.writeFile(itemPath, imageBuffer);
 
 		const newMediaItem = await this.createMediaItemFromFile({
-			vault,
 			fileExtension: finalExtension,
 			originalFileName,
 			preCalculatedId: id,
@@ -215,38 +205,25 @@ class MediaService {
 		};
 	}
 
-	public async addLoraToMediaItem(
-		vault: VaultInstance,
-		mediaItemId: number,
-		loraId: string
-	): Promise<void> {
-		const { db } = vault;
-		await db.insert(lorasToMediaItems).values({ loraId, mediaItemId });
+	public async addLoraToMediaItem(mediaItemId: number, loraId: string): Promise<void> {
+		await this.db.insert(lorasToMediaItems).values({ loraId, mediaItemId });
 	}
 
-	public async addTagToMediaItem(
-		vault: VaultBase,
-		mediaItemId: number,
-		tagId: number
-	): Promise<void> {
-		const { db } = vault;
-		await db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
+	public async addTagToMediaItem(mediaItemId: number, tagId: number): Promise<void> {
+		await this.db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
 	}
 
 	public async setMediaItemSDCheckpoint(
-		vault: VaultInstance,
 		mediaItemId: number,
 		sdCheckpointId: string
 	): Promise<void> {
-		const { db } = vault;
-		await db
+		await this.db
 			.update(mediaItems)
 			.set({ sdCheckpoint: sdCheckpointId })
 			.where(eq(mediaItems.id, mediaItemId));
 	}
 
 	private async processMediaItemExif(
-		vault: VaultInstance,
 		mediaItemId: number,
 		exif: ParsedExif
 	): Promise<MediaItemMetadataSchema> {
@@ -324,17 +301,15 @@ class MediaService {
 			}
 		}
 
-		const { db } = vault;
-		const [newMetadata] = await db.insert(mediaItemsMetadata).values(metadataPayload).returning();
+		const [newMetadata] = await this.db
+			.insert(mediaItemsMetadata)
+			.values(metadataPayload)
+			.returning();
 		return newMetadata;
 	}
 
-	public async tagMediaItemFromPrompt(
-		vault: VaultInstance,
-		mediaItemIds: number[],
-		prompt: string
-	): Promise<void> {
-		const aiTag = await TagService.getTagByName(vault, 'ai');
+	public async tagMediaItemFromPrompt(mediaItemIds: number[], prompt: string): Promise<void> {
+		const aiTag = await this.tagService.getTagByName('ai');
 		const tags: number[] = [];
 		for (const token of prompt.split(',')) {
 			let formattedToken = token.trim().replaceAll('(', '').replaceAll(')', '');
@@ -356,23 +331,21 @@ class MediaService {
 			}
 
 			formattedToken = formattedToken.split(':')[0];
-			let tag = await TagService.getTagByName(vault, formattedToken);
+			let tag = await this.tagService.getTagByName(formattedToken);
 			if (!tag) {
-				tag = await TagService.createTag(vault, formattedToken, generateRandomColor());
+				tag = await this.tagService.createTag(formattedToken, generateRandomColor());
 			}
 			tags.push(tag.id);
 		}
 
 		for (const id of mediaItemIds) {
 			for (const tag of tags) {
-				await mediaService.addTagToMediaItem(vault, id, tag);
+				await this.addTagToMediaItem(id, tag);
 			}
 
 			if (aiTag) {
-				await mediaService.addTagToMediaItem(vault, id, aiTag.id);
+				await this.addTagToMediaItem(id, aiTag.id);
 			}
 		}
 	}
 }
-
-export const mediaService = new MediaService();

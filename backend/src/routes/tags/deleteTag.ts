@@ -1,13 +1,12 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
 import { checkVault } from '../../hooks/checkVault';
-import TagService from '../../services/TagService';
+import { Request } from '../../types/Request';
 
 const deleteTag = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
+	const { vault } = request;
 	const params = request.params as { id: string };
 
-	if (!vaultInstance) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
@@ -16,7 +15,7 @@ const deleteTag = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('Invalid tag id sent');
 	}
 
-	await TagService.deleteTag(vaultInstance, parsedId);
+	await vault.tags.deleteTag(parsedId);
 	return reply.send({ message: 'Tag deleted successfully' });
 };
 

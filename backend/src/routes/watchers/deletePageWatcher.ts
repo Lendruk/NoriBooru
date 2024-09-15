@@ -10,7 +10,7 @@ const deleteWatcher = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { id } = request.params as { id: string };
-	vault.deleteWatcher(id);
+	vault.watchers.deleteWatcher(id);
 	return reply.send({ message: 'Watcher deleted successfully' });
 };
 

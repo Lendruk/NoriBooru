@@ -1,7 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { MediaItemMetadataSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 import { SDPromptRequest } from '../../types/sd/SDPromptRequest';
 import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
@@ -25,7 +24,7 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const sdPort = vault.getSdPort();
+	const sdPort = vault.stableDiffusion.getSdPort();
 	if (!sdPort) {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}
@@ -43,23 +42,20 @@ const promptSD = async (request: Request, reply: FastifyReply) => {
 	const items: PromptResponse[] = [];
 
 	for (const image of body.images) {
-		const { fileName, id } = await mediaService.createItemFromBase64(
-			image,
-			'png',
-			vault,
-			undefined,
-			checkpointId,
+		const { fileName, id } = await vault.media.createItemFromBase64({
+			base64EncodedImage: image,
+			fileExtension: 'png',
+			sdCheckPointId: checkpointId,
 			loras
-		);
-		const metadata = await mediaService.getItemMetadata(vault, id);
+		});
+		const metadata = await vault.media.getItemMetadata(id);
 		items.push({ fileName, id, metadata, isArchived: false });
 	}
 
 	// Prompt tags
 	// Can be optimized
 	if (autoTag) {
-		await mediaService.tagMediaItemFromPrompt(
-			vault,
+		await vault.media.tagMediaItemFromPrompt(
 			items.map((item) => item.id),
 			prompt.prompt
 		);

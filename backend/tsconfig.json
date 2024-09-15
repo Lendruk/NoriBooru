@@ -7,8 +7,12 @@
 		"moduleResolution": "Bundler",
 		"skipLibCheck": true,
 		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 		"allowJs": true,
 		"outDir": "./dist",
+		"lib": ["ESNext"],
+		"types": ["reflect-metadata"],
 		"rootDir": "./"
 	},
 	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts", "node_modules", "vaults"]

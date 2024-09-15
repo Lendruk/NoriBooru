@@ -220,9 +220,12 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 						.select()
 						.from(mediaItems)
 						.where(
-							query.sortMethod === 'newest'
-								? lt(mediaItems.id, parsedId)
-								: gt(mediaItems.id, parsedId)
+							and(
+								query.sortMethod === 'newest'
+									? lt(mediaItems.id, parsedId)
+									: gt(mediaItems.id, parsedId),
+								...queryArr
+							)
 						)
 						.groupBy(mediaItems.id)
 						.orderBy(previousItemOrderBy)
@@ -264,7 +267,7 @@ const getMediaItem = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'GET',
-	url: '/mediaItems/:id',
+	url: '/media-items/:id',
 	handler: getMediaItem,
 	onRequest: checkVault
 } as RouteOptions;

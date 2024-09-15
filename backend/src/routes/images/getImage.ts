@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
-import path from 'path';
 import * as fs from 'fs/promises';
+import path from 'path';
 import { VaultController } from '../../db/VaultController';
 
-const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) => {
+const getImage = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { fileName: string; vaultId: string };
 
 	const vaultId = params.vaultId;
@@ -13,7 +13,7 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
-	const imagePath = path.join(vault.path, 'media', 'images', `${fileName}`);
+	const imagePath = path.join(vault.config.path, 'media', 'images', `${fileName}`);
 	const image = await fs.readFile(imagePath);
 
 	return reply.header('Content-Type', 'image/jpg').send(image);
@@ -22,5 +22,5 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 export default {
 	method: 'GET',
 	url: '/images/:vaultId/:fileName',
-	handler: getImageThumbnail
+	handler: getImage
 } as RouteOptions;

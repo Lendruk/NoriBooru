@@ -4,7 +4,6 @@ import * as fs from 'fs/promises';
 import path from 'path';
 import { VaultController } from '../../db/VaultController';
 import { mediaItems } from '../../db/vault/schema';
-import { mediaService } from '../../services/MediaService';
 
 const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { fileName: string; vaultId: string };
@@ -17,7 +16,7 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
 
-	const thumbnailPath = path.join(vault.path, 'media', 'images', '.thumb', `${fileName}`);
+	const thumbnailPath = path.join(vault.config.path, 'media', 'images', '.thumb', `${fileName}`);
 
 	let image: Buffer | undefined;
 	try {
@@ -30,12 +29,12 @@ const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 
 			if (item) {
 				const filePath = path.join(
-					vault.path,
+					vault.config.path,
 					'media',
 					'images',
 					`${item.fileName}.${item.extension}`
 				);
-				await mediaService.generateItemThumbnail(vault, item.extension, filePath, item);
+				await vault.media.generateItemThumbnail(item.extension, filePath, item);
 				image = await fs.readFile(thumbnailPath);
 			}
 		}

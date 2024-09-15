@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { activeWatchers, ActiveWatcherSchema } from '../../db/vault/schema';
-import { VaultInstance } from '../VaultInstance';
+import { WebsocketService } from '../../services/WebsocketService';
+import { VaultDb } from '../VaultInstance';
 import { WatcherSource } from './WatcherSource';
 
 export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema {
@@ -24,7 +25,8 @@ export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema 
 
 	public constructor(
 		rawWatcher: ActiveWatcherSchema,
-		protected vault: VaultInstance
+		protected db: VaultDb,
+		protected websocketService: WebsocketService
 	) {
 		this.id = rawWatcher.id;
 		this.description = rawWatcher.description;
@@ -71,7 +73,7 @@ export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema 
 	public abstract queryPage(): Promise<void>;
 
 	public async save(): Promise<void> {
-		await this.vault.db
+		await this.db
 			.update(activeWatchers)
 			.set({
 				data: JSON.stringify(this.instanceData),
@@ -87,7 +89,7 @@ export abstract class ActiveWatcher<T = unknown> implements ActiveWatcherSchema 
 	}
 
 	protected notity(): void {
-		this.vault.broadcastEvent({ event: 'watcher-update', data: { id: this.id } });
+		this.websocketService.broadcastEvent({ event: 'watcher-update', data: { id: this.id } });
 	}
 
 	public toSchema(): ActiveWatcherSchema {

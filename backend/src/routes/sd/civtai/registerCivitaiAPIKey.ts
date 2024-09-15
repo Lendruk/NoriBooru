@@ -11,7 +11,7 @@ const registerCivitaiAPIKey = async (request: Request, reply: FastifyReply) => {
 	const { key } = request.body as { key: string };
 
 	if (key) {
-		await vault.setCivitaiApiKey(key);
+		await vault.config.setCivitaiApiKey(key);
 	}
 
 	reply.send({ message: 'API key registered successfully' });

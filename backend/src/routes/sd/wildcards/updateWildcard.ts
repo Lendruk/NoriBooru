@@ -1,22 +1,21 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../../hooks/checkVault';
-import WildcardService from '../../../services/WildcardService';
 import { Request } from '../../../types/Request';
 
 type RequestBody = {
-  name?: string;
-  values?: string[]
-}
+	name?: string;
+	values?: string[];
+};
 
 const updateWildcard = async (request: Request, reply: FastifyReply) => {
-	const vaultInstance = request.vault;
+	const { vault } = request;
 	const { id } = request.params as { id: string };
 	const body = request.body as RequestBody;
-	if (!vaultInstance) {
+	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
 
-	const updatedWildcard = await WildcardService.updateWildcard(vaultInstance, id, body);
+	const updatedWildcard = await vault.wildcards.updateWildcard(id, body);
 	return reply.send(updatedWildcard);
 };
 

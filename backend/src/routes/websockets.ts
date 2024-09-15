@@ -1,7 +1,7 @@
 import { WebSocket } from '@fastify/websocket';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { VaultController } from '../db/VaultController';
-import { VaultInstance } from '../lib/VaultInstance';
+import type { VaultInstance } from '../lib/VaultInstance';
 
 type WebSocketRegisterEvent = {
 	type: 'register';
@@ -21,7 +21,7 @@ const websocketHandler = (connection: WebSocket) => {
 				} catch {
 					vault = await VaultController.registerVault(event.data.vault);
 				}
-				vault!.registerWebsocketConnection(connection);
+				vault!.websockets.registerWebsocketConnection(connection);
 			}
 		} catch (error) {
 			console.log(error);

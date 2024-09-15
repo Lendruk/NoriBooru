@@ -173,14 +173,14 @@
 	}
 
 	async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.delete(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+		await HttpService.delete(`/media-items/${mediaItemId}/tags`, { ...tag });
 		const tagIndex = mediaItemInTagEdit!.tags.findIndex((mediaTag) => mediaTag.id === tag.id);
 		mediaItemInTagEdit!.tags.splice(tagIndex, 1);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
 
 	async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.put(`/mediaItems/${JSON.stringify([mediaItemId])}/tags`, { ...tag });
+		await HttpService.put(`/media-items/${JSON.stringify([mediaItemId])}/tags`, { ...tag });
 		mediaItemInTagEdit!.tags.push(tag);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
@@ -206,7 +206,7 @@
 		if (isInbox !== undefined) {
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
-		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + params);
+		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/media-items?' + params);
 		let fetchedMediaItems = res.mediaItems;
 		if (appendResults) {
 			if (res.mediaItems.length > 0) {
@@ -247,7 +247,7 @@
 	}
 
 	async function deleteItems(mediaItemIds: number[]) {
-		await HttpService.delete(`/mediaItems/${JSON.stringify(mediaItemIds)}`);
+		await HttpService.delete(`/media-items/${JSON.stringify(mediaItemIds)}`);
 		mediaItems = mediaItems.filter((item) => !mediaItemIds.includes(item.id));
 	}
 
@@ -261,7 +261,7 @@
 	}
 
 	async function toggleArchivedStatus(mediaItemIds: number[], isArchived: boolean) {
-		await HttpService.patch(`/mediaItems/${JSON.stringify(mediaItemIds)}`, { isArchived });
+		await HttpService.patch(`/media-items/${JSON.stringify(mediaItemIds)}`, { isArchived });
 		mediaItems = mediaItems.map((item) =>
 			mediaItemIds.includes(item.id) ? { ...item, isArchived } : item
 		);
@@ -278,7 +278,7 @@
 	}
 
 	async function fetchMediaItemTags(mediaItemId: number) {
-		const tags = await HttpService.get<PopulatedTag[]>(`/mediaItems/${mediaItemId}/tags`);
+		const tags = await HttpService.get<PopulatedTag[]>(`/media-items/${mediaItemId}/tags`);
 		mediaItemInTagEdit = { id: mediaItemId, tags };
 	}
 
@@ -530,6 +530,7 @@
 		>
 			{#each mediaItems as mediaItem}
 				<GalleryItem
+					{mediaItem}
 					isAiGen={!!mediaItem.metadata?.model}
 					isArchived={mediaItem.isArchived}
 					onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}

@@ -6,7 +6,6 @@ import path from 'node:path';
 import { pipeline } from 'stream/promises';
 import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../lib/Job';
-import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 
 type MediaItemJobUpdatePayload = {
@@ -49,7 +48,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				const finalExtension =
 					fileType === 'image' ? getExtensionForImage(currentFileExtension) : currentFileExtension;
 				const finalPath = path.join(
-					vault.path,
+					vault.config.path,
 					'media',
 					part.mimetype.includes('image') ? 'images' : 'videos',
 					`${id}.${finalExtension}`
@@ -58,8 +57,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				try {
 					await pipeline(part.file, createWriteStream(finalPath));
 
-					await mediaService.createMediaItemFromFile({
-						vault,
+					await vault.media.createMediaItemFromFile({
 						fileExtension: finalExtension,
 						originalFileName: part.filename,
 						preCalculatedId: id
@@ -81,8 +79,8 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 		}
 	});
 
-	vault.registerJob(mediaImportJob);
-	vault.runJob(mediaImportJob.id);
+	vault.jobs.registerJob(mediaImportJob);
+	vault.jobs.runJob(mediaImportJob.id);
 
 	return reply.send({
 		message: 'Job registered successfully!',
@@ -94,7 +92,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'POST',
-	url: '/mediaItems',
+	url: '/media-items',
 	handler: createMediaItems,
 	onRequest: checkVault
 } as RouteOptions;

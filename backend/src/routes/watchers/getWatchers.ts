@@ -9,7 +9,9 @@ const getWatchers = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	return reply.send({ watchers: vault.getWatchers().sort((a, b) => b.createdAt - a.createdAt) });
+	return reply.send({
+		watchers: vault.watchers.getWatchers().sort((a, b) => b.createdAt - a.createdAt)
+	});
 };
 
 export default {

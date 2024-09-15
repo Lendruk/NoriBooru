@@ -3,6 +3,7 @@ import multipart from '@fastify/multipart';
 import ws from '@fastify/websocket';
 import Fastify from 'fastify';
 import fs from 'fs/promises';
+import 'reflect-metadata';
 import { VaultMigrator } from './lib/VaultMigrator';
 import routes from './routes';
 import { getServerConfig } from './utils/getServerConfig';

@@ -31,7 +31,7 @@ const updateWatcher = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No inactivity timeout provided');
 	}
 
-	const watcher = await vault.updateWatcher(
+	const watcher = await vault.watchers.updateWatcher(
 		id,
 		body.description ?? '',
 		body.requestInterval,

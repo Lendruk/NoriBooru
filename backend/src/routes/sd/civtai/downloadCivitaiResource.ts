@@ -7,7 +7,6 @@ import { finished, pipeline } from 'stream/promises';
 import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
 import { Job } from '../../../lib/Job';
-import { mediaService } from '../../../services/MediaService';
 import { Request } from '../../../types/Request';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
 
@@ -34,7 +33,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 		console.log(modelVersionId);
 
 		const modelRequest = await fetch(`https://civitai.com/api/v1/models/${modelId}`, {
-			headers: { Authorization: `Bearer ${vault.civitaiApiKey}` }
+			headers: { Authorization: `Bearer ${vault.config.civitaiApiKey}` }
 		});
 		const modelInfo = (await modelRequest.json()) as CivitaiResource;
 		const modelVersion = modelInfo.modelVersions.find(
@@ -46,11 +45,11 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 			const primaryFile = modelVersion.files.find((file) => file.primary);
 
 			if (primaryFile) {
-				const filePath = `${vault.path}/stable-diffusion-webui/models/${getFolderForModel(modelInfo.type)}/${primaryFile.name}`;
+				const filePath = `${vault.config.path}/stable-diffusion-webui/models/${getFolderForModel(modelInfo.type)}/${primaryFile.name}`;
 				const stream = fs.createWriteStream(filePath);
 				const { body } = await fetch(primaryFile.downloadUrl, {
 					headers: {
-						Authorization: `Bearer ${vault.civitaiApiKey}`,
+						Authorization: `Bearer ${vault.config.civitaiApiKey}`,
 						'Content-Disposition': 'inline'
 					}
 				});
@@ -62,16 +61,14 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 				// Create a preview image
 				const imageRequest = await fetch(modelVersion.images[0].url);
 				const id = randomUUID();
-				const finalPath = path.join(vault.path, 'media', 'images', `${id}.png`);
+				const finalPath = path.join(vault.config.path, 'media', 'images', `${id}.png`);
 				await pipeline(imageRequest.body!, createWriteStream(finalPath));
-				const mediaItem = await mediaService.createMediaItemFromFile(
-					vault,
-					'png',
-					undefined,
-					id,
-					modelId,
-					[]
-				);
+				const mediaItem = await vault.media.createMediaItemFromFile({
+					fileExtension: 'png',
+					sdCheckPointId: modelId,
+					loras: [],
+					preCalculatedId: id
+				});
 
 				if (modelInfo.type === 'LORA') {
 					const newLora = await db
@@ -88,7 +85,7 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 							metadata: ''
 						})
 						.returning();
-					await mediaService.addLoraToMediaItem(vault, mediaItem.id, newLora[0].id);
+					await vault.media.addLoraToMediaItem(mediaItem.id, newLora[0].id);
 				} else if (modelInfo.type === 'Checkpoint') {
 					const newCheckpoint = await db
 						.insert(sdCheckpoints)
@@ -103,14 +100,14 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 							sha256: ''
 						})
 						.returning();
-					await mediaService.setMediaItemSDCheckpoint(vault, mediaItem.id, newCheckpoint[0].id);
+					await vault.media.setMediaItemSDCheckpoint(mediaItem.id, newCheckpoint[0].id);
 				}
 
-				if (vault.isSDUiRunning()) {
+				if (vault.stableDiffusion.isSDUiRunning()) {
 					if (modelInfo.type === 'LORA') {
-						await vault.refreshLoras();
+						await vault.stableDiffusion.refreshLoras();
 					} else if (modelInfo.type === 'Checkpoint') {
-						await vault.refreshCheckpoints();
+						await vault.stableDiffusion.refreshCheckpoints();
 					}
 				}
 			}
@@ -119,8 +116,8 @@ const downloadCivitaiResource = async (request: Request, reply: FastifyReply) =>
 		}
 	});
 
-	vault.registerJob(civitaiImportJob);
-	vault.runJob(civitaiImportJob.id);
+	vault.jobs.registerJob(civitaiImportJob);
+	vault.jobs.runJob(civitaiImportJob.id);
 
 	reply.send({
 		message: 'Job registered successfully!',

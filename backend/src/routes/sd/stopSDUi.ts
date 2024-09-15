@@ -8,7 +8,7 @@ const stopSDUi = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await vault.stopSDUi();
+	await vault.stableDiffusion.stopSDUi();
 
 	reply.send({ message: 'SDUi stopped successfully' });
 };

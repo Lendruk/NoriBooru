@@ -30,7 +30,7 @@
 
 	const inboxUrl = '/gallery/inbox';
 	$effect(() => {
-		HttpService.get<number[]>('/mediaItems/review').then(async (items) => {
+		HttpService.get<number[]>('/media-items/review').then(async (items) => {
 			mediaIds = items.reverse();
 			const firstItem = await fetchMediaItem(mediaIds[0]);
 			currentMediaItem = firstItem;
@@ -49,7 +49,7 @@
 
 	async function fetchMediaItem(id: number): Promise<MediaItemWithTags> {
 		const { mediaItem } = await HttpService.get<{ mediaItem: MediaItemWithTags }>(
-			`/mediaItems/${id}`
+			`/media-items/${id}`
 		);
 		return mediaItem;
 	}
@@ -144,19 +144,19 @@
 		let promises: Promise<unknown>[] = [];
 		if (itemsToArchive.length > 0) {
 			promises.push(
-				HttpService.patch(`/mediaItems/${JSON.stringify(itemsToArchive)}`, { isArchived: true })
+				HttpService.patch(`/media-items/${JSON.stringify(itemsToArchive)}`, { isArchived: true })
 			);
 		}
 
 		if (itemsToDelete.length > 0) {
-			promises.push(HttpService.delete(`/mediaItems/${JSON.stringify(itemsToDelete)}`));
+			promises.push(HttpService.delete(`/media-items/${JSON.stringify(itemsToDelete)}`));
 		}
 
 		if (tagsToApply.size > 0) {
 			for (const pair of tagsToApply) {
 				const id = pair[0];
 				const tags = pair[1];
-				promises.push(HttpService.put(`/mediaItems/${JSON.stringify([id])}/tags`, { tags }));
+				promises.push(HttpService.put(`/media-items/${JSON.stringify([id])}/tags`, { tags }));
 			}
 		}
 

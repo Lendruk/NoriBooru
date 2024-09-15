@@ -8,7 +8,7 @@ const markSDAsInactive = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await vault.markProcessAsInactive();
+	await vault.stableDiffusion.markProcessAsInactive();
 
 	reply.status(200).send({ message: 'Instance marked as inactive' });
 };

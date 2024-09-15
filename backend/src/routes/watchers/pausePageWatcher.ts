@@ -10,7 +10,7 @@ const pauseWatcher = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { id } = request.params as { id: string };
-	vault.pauseWatcher(id);
+	vault.watchers.pauseWatcher(id);
 	return reply.send({ message: 'Watcher paused successfully' });
 };
 

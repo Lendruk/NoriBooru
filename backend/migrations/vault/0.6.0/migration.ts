@@ -2,21 +2,20 @@ import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import path from 'path';
 import { mediaItems } from '../../../src/db/vault/schema';
-import { VaultBase } from '../../../src/lib/VaultBase';
-import { mediaService } from '../../../src/services/MediaService';
+import { VaultInstance } from '../../../src/lib/VaultInstance';
 
 /**
  * Migrates 0.5.0 vaults to 0.6.0
  * - Regenerates all .gif thumbnails
  */
-export default async (vault: VaultBase) => {
+export default async (vault: VaultInstance) => {
 	// Regenerate all .gif thumbnails
 
 	const images = await vault.db.query.mediaItems.findMany({
 		where: eq(mediaItems.extension, 'png')
 	});
 	for (const potentialGif of images) {
-		let filePath = path.join(vault.path, 'media', 'images', `${potentialGif.fileName}.png`);
+		let filePath = path.join(vault.config.path, 'media', 'images', `${potentialGif.fileName}.png`);
 		const fileBuffer = await fs.readFile(filePath);
 		// https://stackoverflow.com/questions/8473703/in-node-js-given-a-url-how-do-i-check-whether-its-a-jpg-png-gif
 		if (fileBuffer.toString('hex', 0, 4) === '47494638') {
@@ -25,7 +24,7 @@ export default async (vault: VaultBase) => {
 			filePath = filePath.replace('.png', '.gif');
 			// Delete the old thumbnail
 			await fs.unlink(
-				path.join(vault.path, 'media', 'images', '.thumb', `${potentialGif.fileName}.jpg`)
+				path.join(vault.config.path, 'media', 'images', '.thumb', `${potentialGif.fileName}.jpg`)
 			);
 			await fs.writeFile(filePath, fileBuffer);
 
@@ -35,7 +34,7 @@ export default async (vault: VaultBase) => {
 				.where(eq(mediaItems.id, potentialGif.id));
 
 			potentialGif.extension = 'gif';
-			mediaService.generateItemThumbnail(vault, 'webp', filePath, potentialGif);
+			vault.media.generateItemThumbnail('webp', filePath, potentialGif);
 		}
 	}
 };

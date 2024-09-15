@@ -27,7 +27,7 @@
 			}
 
 			void HttpService.postJob<JobWebsocketEventData<MediaUploadJobUpdatePayload>>(
-				'/mediaItems',
+				'/media-items',
 				formData
 			);
 			createToast('Request created successfully!');

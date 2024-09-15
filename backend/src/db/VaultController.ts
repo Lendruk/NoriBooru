@@ -1,13 +1,9 @@
 import { eq } from 'drizzle-orm';
-import { type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import fs from 'fs/promises';
 import { VaultInstance } from '../lib/VaultInstance';
 import { VaultConfig } from '../types/VaultConfig';
 import { masterDb } from './master/db';
 import { vaults, type Vault } from './master/schema';
-import * as vaultSchema from './vault/schema';
-
-export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
 export class VaultController {
 	public static vaults: Map<string, VaultInstance> = new Map();
@@ -33,11 +29,11 @@ export class VaultController {
 		return vaultInstance;
 	}
 
-	public static getVault(vaultId: string) {
-		const vault = this.vaults.get(vaultId);
-		if (!vault) {
+	public static getVault(vaultId: string): VaultInstance {
+		const vaultInstance = this.vaults.get(vaultId);
+		if (!vaultInstance) {
 			throw new Error('Vault not found');
 		}
-		return vault;
+		return vaultInstance;
 	}
 }

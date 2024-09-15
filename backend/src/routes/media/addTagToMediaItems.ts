@@ -1,7 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { TagSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { mediaService } from '../../services/MediaService';
 import { Request } from '../../types/Request';
 
 const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
@@ -26,7 +25,7 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 			for (const tag of tagsToInsert) {
 				for (const id of parsedIdArray) {
 					const parsedMediaId = Number.parseInt(id);
-					await mediaService.addTagToMediaItem(vault, parsedMediaId , tag.id);
+					await vault.media.addTagToMediaItem(parsedMediaId, tag.id);
 				}
 			}
 		}
@@ -39,7 +38,7 @@ const addTagToMediaItems = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'PUT',
-	url: '/mediaItems/:ids/tags',
+	url: '/media-items/:ids/tags',
 	handler: addTagToMediaItems,
 	onRequest: checkVault
 } as RouteOptions;

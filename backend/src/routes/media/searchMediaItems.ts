@@ -169,7 +169,7 @@ const searchMediaItems = async (request: Request, reply: FastifyReply) => {
 
 export default {
 	method: 'GET',
-	url: '/mediaItems',
+	url: '/media-items',
 	handler: searchMediaItems,
 	onRequest: checkVault
 } as RouteOptions;
