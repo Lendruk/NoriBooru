@@ -8,7 +8,7 @@ const refreshLoras = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await vault.refreshLoras();
+	await vault.stableDiffusion.refreshLoras();
 
 	reply.status(200).send({ message: 'Loras regenerated successfully' });
 };

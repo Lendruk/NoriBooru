@@ -8,7 +8,7 @@ const startSDUi = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await vault.startSDUi();
+	await vault.stableDiffusion.startSDUi();
 
 	reply.send({ message: 'SDUi has been started successfully!' });
 };

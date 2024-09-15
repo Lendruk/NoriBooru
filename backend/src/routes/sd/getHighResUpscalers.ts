@@ -7,7 +7,7 @@ const getHighresUpscalers = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const sdPort = vault.getSdPort();
+	const sdPort = vault.stableDiffusion.getSdPort();
 	if (!sdPort) {
 		return reply.status(400).send('SD Ui is not running for the given vault');
 	}

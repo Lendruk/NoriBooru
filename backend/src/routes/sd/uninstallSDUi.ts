@@ -7,11 +7,11 @@ const uninstallSDUi = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	if (!vault.hasInstalledSD) {
+	if (!vault.config.hasInstalledSD) {
 		return reply.status(400).send('Vault does not have SDUI installed');
 	}
 
-	await vault.uninstallSDUi();
+	await vault.stableDiffusion.uninstallSDUi();
 
 	reply.send({ message: 'SD ui installed successfully!' });
 };
