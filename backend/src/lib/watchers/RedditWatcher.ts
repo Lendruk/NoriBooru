@@ -1,6 +1,8 @@
 import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vault/schema';
+import { MediaService } from '../../services/MediaService';
+import { WebsocketService } from '../../services/WebsocketService';
 import { pause } from '../../utils/pause';
-import type { VaultInstance } from '../VaultInstance';
+import type { VaultDb } from '../VaultInstance';
 import { ActiveWatcher } from './ActiveWatcher';
 
 type RedditJsonPost = {
@@ -38,8 +40,13 @@ export type RedditWatcherData = {
 };
 
 export class RedditWatcher extends ActiveWatcher<RedditWatcherData> {
-	public constructor(rawWatcher: ActiveWatcherSchema, vault: VaultInstance) {
-		super(rawWatcher, vault);
+	public constructor(
+		rawWatcher: ActiveWatcherSchema,
+		db: VaultDb,
+		websocketService: WebsocketService,
+		private mediaService: MediaService
+	) {
+		super(rawWatcher, db, websocketService);
 
 		this.instanceData = this.data
 			? JSON.parse(this.data)
@@ -85,19 +92,19 @@ export class RedditWatcher extends ActiveWatcher<RedditWatcherData> {
 				if (!url.includes('i.redd.it')) {
 					continue;
 				}
-				if (await this.vault.media.isThereMediaItemWithSource(url)) {
+				if (await this.mediaService.isThereMediaItemWithSource(url)) {
 					this.instanceData.duplicatesSkipped++;
 					continue;
 				}
 
 				const itemBuffer = Buffer.from(await (await fetch(url)).arrayBuffer());
 
-				const { id: mediaItemId } = await this.vault.media.createItemFromBase64({
+				const { id: mediaItemId } = await this.mediaService.createItemFromBase64({
 					base64EncodedImage: itemBuffer.toString('base64'),
 					fileExtension: fileName.split('.').pop()!,
 					source: url
 				});
-				await this.vault.db.insert(activeWatchers_to_mediaItems).values({
+				await this.db.insert(activeWatchers_to_mediaItems).values({
 					activeWatcherId: this.id,
 					mediaItemId
 				});

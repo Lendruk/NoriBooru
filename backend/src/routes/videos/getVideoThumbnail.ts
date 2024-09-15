@@ -16,7 +16,7 @@ const getVideoThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 	const fileName = params.fileName;
 	const vault = VaultController.getVault(vaultId);
 
-	const thumbnailPath = path.join(vault.path, 'media', 'videos', '.thumb', `${fileName}`);
+	const thumbnailPath = path.join(vault.config.path, 'media', 'videos', '.thumb', `${fileName}`);
 	let video: Buffer | undefined;
 	try {
 		video = await fs.readFile(thumbnailPath);
@@ -28,7 +28,7 @@ const getVideoThumbnail = async (request: FastifyRequest, reply: FastifyReply) =
 
 			if (item) {
 				const filePath = path.join(
-					vault.path,
+					vault.config.path,
 					'media',
 					'videos',
 					`${item.fileName}.${item.extension}`

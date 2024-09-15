@@ -21,7 +21,7 @@ const websocketHandler = (connection: WebSocket) => {
 				} catch {
 					vault = await VaultController.registerVault(event.data.vault);
 				}
-				vault!.registerWebsocketConnection(connection);
+				vault!.websockets.registerWebsocketConnection(connection);
 			}
 		} catch (error) {
 			console.log(error);

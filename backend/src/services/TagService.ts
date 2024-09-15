@@ -1,7 +1,8 @@
 import { eq, like, sql } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { TagSchema, tags } from '../db/vault/schema';
-import { VaultInstance } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultInstance';
+import { VaultService } from '../lib/VaultService';
 import { generateRandomColor } from '../utils/generateRandomColor';
 
 export type SimpleTag = Omit<TagSchema, 'parentTagId'>;
@@ -11,12 +12,13 @@ export type PopulatedTag = SimpleTag & {
 };
 
 @injectable()
-export class TagService {
-	public constructor(@inject(VaultInstance) private vault: VaultInstance) {}
+export class TagService extends VaultService {
+	public constructor(@inject('db') db: VaultDb) {
+		super(db);
+	}
 
 	public async getTag(id: number): Promise<PopulatedTag> {
-		const { db } = this.vault;
-		const dbTag = await db.query.tags.findFirst({ where: eq(tags.id, id) });
+		const dbTag = await this.db.query.tags.findFirst({ where: eq(tags.id, id) });
 
 		if (!dbTag) {
 			throw new Error(`Error while fetching tag, tag with id ${id} not found`);
@@ -26,30 +28,27 @@ export class TagService {
 	}
 
 	public async doesTagExist(tagName: string): Promise<boolean> {
-		const { db } = this.vault;
-		const dbTag = await db.query.tags.findFirst({
+		const dbTag = await this.db.query.tags.findFirst({
 			where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase())
 		});
 		return !!dbTag;
 	}
 
 	public async getTagByName(tagName: string): Promise<SimpleTag | undefined> {
-		const { db } = this.vault;
-		const dbTag = await db.query.tags.findFirst({
+		const dbTag = await this.db.query.tags.findFirst({
 			where: like(tags.name, tagName.trim().replaceAll(' ', '_').toLowerCase())
 		});
 		return dbTag;
 	}
 
 	public async getAllTags(nameToQuery?: string): Promise<PopulatedTag[]> {
-		const { db } = this.vault;
 		let foundTags: TagSchema[] = [];
 		if (nameToQuery) {
-			foundTags = await db.query.tags.findMany({
+			foundTags = await this.db.query.tags.findMany({
 				where: like(tags.name, `%${nameToQuery}%`)
 			});
 		} else {
-			foundTags = await db.query.tags.findMany();
+			foundTags = await this.db.query.tags.findMany();
 		}
 
 		let finalTags: PopulatedTag[] = [];
@@ -63,10 +62,9 @@ export class TagService {
 	}
 
 	public async populateTagsById(tagIds: number[]): Promise<PopulatedTag[]> {
-		const { db } = this.vault;
 		let foundTags: TagSchema[] = [];
 
-		foundTags = await db.query.tags.findMany({
+		foundTags = await this.db.query.tags.findMany({
 			where: sql`${tags.id} in (${tagIds.join(',')})`
 		});
 		let finalTags: PopulatedTag[] = [];
@@ -80,7 +78,6 @@ export class TagService {
 	}
 
 	public async createTag(name: string, color: string, parentId?: number): Promise<SimpleTag> {
-		const { db } = this.vault;
 		const formattedTagName = name.trim().replaceAll(' ', '_').toLowerCase();
 
 		if (formattedTagName.length === 0) {
@@ -88,7 +85,7 @@ export class TagService {
 		}
 
 		const newTag = (
-			await db
+			await this.db
 				.insert(tags)
 				.values({
 					name: formattedTagName,
@@ -101,17 +98,15 @@ export class TagService {
 	}
 
 	public async deleteTag(tagId: number): Promise<void> {
-		const { db } = this.vault;
-		await db.delete(tags).where(eq(tags.id, tagId));
+		await this.db.delete(tags).where(eq(tags.id, tagId));
 	}
 
 	public async updateTag(
 		tagId: number,
 		updatePayload: { name?: string; parentId?: number; color: string }
 	): Promise<SimpleTag> {
-		const { db } = this.vault;
 		const updated = (
-			await db
+			await this.db
 				.update(tags)
 				.set({ ...updatePayload, parentTagId: updatePayload.parentId ?? null })
 				.where(eq(tags.id, tagId))
@@ -124,7 +119,7 @@ export class TagService {
 	private populateTag = async (tag: TagSchema): Promise<PopulatedTag> => {
 		let parentTag: SimpleTag | null = null;
 		if (tag.parentTagId) {
-			const result = await this.vault.db.query.tags.findFirst({
+			const result = await this.db.query.tags.findFirst({
 				where: eq(tags.id, tag.parentTagId)
 			});
 			if (result) {
@@ -137,7 +132,7 @@ export class TagService {
 		}
 
 		let subTags: PopulatedTag[] = [];
-		const foundSubTags = await this.vault.db.query.tags.findMany({
+		const foundSubTags = await this.db.query.tags.findMany({
 			where: eq(tags.parentTagId, tag.id)
 		});
 		if (foundSubTags) {

@@ -48,7 +48,7 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 				const finalExtension =
 					fileType === 'image' ? getExtensionForImage(currentFileExtension) : currentFileExtension;
 				const finalPath = path.join(
-					vault.path,
+					vault.config.path,
 					'media',
 					part.mimetype.includes('image') ? 'images' : 'videos',
 					`${id}.${finalExtension}`
@@ -58,7 +58,6 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 					await pipeline(part.file, createWriteStream(finalPath));
 
 					await vault.media.createMediaItemFromFile({
-						vault,
 						fileExtension: finalExtension,
 						originalFileName: part.filename,
 						preCalculatedId: id
@@ -80,8 +79,8 @@ const createMediaItems = async (request: Request, reply: FastifyReply) => {
 		}
 	});
 
-	vault.registerJob(mediaImportJob);
-	vault.runJob(mediaImportJob.id);
+	vault.jobs.registerJob(mediaImportJob);
+	vault.jobs.runJob(mediaImportJob.id);
 
 	return reply.send({
 		message: 'Job registered successfully!',

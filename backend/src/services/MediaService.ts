@@ -14,19 +14,21 @@ import {
 	mediaItemsMetadata,
 	tagsToMediaItems
 } from '../db/vault/schema';
-import { VaultInstance } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultInstance';
 import { VaultService } from '../lib/VaultService';
 import { ParsedExif } from '../types/Exif';
+import { VaultConfig } from '../types/VaultConfig';
 import { generateRandomColor } from '../utils/generateRandomColor';
 import { TagService } from './TagService';
 
 @injectable()
 export class MediaService extends VaultService {
 	public constructor(
-		vault: VaultInstance,
+		@inject('db') protected db: VaultDb,
+		@inject('config') private config: VaultConfig,
 		@inject(TagService) private tagService: TagService
 	) {
-		super(vault);
+		super(db);
 	}
 
 	private getTypeFromExtension(fileExtension: string): 'image' | 'video' {
@@ -49,8 +51,7 @@ export class MediaService extends VaultService {
 	}
 
 	public async getItemMetadata(id: number): Promise<MediaItemMetadataSchema> {
-		const { db } = this.vault;
-		const metadata = await db.query.mediaItemsMetadata.findFirst({
+		const metadata = await this.db.query.mediaItemsMetadata.findFirst({
 			where: eq(mediaItemsMetadata.mediaItem, id)
 		});
 
@@ -61,8 +62,7 @@ export class MediaService extends VaultService {
 	}
 
 	public async isThereMediaItemWithSource(source: string): Promise<boolean> {
-		const { db } = this.vault;
-		const mediaItem = await db.query.mediaItems.findFirst({
+		const mediaItem = await this.db.query.mediaItems.findFirst({
 			where: eq(mediaItems.source, source)
 		});
 
@@ -79,11 +79,10 @@ export class MediaService extends VaultService {
 	}): Promise<MediaItem> {
 		const { fileExtension, originalFileName, preCalculatedId, sdCheckPointId, loras, source } =
 			options;
-		const { db } = this.vault;
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const id = preCalculatedId ?? randomUUID();
 		const finalPath = path.join(
-			this.vault.path,
+			this.config.path,
 			'media',
 			fileType === 'image' ? 'images' : 'videos',
 			`${id}.${fileExtension}`
@@ -94,7 +93,7 @@ export class MediaService extends VaultService {
 		const hexHash = hash.digest('hex').toString();
 		// Exif
 		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
-		const [newMediaItem] = await db
+		const [newMediaItem] = await this.db
 			.insert(mediaItems)
 			.values({
 				fileName: id,
@@ -133,15 +132,15 @@ export class MediaService extends VaultService {
 			if (fileExtension === 'gif') {
 				await sharp(filePath, { animated: true, limitInputPixels: false })
 					.webp({ quality: 70, lossless: false })
-					.toFile(`${this.vault.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
+					.toFile(`${this.config.path}/media/images/.thumb/${mediaItem.fileName}.webp`);
 			} else {
 				await sharp(filePath, { limitInputPixels: false })
 					.jpeg({ quality: 80 })
-					.toFile(`${this.vault.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
+					.toFile(`${this.config.path}/media/images/.thumb/${mediaItem.fileName}.jpg`);
 			}
 		} else if (mediaItem.type === 'video') {
 			const thumbnailPath = path.join(
-				this.vault.path,
+				this.config.path,
 				'media',
 				'videos',
 				'.thumb',
@@ -182,7 +181,7 @@ export class MediaService extends VaultService {
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const finalExtension = this.getFinalExtension(fileExtension);
 		const itemPath = path.join(
-			this.vault.path,
+			this.config.path,
 			'media',
 			fileType === 'image' ? 'images' : 'videos',
 			`${id}.${finalExtension}`
@@ -207,21 +206,18 @@ export class MediaService extends VaultService {
 	}
 
 	public async addLoraToMediaItem(mediaItemId: number, loraId: string): Promise<void> {
-		const { db } = this.vault;
-		await db.insert(lorasToMediaItems).values({ loraId, mediaItemId });
+		await this.db.insert(lorasToMediaItems).values({ loraId, mediaItemId });
 	}
 
 	public async addTagToMediaItem(mediaItemId: number, tagId: number): Promise<void> {
-		const { db } = this.vault;
-		await db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
+		await this.db.insert(tagsToMediaItems).values({ tagId: tagId, mediaItemId: mediaItemId });
 	}
 
 	public async setMediaItemSDCheckpoint(
 		mediaItemId: number,
 		sdCheckpointId: string
 	): Promise<void> {
-		const { db } = this.vault;
-		await db
+		await this.db
 			.update(mediaItems)
 			.set({ sdCheckpoint: sdCheckpointId })
 			.where(eq(mediaItems.id, mediaItemId));
@@ -305,8 +301,10 @@ export class MediaService extends VaultService {
 			}
 		}
 
-		const { db } = this.vault;
-		const [newMetadata] = await db.insert(mediaItemsMetadata).values(metadataPayload).returning();
+		const [newMetadata] = await this.db
+			.insert(mediaItemsMetadata)
+			.values(metadataPayload)
+			.returning();
 		return newMetadata;
 	}
 

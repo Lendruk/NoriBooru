@@ -1,7 +1,9 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
+import { inject } from 'inversify';
 import { sdWildcards, SDWildcardSchema } from '../db/vault/schema';
-import type { VaultInstance } from '../lib/VaultInstance';
+import type { VaultDb } from '../lib/VaultInstance';
+import { VaultService } from '../lib/VaultService';
 
 export type SDWildcard = {
 	id: string;
@@ -9,19 +11,20 @@ export type SDWildcard = {
 	values: string[];
 };
 
-class WildcardService {
-	public async getWildcards(vault: VaultInstance): Promise<SDWildcard[]> {
-		const { db } = vault;
-		const rawWildcards = await db.query.sdWildcards.findMany();
+export class WildcardService extends VaultService {
+	public constructor(@inject('db') db: VaultDb) {
+		super(db);
+	}
+
+	public async getWildcards(): Promise<SDWildcard[]> {
+		const rawWildcards = await this.db.query.sdWildcards.findMany();
 		return this.mapDBSchemas(rawWildcards);
 	}
 
 	public async updateWildcard(
-		vault: VaultInstance,
 		wildcardId: string,
 		updateBody: { name?: string; values?: string[] }
 	): Promise<SDWildcard> {
-		const { db } = vault;
 		const updatePayload: Partial<SDWildcardSchema> = {};
 
 		if (updateBody.name) {
@@ -32,7 +35,7 @@ class WildcardService {
 			updatePayload.values = updateBody.values.join(',');
 		}
 
-		const rawWildcard = await db
+		const rawWildcard = await this.db
 			.update(sdWildcards)
 			.set(updatePayload)
 			.where(eq(sdWildcards.id, wildcardId))
@@ -40,13 +43,8 @@ class WildcardService {
 		return this.mapDBSchema(rawWildcard[0]);
 	}
 
-	public async createWildcard(
-		vault: VaultInstance,
-		name: string,
-		values: string[]
-	): Promise<SDWildcard> {
-		const { db } = vault;
-		const newWildcard = await db
+	public async createWildcard(name: string, values: string[]): Promise<SDWildcard> {
+		const newWildcard = await this.db
 			.insert(sdWildcards)
 			.values({ id: randomUUID(), listName: name, values: values.join(',') })
 			.returning();
@@ -57,9 +55,8 @@ class WildcardService {
 		};
 	}
 
-	public async deleteWildcard(vault: VaultInstance, wildcardId: string): Promise<void> {
-		const { db } = vault;
-		await db.delete(sdWildcards).where(eq(sdWildcards.id, wildcardId));
+	public async deleteWildcard(wildcardId: string): Promise<void> {
+		await this.db.delete(sdWildcards).where(eq(sdWildcards.id, wildcardId));
 	}
 
 	private mapDBSchemas(rawWildcards: SDWildcardSchema[]): SDWildcard[] {
@@ -80,5 +77,3 @@ class WildcardService {
 		};
 	}
 }
-
-export default new WildcardService();

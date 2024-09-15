@@ -34,11 +34,11 @@ const createWatcher = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No inactivity timeout provided');
 	}
 
-	if (vault.isThereWatcherWithUrl(body.url)) {
+	if (vault.watchers.isThereWatcherWithUrl(body.url)) {
 		return reply.status(400).send('Watcher with this url already exists');
 	}
 
-	const watcher = await vault.registerWatcher(
+	const watcher = await vault.watchers.createWatcher(
 		body.url,
 		body.description ?? '',
 		body.requestInterval,

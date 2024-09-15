@@ -15,7 +15,7 @@ export default async (vault: VaultInstance) => {
 		where: eq(mediaItems.extension, 'png')
 	});
 	for (const potentialGif of images) {
-		let filePath = path.join(vault.path, 'media', 'images', `${potentialGif.fileName}.png`);
+		let filePath = path.join(vault.config.path, 'media', 'images', `${potentialGif.fileName}.png`);
 		const fileBuffer = await fs.readFile(filePath);
 		// https://stackoverflow.com/questions/8473703/in-node-js-given-a-url-how-do-i-check-whether-its-a-jpg-png-gif
 		if (fileBuffer.toString('hex', 0, 4) === '47494638') {
@@ -24,7 +24,7 @@ export default async (vault: VaultInstance) => {
 			filePath = filePath.replace('.png', '.gif');
 			// Delete the old thumbnail
 			await fs.unlink(
-				path.join(vault.path, 'media', 'images', '.thumb', `${potentialGif.fileName}.jpg`)
+				path.join(vault.config.path, 'media', 'images', '.thumb', `${potentialGif.fileName}.jpg`)
 			);
 			await fs.writeFile(filePath, fileBuffer);
 

@@ -11,7 +11,7 @@ const getWatcher = async (request: Request, reply: FastifyReply) => {
 
 	const { id } = request.params as { id: string };
 
-	return reply.send({ ...vault.getWatcher(id) });
+	return reply.send({ ...vault.watchers.getWatcher(id) });
 };
 
 export default {

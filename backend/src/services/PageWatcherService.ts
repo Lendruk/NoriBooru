@@ -1,10 +1,12 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
-import { activeWatchers, ActiveWatcherSchema } from '../../db/vault/schema';
-import type { VaultInstance } from '../VaultInstance';
-import { ActiveWatcher } from './ActiveWatcher';
-import { PageParserFactory } from './WatcherFactory';
-import { WatcherSource } from './WatcherSource';
+import { inject, injectable } from 'inversify';
+import { activeWatchers, ActiveWatcherSchema } from '../db/vault/schema';
+import type { VaultDb } from '../lib/VaultInstance';
+import { VaultService } from '../lib/VaultService';
+import { ActiveWatcher } from '../lib/watchers/ActiveWatcher';
+import { PageParserFactory } from '../lib/watchers/PageParserFactory';
+import { WatcherSource } from '../lib/watchers/WatcherSource';
 
 const getSourceFromUrl = (url: string): WatcherSource => {
 	if (url.includes('4chan.org')) {
@@ -15,18 +17,22 @@ const getSourceFromUrl = (url: string): WatcherSource => {
 	throw new Error('Invalid url');
 };
 
-export class PageWatcherService {
+@injectable()
+export class PageWatcherService extends VaultService {
 	private watchers: ActiveWatcher[] = [];
 
-	public constructor(private vault: VaultInstance) {}
+	public constructor(
+		@inject('db') vaultDb: VaultDb,
+		@inject(PageParserFactory) private parserFactory: PageParserFactory
+	) {
+		super(vaultDb);
+	}
 
 	public async init(): Promise<void> {
 		console.log('PageWatcherService::init: called...');
-		const { db } = this.vault;
-		const rawWatchers = await db.query.activeWatchers.findMany();
+		const rawWatchers = await this.db.query.activeWatchers.findMany();
 		for (const rawWatcher of rawWatchers) {
-			const activeWatcher = PageParserFactory.createParser(
-				this.vault,
+			const activeWatcher = this.parserFactory.createParser(
 				getSourceFromUrl(rawWatcher.url),
 				rawWatcher
 			);
@@ -69,9 +75,8 @@ export class PageWatcherService {
 		inactivityTimeout: number
 	): Promise<ActiveWatcher> {
 		const source = getSourceFromUrl(url);
-		const { db } = this.vault;
 		const rawWatcher = (
-			await db
+			await this.db
 				.insert(activeWatchers)
 				.values({
 					description: description,
@@ -88,7 +93,7 @@ export class PageWatcherService {
 				.returning()
 		)[0];
 
-		const activeWatcher = PageParserFactory.createParser(this.vault, source, rawWatcher);
+		const activeWatcher = this.parserFactory.createParser(source, rawWatcher);
 		this.watchers.push(activeWatcher);
 		void activeWatcher.start();
 
@@ -138,7 +143,7 @@ export class PageWatcherService {
 				await watcher.pause();
 			}
 
-			await this.vault.db.delete(activeWatchers).where(eq(activeWatchers.id, watcher.id));
+			await this.db.delete(activeWatchers).where(eq(activeWatchers.id, watcher.id));
 		}
 	}
 }

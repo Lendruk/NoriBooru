@@ -10,7 +10,7 @@ const resumePageWatcher = async (request: Request, reply: FastifyReply) => {
 	}
 
 	const { id } = request.params as { id: string };
-	vault.resumeWatcher(id);
+	vault.watchers.resumeWatcher(id);
 	return reply.send({ message: 'Watcher resumed successfully' });
 };
 
