@@ -45,12 +45,18 @@
 	}
 
 	$effect(() => {
+		const params = new URLSearchParams($page.url.search);
+
+		if (!params.has('inbox')) {
+			params.set('inbox', 'false');
+		}
+
 		HttpService.get<{
 			mediaItem: MediaItemWithTags;
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/media-items/${$page.params.id}?${$page.url.search}`).then((res) => {
+		}>(`/media-items/${$page.params.id}?${params.toString()}`).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
