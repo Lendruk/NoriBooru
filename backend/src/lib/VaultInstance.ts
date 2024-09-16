@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import { Container, injectable } from 'inversify';
-import * as vaultSchema from '../db/vault/schema';
+import vaultSchema from '../db/vault';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';
@@ -11,6 +11,7 @@ import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
 import { WildcardService } from '../services/WildcardService';
 import { VaultConfig } from '../types/VaultConfig';
+import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
@@ -58,6 +59,7 @@ export class VaultInstance {
 	}
 
 	public async init(): Promise<void> {
+		await VaultMigrator.migrateVault(this);
 		await this.watchers.init();
 	}
 }
