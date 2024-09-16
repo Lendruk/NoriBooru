@@ -11,6 +11,7 @@ import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
 import { WildcardService } from '../services/WildcardService';
 import { VaultConfig } from '../types/VaultConfig';
+import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
@@ -58,6 +59,7 @@ export class VaultInstance {
 	}
 
 	public async init(): Promise<void> {
+		VaultMigrator.migrateVault(this);
 		await this.watchers.init();
 	}
 }
