@@ -11,11 +11,12 @@ const unlinkVault = async (request: Request, reply: FastifyReply) => {
 	if (!vault) {
 		return reply.status(400).send('No vault provided');
 	}
-	const vaultPath = (await masterDb.query.vaults.findFirst({ where: eq(vaults.id, vault.id) }))
-		?.path;
+	const vaultPath = (
+		await masterDb.query.vaults.findFirst({ where: eq(vaults.id, vault.config.id) })
+	)?.path;
 
 	if (vaultPath) {
-		await masterDb.delete(vaults).where(eq(vaults.id, vault.id));
+		await masterDb.delete(vaults).where(eq(vaults.id, vault.config.id));
 	}
 	return reply.send({ message: 'Vault unlinked successfully' });
 };
