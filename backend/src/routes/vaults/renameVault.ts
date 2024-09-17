@@ -10,9 +10,9 @@ const renameVault = async (request: Request, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	await vault.setName(body.name);
+	await vault.config.setName(body.name);
 
-	return reply.send(vault.getConfig());
+	return reply.send(vault.config.getConfig());
 };
 
 export default {
