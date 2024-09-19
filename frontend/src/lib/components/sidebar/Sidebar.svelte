@@ -2,9 +2,14 @@
 	import { version } from '$app/environment';
 	import { page } from '$app/stores';
 	import CircleDown from '$lib/icons/CircleDown.svelte';
+	import FlagIcon from '$lib/icons/FlagIcon.svelte';
 	import FolderClosedIcon from '$lib/icons/FolderClosedIcon.svelte';
+	import LocationPinIcon from '$lib/icons/LocationPinIcon.svelte';
+	import MapIcon from '$lib/icons/MapIcon.svelte';
 	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
+	import SwordIcon from '$lib/icons/SwordIcon.svelte';
+	import UserIcon from '$lib/icons/UserIcon.svelte';
 	import WorldIcon from '$lib/icons/WorldIcon.svelte';
 	import { vaultStore } from '../../../store';
 	import ArrowLeft from '../../icons/ArrowLeft.svelte';
@@ -81,8 +86,40 @@
 		},
 		{
 			name: 'World Building',
-			path: '/world-building',
-			navHref: '/world-building',
+			path: '',
+			navHref: '',
+			subRoutes: [
+				{
+					name: 'Characters',
+					path: '/world-building/characters',
+					navHref: '/world-building/characters',
+					icon: UserIcon
+				},
+				{
+					name: 'Locations',
+					path: '/world-building/locations',
+					navHref: '/world-building/locations',
+					icon: LocationPinIcon
+				},
+				{
+					name: 'Nations',
+					path: '/world-building/nations',
+					navHref: '/world-building/nations',
+					icon: FlagIcon
+				},
+				{
+					name: 'Maps',
+					path: '/world-building/maps',
+					navHref: '/world-building/maps',
+					icon: MapIcon
+				},
+				{
+					name: 'Items',
+					path: '/world-building/items',
+					navHref: '/world-building/items',
+					icon: SwordIcon
+				}
+			],
 			icon: WorldIcon
 		},
 		{
