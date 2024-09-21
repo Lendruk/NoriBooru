@@ -10,6 +10,7 @@ import { TagService } from '../services/TagService';
 import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
 import { WildcardService } from '../services/WildcardService';
+import { CharacterService } from '../services/worldbuilding/CharacterService';
 import { VaultConfig } from '../types/VaultConfig';
 import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
@@ -47,6 +48,9 @@ export class VaultInstance {
 		this.container.bind(PageParserFactory).toSelf().inSingletonScope();
 		this.container.bind(PageWatcherService).toSelf().inSingletonScope();
 		this.container.bind(SDService).toSelf().inSingletonScope();
+
+		// Worldbuilding
+		this.container.bind(CharacterService).toSelf().inSingletonScope();
 
 		this.tags = this.container.get(TagService);
 		this.media = this.container.get(MediaService);

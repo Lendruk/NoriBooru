@@ -1,3 +1,4 @@
+import { InferSelectModel } from 'drizzle-orm';
 import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { mediaItems, tags } from './schema';
 
@@ -34,6 +35,8 @@ export const worldCultures = sqliteTable('world_cultures', {
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldCultureSchema = InferSelectModel<typeof worldCultures>;
+
 export const worldCharacters = sqliteTable('world_characters', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
@@ -43,6 +46,8 @@ export const worldCharacters = sqliteTable('world_characters', {
 	specieId: text('specie_id').references(() => worldSpecies.id, { onDelete: 'set null' }),
 	cultureId: text('culture_id').references(() => worldCultures.id, { onDelete: 'set null' })
 });
+
+export type WorldCharacterSchema = InferSelectModel<typeof worldCharacters>;
 
 export const worldItems = sqliteTable('world_items', {
 	id: text('id').primaryKey(),
