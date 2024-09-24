@@ -27,6 +27,8 @@ export const worldSpecies = sqliteTable('world_species', {
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldSpecieSchema = InferSelectModel<typeof worldSpecies>;
+
 export const worldCultures = sqliteTable('world_cultures', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
@@ -65,6 +67,8 @@ export const worldCurrencies = sqliteTable('world_currencies', {
 	createdAt: integer('created_at').notNull(),
 	updatedAt: integer('updated_at').notNull()
 });
+
+export type WorldCurrencySchema = InferSelectModel<typeof worldCurrencies>;
 
 export const worldMaps = sqliteTable('world_maps', {
 	id: text('id').primaryKey(),
