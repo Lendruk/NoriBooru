@@ -50,6 +50,18 @@ export class MediaService extends VaultService {
 		return fileExtension;
 	}
 
+	public async getMediaItem(id: number): Promise<MediaItem> {
+		const rawMediaItem = await this.db.query.mediaItems.findFirst({
+			where: eq(mediaItems.id, id)
+		});
+
+		if (!rawMediaItem) {
+			throw new Error('Media item not found');
+		}
+
+		return rawMediaItem;
+	}
+
 	public async getItemMetadata(id: number): Promise<MediaItemMetadataSchema> {
 		const metadata = await this.db.query.mediaItemsMetadata.findFirst({
 			where: eq(mediaItemsMetadata.mediaItem, id)

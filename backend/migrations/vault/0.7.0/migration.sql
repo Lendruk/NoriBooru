@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `world_articles_to_tags` (
 CREATE TABLE IF NOT EXISTS `world_items_to_world_currencies` (
 	`world_item_id` text NOT NULL,
 	`world_currency_id` text NOT NULL,
-	`value` integer NOT NULL,
+	`amount` integer NOT NULL,
 	PRIMARY KEY(`world_item_id`, `world_currency_id`),
 	FOREIGN KEY (`world_item_id`) REFERENCES `world_items`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`world_currency_id`) REFERENCES `world_currencies`(`id`) ON UPDATE no action ON DELETE cascade
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `world_items_to_world_currencies` (
 --- StatementBreak
 CREATE TABLE IF NOT EXISTS `world_items_to_media_items` (
 	`world_item_id` text NOT NULL,
-	`media_item_id` text NOT NULL,
+	`media_item_id` integer NOT NULL,
 	PRIMARY KEY(`world_item_id`, `media_item_id`),
 	FOREIGN KEY (`world_item_id`) REFERENCES `world_items`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `world_items_to_media_items` (
 --- StatementBreak
 CREATE TABLE IF NOT EXISTS `world_characters_to_media_items` (
 	`world_character_id` text NOT NULL,
-	`media_item_id` text NOT NULL,
+	`media_item_id` integer NOT NULL,
 	PRIMARY KEY(`world_character_id`, `media_item_id`),
 	FOREIGN KEY (`world_character_id`) REFERENCES `world_characters`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`media_item_id`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE cascade

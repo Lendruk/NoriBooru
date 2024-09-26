@@ -59,6 +59,8 @@ export const worldItems = sqliteTable('world_items', {
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldItemSchema = InferSelectModel<typeof worldItems>;
+
 export const worldCurrencies = sqliteTable('world_currencies', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
@@ -102,10 +104,12 @@ export const worldItems_to_worldCurrencies = sqliteTable(
 		worldCurrencyId: text('world_currency_id')
 			.notNull()
 			.references(() => worldCurrencies.id, { onDelete: 'cascade' }),
-		value: integer('value').notNull()
+		amount: integer('amount').notNull()
 	},
 	(t) => ({ pk: primaryKey({ columns: [t.worldItemId, t.worldCurrencyId] }) })
 );
+
+export type WorldItemToCurrencySchema = InferSelectModel<typeof worldItems_to_worldCurrencies>;
 
 export const worldItems_to_mediaItems = sqliteTable(
 	'world_items_to_media_items',
@@ -113,12 +117,14 @@ export const worldItems_to_mediaItems = sqliteTable(
 		worldItemId: text('world_item_id')
 			.notNull()
 			.references(() => worldItems.id, { onDelete: 'cascade' }),
-		mediaItemId: text('media_item_id')
+		mediaItemId: integer('media_item_id')
 			.notNull()
 			.references(() => mediaItems.id, { onDelete: 'cascade' })
 	},
 	(t) => ({ pk: primaryKey({ columns: [t.worldItemId, t.mediaItemId] }) })
 );
+
+export type WorldItemToMediaItemSchema = InferSelectModel<typeof worldItems_to_mediaItems>;
 
 export const worldCharacters_to_mediaItems = sqliteTable(
 	'world_characters_to_media_items',
@@ -126,7 +132,7 @@ export const worldCharacters_to_mediaItems = sqliteTable(
 		worldCharacterId: text('world_character_id')
 			.notNull()
 			.references(() => worldCharacters.id, { onDelete: 'cascade' }),
-		mediaItemId: text('media_item_id')
+		mediaItemId: integer('media_item_id')
 			.notNull()
 			.references(() => mediaItems.id, { onDelete: 'cascade' })
 	},

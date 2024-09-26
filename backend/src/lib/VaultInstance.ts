@@ -11,6 +11,10 @@ import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
 import { WildcardService } from '../services/WildcardService';
 import { CharacterService } from '../services/worldbuilding/CharacterService';
+import { CultureService } from '../services/worldbuilding/CultureService';
+import { CurrencyService } from '../services/worldbuilding/CurrencyService';
+import { ItemService } from '../services/worldbuilding/ItemService';
+import { SpecieService } from '../services/worldbuilding/SpecieService';
 import { VaultConfig } from '../types/VaultConfig';
 import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
@@ -30,6 +34,13 @@ export class VaultInstance {
 	public stableDiffusion: SDService;
 	public config: VaultConfigService;
 	public watchers: PageWatcherService;
+
+	// Worldbuilding
+	public characters: CharacterService;
+	public cultures: CultureService;
+	public currencies: CurrencyService;
+	public species: SpecieService;
+	public items: ItemService;
 
 	public constructor(vault: VaultConfig) {
 		this.container = new Container();
@@ -51,6 +62,10 @@ export class VaultInstance {
 
 		// Worldbuilding
 		this.container.bind(CharacterService).toSelf().inSingletonScope();
+		this.container.bind(CultureService).toSelf().inSingletonScope();
+		this.container.bind(CurrencyService).toSelf().inSingletonScope();
+		this.container.bind(SpecieService).toSelf().inSingletonScope();
+		this.container.bind(ItemService).toSelf().inSingletonScope();
 
 		this.tags = this.container.get(TagService);
 		this.media = this.container.get(MediaService);
@@ -60,6 +75,12 @@ export class VaultInstance {
 		this.jobs = this.container.get(JobService);
 		this.stableDiffusion = this.container.get(SDService);
 		this.config = this.container.get(VaultConfigService);
+
+		this.characters = this.container.get(CharacterService);
+		this.cultures = this.container.get(CultureService);
+		this.currencies = this.container.get(CurrencyService);
+		this.species = this.container.get(SpecieService);
+		this.items = this.container.get(ItemService);
 	}
 
 	public async init(): Promise<void> {
