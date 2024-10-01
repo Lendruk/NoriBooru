@@ -2,6 +2,7 @@ import imageRoutes from './images';
 import mediaItemRoutes from './media';
 import playlistRoutes from './playlists';
 import sdRoutes from './sd';
+import settingsRoutes from './settings';
 import tagRoutes from './tags';
 import vaultRoutes from './vaults';
 import videoRoutes from './videos';
@@ -16,5 +17,6 @@ export default [
 	...tagRoutes,
 	...playlistRoutes,
 	...sdRoutes,
-	...watcherRoutes
+	...watcherRoutes,
+	...settingsRoutes
 ];
