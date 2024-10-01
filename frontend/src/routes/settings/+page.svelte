@@ -12,6 +12,17 @@
 	let vaultName = $state($vaultStore?.name ?? '');
 	let isPerformingDestructiveAction = $state(false);
 	let currentAction = $state('');
+	let civitaiApiKey = $state($vaultStore?.civitaiApiKey ?? '');
+
+	$effect(() => {
+		HttpService.get<{ civitaiApiKey: string }>(`/settings/api-keys`).then((res) => {
+			civitaiApiKey = res.civitaiApiKey;
+		});
+	});
+
+	async function setCivitaiApiKey() {
+		await HttpService.post(`/sd/civitai/register`, { key: civitaiApiKey });
+	}
 
 	async function renameVault() {
 		if (!vaultName) {
@@ -72,6 +83,15 @@
 		<div slot="content" class="flex gap-2">
 			<TextInput bind:value={vaultName} />
 			<Button onClick={renameVault}>Rename</Button>
+		</div>
+	</LabeledComponent>
+
+	<div class="text-xl mb-2">Api Keys</div>
+	<LabeledComponent>
+		<div slot="label">Civitai API Key</div>
+		<div slot="content" class="flex gap-2">
+			<TextInput isBlurred={true} bind:value={civitaiApiKey} />
+			<Button onClick={setCivitaiApiKey}>Set</Button>
 		</div>
 	</LabeledComponent>
 
