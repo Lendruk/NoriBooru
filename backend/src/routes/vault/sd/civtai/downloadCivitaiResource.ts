@@ -4,11 +4,11 @@ import fs, { createWriteStream } from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
 import { finished, pipeline } from 'stream/promises';
-import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
-import { checkVault } from '../../../hooks/checkVault';
-import { Job } from '../../../lib/Job';
-import { VaultRequest } from '../../../types/Request';
-import { CivitaiResource } from '../../../types/sd/CivtaiResource';
+import { sdCheckpoints, sdLoras } from '../../../../db/vault/schema';
+import { checkVault } from '../../../../hooks/checkVault';
+import { Job } from '../../../../lib/Job';
+import { VaultRequest } from '../../../../types/Request';
+import { CivitaiResource } from '../../../../types/sd/CivtaiResource';
 
 const downloadCivitaiResource = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;

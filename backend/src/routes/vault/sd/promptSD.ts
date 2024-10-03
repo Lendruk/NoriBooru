@@ -1,9 +1,9 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { MediaItemMetadataSchema } from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
-import { SDPromptRequest } from '../../types/sd/SDPromptRequest';
-import { SDPromptResponse } from '../../types/sd/SDPromptResponse';
+import { MediaItemMetadataSchema } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
+import { SDPromptRequest } from '../../../types/sd/SDPromptRequest';
+import { SDPromptResponse } from '../../../types/sd/SDPromptResponse';
 
 type PromptResponse = {
 	fileName: string;

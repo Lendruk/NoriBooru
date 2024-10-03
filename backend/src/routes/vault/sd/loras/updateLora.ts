@@ -1,8 +1,8 @@
 import { eq, sql } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { sdLoras, tagsToLoras } from '../../../db/vault/schema';
-import { checkVault } from '../../../hooks/checkVault';
-import { VaultRequest } from '../../../types/Request';
+import { sdLoras, tagsToLoras } from '../../../../db/vault/schema';
+import { checkVault } from '../../../../hooks/checkVault';
+import { VaultRequest } from '../../../../types/Request';
 
 const updateLora = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;

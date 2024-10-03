@@ -7,9 +7,9 @@ import {
 	mediaItems,
 	mediaItemsMetadata,
 	tagsToMediaItems
-} from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
+} from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 type BaseMediaItem = {
 	id: number;

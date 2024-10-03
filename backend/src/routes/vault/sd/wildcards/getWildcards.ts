@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { checkVault } from '../../../hooks/checkVault';
-import { SDWildcard } from '../../../services/WildcardService';
-import { VaultRequest } from '../../../types/Request';
+import { checkVault } from '../../../../hooks/checkVault';
+import { SDWildcard } from '../../../../services/WildcardService';
+import { VaultRequest } from '../../../../types/Request';
 
 const getWildcards = async (request: VaultRequest, reply: FastifyReply) => {
 	const { vault } = request;

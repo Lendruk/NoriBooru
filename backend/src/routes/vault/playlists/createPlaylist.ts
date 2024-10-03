@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
-import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
+import { playlists, playlists_mediaItems_table } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 type RequestBody = {
 	name: string;

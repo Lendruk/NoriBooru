@@ -8,10 +8,10 @@ import {
 	mediaItemsMetadata,
 	tags,
 	tagsToMediaItems
-} from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { PopulatedTag } from '../../services/TagService';
-import { VaultRequest } from '../../types/Request';
+} from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { PopulatedTag } from '../../../services/TagService';
+import { VaultRequest } from '../../../types/Request';
 import { MediaSearchQuery } from './searchMediaItems';
 
 const getMediaItem = async (request: VaultRequest, reply: FastifyReply) => {

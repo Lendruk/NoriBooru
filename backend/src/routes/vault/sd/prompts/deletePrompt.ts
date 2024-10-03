@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { sdPrompts } from '../../../db/vault/schema';
-import { checkVault } from '../../../hooks/checkVault';
-import { VaultRequest } from '../../../types/Request';
+import { sdPrompts } from '../../../../db/vault/schema';
+import { checkVault } from '../../../../hooks/checkVault';
+import { VaultRequest } from '../../../../types/Request';
 
 const deletePrompt = async (request: VaultRequest, reply: FastifyReply) => {
 	const vaultInstance = request.vault;

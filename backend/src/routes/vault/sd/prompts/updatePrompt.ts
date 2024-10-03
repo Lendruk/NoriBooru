@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { sdPrompts } from '../../../db/vault/schema';
-import { checkVault } from '../../../hooks/checkVault';
-import { VaultRequest } from '../../../types/Request';
+import { sdPrompts } from '../../../../db/vault/schema';
+import { checkVault } from '../../../../hooks/checkVault';
+import { VaultRequest } from '../../../../types/Request';
 
 type RequestOptions = {
 	name: string;

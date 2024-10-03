@@ -4,9 +4,9 @@ import fs from 'fs/promises';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { pipeline } from 'stream/promises';
-import { checkVault } from '../../hooks/checkVault';
-import { Job } from '../../lib/Job';
-import { VaultRequest } from '../../types/Request';
+import { checkVault } from '../../../hooks/checkVault';
+import { Job } from '../../../lib/Job';
+import { VaultRequest } from '../../../types/Request';
 
 type MediaItemJobUpdatePayload = {
 	totalFiles: number;

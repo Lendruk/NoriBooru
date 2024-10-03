@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import fs from 'fs/promises';
-import { sdLoras } from '../../../db/vault/schema';
-import { checkVault } from '../../../hooks/checkVault';
-import { VaultRequest } from '../../../types/Request';
+import { sdLoras } from '../../../../db/vault/schema';
+import { checkVault } from '../../../../hooks/checkVault';
+import { VaultRequest } from '../../../../types/Request';
 
 const deleteLora = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;

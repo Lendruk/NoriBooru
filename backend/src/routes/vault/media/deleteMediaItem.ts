@@ -7,9 +7,9 @@ import {
 	playlists_mediaItems_table,
 	tags,
 	tagsToMediaItems
-} from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
+} from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 const deleteMediaItem = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;

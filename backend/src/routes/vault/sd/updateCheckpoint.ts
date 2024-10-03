@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { sdCheckpoints } from '../../db/vault/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
+import { sdCheckpoints } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 const updateCheckpoint = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
