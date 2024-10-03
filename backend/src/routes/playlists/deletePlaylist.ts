@@ -1,10 +1,10 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../types/Request';
-import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { eq } from 'drizzle-orm';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
+import { VaultRequest } from '../../types/Request';
 
-const deletePlaylist = async (request: Request, reply: FastifyReply) => {
+const deletePlaylist = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const params = request.params as { id: string };
 

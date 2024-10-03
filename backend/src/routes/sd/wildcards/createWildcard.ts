@@ -1,13 +1,13 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../../hooks/checkVault';
-import { Request } from '../../../types/Request';
+import { VaultRequest } from '../../../types/Request';
 
 type RequestBody = {
 	name: string;
 	values: string[];
 };
 
-const createWildcard = async (request: Request, reply: FastifyReply) => {
+const createWildcard = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const body = request.body as RequestBody;
 	if (!vault) {

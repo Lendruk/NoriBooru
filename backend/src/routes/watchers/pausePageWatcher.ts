@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const pauseWatcher = async (request: Request, reply: FastifyReply) => {
+const pauseWatcher = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

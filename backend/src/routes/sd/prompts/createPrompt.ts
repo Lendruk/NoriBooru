@@ -1,8 +1,8 @@
-import { FastifyReply, RouteOptions } from 'fastify';
-import { Request } from '../../../types/Request';
-import { checkVault } from '../../../hooks/checkVault';
-import { sdPrompts } from '../../../db/vault/schema';
 import { randomUUID } from 'crypto';
+import { FastifyReply, RouteOptions } from 'fastify';
+import { sdPrompts } from '../../../db/vault/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 type RequestOptions = {
 	name: string;
@@ -23,7 +23,7 @@ type RequestOptions = {
 	} | null;
 };
 
-const createPrompt = async (request: Request, reply: FastifyReply) => {
+const createPrompt = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	if (!vault) {
 		return reply.status(400).send('No vault provided');

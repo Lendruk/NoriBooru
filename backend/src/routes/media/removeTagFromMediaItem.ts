@@ -2,9 +2,9 @@ import { and, eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { TagSchema, tagsToMediaItems } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const removeTagFromMediaItem = async (request: Request, reply: FastifyReply) => {
+const removeTagFromMediaItem = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	if (!vault) {
 		return reply.status(400).send('No vault provided');

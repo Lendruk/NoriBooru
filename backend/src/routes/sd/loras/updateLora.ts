@@ -2,9 +2,9 @@ import { eq, sql } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { sdLoras, tagsToLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
-import { Request } from '../../../types/Request';
+import { VaultRequest } from '../../../types/Request';
 
-const updateLora = async (request: Request, reply: FastifyReply) => {
+const updateLora = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const { id } = request.params as { id: string };
 	const body = request.body as {
@@ -31,7 +31,7 @@ const updateLora = async (request: Request, reply: FastifyReply) => {
 	if (Object.keys(updatePayload).length > 0) {
 		await db
 			.update(sdLoras)
-			.set({...updatePayload })
+			.set({ ...updatePayload })
 			.where(eq(sdLoras.id, id));
 	}
 	const currentTags = (

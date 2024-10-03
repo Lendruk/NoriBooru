@@ -9,7 +9,7 @@ import {
 	tagsToMediaItems
 } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
 type BaseMediaItem = {
 	id: number;
@@ -51,7 +51,7 @@ export type MediaSearchQuery = {
 const PAGE_SIZE = 50;
 type SortMethods = 'newest' | 'oldest';
 
-const searchMediaItems = async (request: Request, reply: FastifyReply) => {
+const searchMediaItems = async (request: VaultRequest, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
 	const query = request.query as MediaSearchQuery;
 

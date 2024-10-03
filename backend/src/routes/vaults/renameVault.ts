@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const renameVault = async (request: Request, reply: FastifyReply) => {
+const renameVault = async (request: VaultRequest, reply: FastifyReply) => {
 	const body = request.body as { name: string };
 	const { vault } = request;
 

@@ -1,9 +1,9 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { Request } from '../types/Request';
-import { VaultController } from '../db/VaultController';
 import { eq } from 'drizzle-orm';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { masterDb } from '../db/master/db';
 import { vaults } from '../db/master/schema';
+import { VaultController } from '../db/VaultController';
+import { VaultRequest } from '../types/Request';
 
 export const checkVault = async (req: FastifyRequest, reply: FastifyReply) => {
 	const vaultHeader = req.headers['vault'];
@@ -19,6 +19,6 @@ export const checkVault = async (req: FastifyRequest, reply: FastifyReply) => {
 			await VaultController.registerVault(vault);
 		}
 
-		(req as Request)['vault'] = VaultController.getVault(vaultHeader);
+		(req as VaultRequest)['vault'] = VaultController.getVault(vaultHeader);
 	}
 };

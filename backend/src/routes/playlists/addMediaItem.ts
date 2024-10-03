@@ -2,9 +2,9 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const addMediaItem = async (request: Request, reply: FastifyReply) => {
+const addMediaItem = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const params = request.params as { id: string };
 	const body = request.body as {

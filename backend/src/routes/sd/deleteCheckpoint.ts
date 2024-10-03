@@ -3,9 +3,9 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import fs from 'fs/promises';
 import { sdCheckpoints } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const deleteCheckpoint = async (request: Request, reply: FastifyReply) => {
+const deleteCheckpoint = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const { id } = request.params as { id: string };
 	if (!vault) {

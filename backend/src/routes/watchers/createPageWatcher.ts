@@ -1,6 +1,6 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
 type RequestBody = {
 	url?: string;
@@ -10,7 +10,7 @@ type RequestBody = {
 	inactivityTimeout: number;
 };
 
-const createWatcher = async (request: Request, reply: FastifyReply) => {
+const createWatcher = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

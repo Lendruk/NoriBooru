@@ -11,10 +11,10 @@ import {
 } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
 import { PopulatedTag } from '../../services/TagService';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 import { MediaSearchQuery } from './searchMediaItems';
 
-const getMediaItem = async (request: Request, reply: FastifyReply) => {
+const getMediaItem = async (request: VaultRequest, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
 	if (!vaultInstance) {
 		return reply.status(400).send('No vault provided');

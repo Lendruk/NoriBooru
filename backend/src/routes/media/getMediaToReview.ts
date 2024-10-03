@@ -2,9 +2,9 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { mediaItems } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const getMediaToReview = async (request: Request, reply: FastifyReply) => {
+const getMediaToReview = async (request: VaultRequest, reply: FastifyReply) => {
 	const vaultInstance = request.vault;
 
 	if (!vaultInstance) {

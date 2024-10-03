@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
 import { playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
 export type SimplePlaylist = {
 	id: number;
@@ -14,7 +14,7 @@ export type SimplePlaylist = {
 	items: number[];
 };
 
-const getPlaylists = async (request: Request, reply: FastifyReply) => {
+const getPlaylists = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

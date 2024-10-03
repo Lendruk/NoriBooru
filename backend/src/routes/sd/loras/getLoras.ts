@@ -3,7 +3,7 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import { SDLoraSchema, tagsToLoras } from '../../../db/vault/schema';
 import { checkVault } from '../../../hooks/checkVault';
 import { PopulatedTag } from '../../../services/TagService';
-import { Request } from '../../../types/Request';
+import { VaultRequest } from '../../../types/Request';
 import { SDLora } from '../../../types/sd/SDLora';
 
 type LoraQuery = {
@@ -11,7 +11,7 @@ type LoraQuery = {
 	name: string;
 };
 
-const getLoras = async (request: Request, reply: FastifyReply) => {
+const getLoras = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	const { tags, name: nameQuery } = request.query as LoraQuery;
 

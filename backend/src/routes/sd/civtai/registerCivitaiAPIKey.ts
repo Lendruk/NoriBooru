@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../../hooks/checkVault';
-import { Request } from '../../../types/Request';
+import { VaultRequest } from '../../../types/Request';
 
-const registerCivitaiAPIKey = async (request: Request, reply: FastifyReply) => {
+const registerCivitaiAPIKey = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 	if (!vault) {
 		return reply.status(400).send('No vault provided');

@@ -3,9 +3,9 @@ import { FastifyReply, RouteOptions } from 'fastify';
 import { masterDb } from '../../db/master/db';
 import { vaults } from '../../db/master/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const unlinkVault = async (request: Request, reply: FastifyReply) => {
+const unlinkVault = async (request: VaultRequest, reply: FastifyReply) => {
 	const { vault } = request;
 
 	if (!vault) {

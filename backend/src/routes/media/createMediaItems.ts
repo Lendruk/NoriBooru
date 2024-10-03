@@ -6,7 +6,7 @@ import path from 'node:path';
 import { pipeline } from 'stream/promises';
 import { checkVault } from '../../hooks/checkVault';
 import { Job } from '../../lib/Job';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
 type MediaItemJobUpdatePayload = {
 	totalFiles: number;
@@ -21,7 +21,7 @@ const getExtensionForImage = (currentExtension: string): string => {
 	return 'png';
 };
 
-const createMediaItems = async (request: Request, reply: FastifyReply) => {
+const createMediaItems = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

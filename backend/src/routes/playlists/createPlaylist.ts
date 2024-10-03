@@ -1,7 +1,7 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { playlists, playlists_mediaItems_table } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
 type RequestBody = {
 	name: string;
@@ -10,7 +10,7 @@ type RequestBody = {
 	items: number[];
 };
 
-const createPlaylist = async (request: Request, reply: FastifyReply) => {
+const createPlaylist = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

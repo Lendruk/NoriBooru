@@ -1,8 +1,8 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../../hooks/checkVault';
-import { Request } from '../../../types/Request';
+import { VaultRequest } from '../../../types/Request';
 
-const deleteWildcard = async (request: Request, reply: FastifyReply) => {
+const deleteWildcard = async (request: VaultRequest, reply: FastifyReply) => {
 	const { vault } = request;
 	const { id } = request.params as { id: string };
 	if (!vault) {

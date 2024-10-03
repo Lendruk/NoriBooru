@@ -1,9 +1,9 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { TagSchema } from '../../db/vault/schema';
 import { checkVault } from '../../hooks/checkVault';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const createImage = async (request: Request, reply: FastifyReply) => {
+const createImage = async (request: VaultRequest, reply: FastifyReply) => {
 	const vault = request.vault;
 
 	if (!vault) {

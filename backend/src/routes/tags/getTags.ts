@@ -1,9 +1,9 @@
 import { FastifyReply, RouteOptions } from 'fastify';
 import { checkVault } from '../../hooks/checkVault';
 import { PopulatedTag } from '../../services/TagService';
-import { Request } from '../../types/Request';
+import { VaultRequest } from '../../types/Request';
 
-const getTags = async (request: Request, reply: FastifyReply) => {
+const getTags = async (request: VaultRequest, reply: FastifyReply) => {
 	const { vault } = request;
 	const query = request.query as { name: string };
 	if (!vault) {
