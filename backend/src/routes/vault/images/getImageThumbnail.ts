@@ -2,8 +2,8 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { VaultController } from '../../db/VaultController';
-import { mediaItems } from '../../db/vault/schema';
+import { VaultController } from '../../../db/VaultController';
+import { mediaItems } from '../../../db/vault/schema';
 
 const getImageThumbnail = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { fileName: string; vaultId: string };

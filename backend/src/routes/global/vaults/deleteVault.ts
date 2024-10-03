@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import fs from 'fs/promises';
-import { masterDb } from '../../db/master/db';
-import { vaults } from '../../db/master/schema';
+import { masterDb } from '../../../db/master/db';
+import { vaults } from '../../../db/master/schema';
 const deleteVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { id: string };
 

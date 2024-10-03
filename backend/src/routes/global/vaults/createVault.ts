@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import * as fs from 'fs/promises';
-import { masterDb } from '../../db/master/db';
-import { vaults } from '../../db/master/schema';
-import { VaultController } from '../../db/VaultController';
-import { VaultConfig } from '../../types/VaultConfig';
-import { getServerConfig } from '../../utils/getServerConfig';
+import { masterDb } from '../../../db/master/db';
+import { vaults } from '../../../db/master/schema';
+import { VaultController } from '../../../db/VaultController';
+import { VaultConfig } from '../../../types/VaultConfig';
+import { getServerConfig } from '../../../utils/getServerConfig';
 
 const createVault = async (request: FastifyRequest, reply: FastifyReply) => {
 	const body = request.body as { path?: string; name: string };

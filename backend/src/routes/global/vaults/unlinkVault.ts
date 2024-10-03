@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { FastifyReply, RouteOptions } from 'fastify';
-import { masterDb } from '../../db/master/db';
-import { vaults } from '../../db/master/schema';
-import { checkVault } from '../../hooks/checkVault';
-import { VaultRequest } from '../../types/Request';
+import { masterDb } from '../../../db/master/db';
+import { vaults } from '../../../db/master/schema';
+import { checkVault } from '../../../hooks/checkVault';
+import { VaultRequest } from '../../../types/Request';
 
 const unlinkVault = async (request: VaultRequest, reply: FastifyReply) => {
 	const { vault } = request;

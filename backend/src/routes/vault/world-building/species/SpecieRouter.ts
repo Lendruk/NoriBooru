@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
-import { Route, Router } from '../../../lib/Router';
-import { SpecieService } from '../../../services/worldbuilding/SpecieService';
+import { Route, Router } from '../../../../lib/Router';
+import { SpecieService } from '../../../../services/worldbuilding/SpecieService';
 
 @injectable()
 export class SpecieRouter extends Router {

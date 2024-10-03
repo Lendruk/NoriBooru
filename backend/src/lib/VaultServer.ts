@@ -7,7 +7,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { Container } from 'inversify';
 import { createConnection } from 'net';
 import vaultSchema from '../db/vault';
-import { SpecieRouter } from '../routes/world-building/species/SpecieRouter';
+import { SpecieRouter } from '../routes/vault/world-building/species/SpecieRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';

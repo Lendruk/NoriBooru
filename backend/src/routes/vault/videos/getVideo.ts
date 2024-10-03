@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { VaultController } from '../../db/VaultController';
+import { VaultController } from '../../../db/VaultController';
 
 const getVideo = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { vaultId: string; fileName: string };

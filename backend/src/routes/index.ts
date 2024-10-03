@@ -1,12 +1,12 @@
-import imageRoutes from './images';
-import mediaItemRoutes from './media';
-import playlistRoutes from './playlists';
-import sdRoutes from './sd';
-import settingsRoutes from './settings';
-import tagRoutes from './tags';
-import vaultRoutes from './vaults';
-import videoRoutes from './videos';
-import watcherRoutes from './watchers';
+import vaultRoutes from './global/vaults';
+import imageRoutes from './vault/images';
+import mediaItemRoutes from './vault/media';
+import playlistRoutes from './vault/playlists';
+import sdRoutes from './vault/sd';
+import settingsRoutes from './vault/settings';
+import tagRoutes from './vault/tags';
+import videoRoutes from './vault/videos';
+import watcherRoutes from './vault/watchers';
 import websocketHandler from './websockets';
 export default [
 	websocketHandler,

@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { VaultController } from '../../db/VaultController';
+import { VaultController } from '../../../db/VaultController';
 
 const getImage = async (request: FastifyRequest, reply: FastifyReply) => {
 	const params = request.params as { fileName: string; vaultId: string };

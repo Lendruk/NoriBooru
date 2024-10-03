@@ -2,10 +2,10 @@ import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 import fs from 'fs/promises';
 import path from 'path';
-import { masterDb } from '../../db/master/db';
-import { vaults } from '../../db/master/schema';
-import { VaultConfig } from '../../types/VaultConfig';
-import { getServerConfig } from '../../utils/getServerConfig';
+import { masterDb } from '../../../db/master/db';
+import { vaults } from '../../../db/master/schema';
+import { VaultConfig } from '../../../types/VaultConfig';
+import { getServerConfig } from '../../../utils/getServerConfig';
 
 const getVaults = async (_: FastifyRequest, reply: FastifyReply) => {
 	const fetchedVaults = await masterDb.query.vaults.findMany();
