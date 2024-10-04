@@ -1,23 +1,27 @@
 import { FastifyReply, HTTPMethods } from 'fastify';
+import { injectable } from 'inversify';
 import { VaultRequest } from '../types/Request';
 
-type RouteHandler = (request: VaultRequest, reply: FastifyReply) => Promise<void>;
+export type RouteHandler = (request: VaultRequest, reply: FastifyReply) => Promise<void>;
 
 export type RouteDefinition = {
 	method: HTTPMethods;
 	url: string;
-	handler: RouteHandler;
+	handler: string;
 };
 
 const routeDecorator = (method: HTTPMethods, url: string) => {
-	return (target: unknown, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-		const handler = descriptor.value as RouteHandler;
+	return (target: object, propertyKey: string | symbol) => {
 		const route: RouteDefinition = {
 			method,
 			url,
-			handler: handler.bind(target)
+			handler: propertyKey as string
 		};
-		(target as Router).routes.push(route);
+		if (Reflect.hasMetadata('routes', target)) {
+			Reflect.getMetadata('routes', target).push(route);
+		} else {
+			Reflect.defineMetadata('routes', [route], target);
+		}
 	};
 };
 
@@ -29,6 +33,7 @@ export const Route = {
 	PATCH: (url: string) => routeDecorator('PATCH', url)
 };
 
+@injectable()
 export abstract class Router {
-	public routes: RouteDefinition[] = [];
+	public constructor() {}
 }

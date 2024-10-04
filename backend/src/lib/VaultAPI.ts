@@ -2,7 +2,7 @@ import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import ws from '@fastify/websocket';
 import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import Fastify, { FastifyInstance } from 'fastify';
 import { Container } from 'inversify';
 import { createConnection } from 'net';
@@ -22,21 +22,36 @@ import { CurrencyService } from '../services/worldbuilding/CurrencyService';
 import { ItemService } from '../services/worldbuilding/ItemService';
 import { SpecieService } from '../services/worldbuilding/SpecieService';
 import { VaultConfig } from '../types/VaultConfig';
-import { Router } from './Router';
+import { RouteDefinition, RouteHandler, Router } from './Router';
+import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
 
-export class VaultServer extends Container {
+export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
+
+export class VaultAPI extends Container {
 	private port: number | undefined;
 	private fastifyApp!: FastifyInstance;
 
-	public constructor(vault: VaultConfig) {
+	// For retro-compatibility with the old VaultInstance
+	// We will supply direct access to the services
+	// Removed as we port the routes to use the Router abstraction
+	public tags: TagService;
+	public media: MediaService;
+	public wildcards: WildcardService;
+	public websockets: WebsocketService;
+	public jobs: JobService;
+	public stableDiffusion: SDService;
+	public config: VaultConfigService;
+	public watchers: PageWatcherService;
+
+	public constructor(config: VaultConfig) {
 		super();
 
 		// Create db connection
-		const newDb = new Database(`${vault.path}/vault.sqlite`);
+		const newDb = new Database(`${config.path}/vault.sqlite`);
 		const db = drizzle(newDb, { schema: vaultSchema });
 		this.bind('db').toConstantValue(db);
-		this.bind('config').toConstantValue(vault);
+		this.bind('config').toConstantValue(config);
 
 		// Services
 		this.bind(VaultConfigService).toSelf().inSingletonScope();
@@ -58,11 +73,24 @@ export class VaultServer extends Container {
 
 		// Routers
 		this.bind<Router>(Router).to(SpecieRouter).inSingletonScope();
+
+		this.tags = this.get(TagService);
+		this.media = this.get(MediaService);
+		this.wildcards = this.get(WildcardService);
+		this.watchers = this.get(PageWatcherService);
+		this.websockets = this.get(WebsocketService);
+		this.jobs = this.get(JobService);
+		this.stableDiffusion = this.get(SDService);
+		this.config = this.get(VaultConfigService);
+	}
+
+	public getDb(): VaultDb {
+		return this.get('db');
 	}
 
 	public async init(): Promise<void> {
-		// await VaultMigrator.migrateVault();
-		// await this.watchers.init();
+		await VaultMigrator.migrateVault(this);
+		await this.watchers.init();
 		await this.listen();
 	}
 
@@ -76,9 +104,9 @@ export class VaultServer extends Container {
 
 		const routers = this.getAll<Router>(Router);
 		for (const router of routers) {
-			for (const route of router.routes) {
+			for (const route of Reflect.getMetadata('routes', router) as RouteDefinition[]) {
 				app.route({
-					handler: route.handler,
+					handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
 					method: route.method,
 					url: route.url
 				});
@@ -94,6 +122,9 @@ export class VaultServer extends Container {
 			}
 		});
 
+		console.log(
+			`Starting API for vault ${this.get<VaultConfig>('config').id} on port: ${this.port}`
+		);
 		app.listen({ port: this.port, host: '0.0.0.0' }, (err) => {
 			if (err) throw err;
 		});

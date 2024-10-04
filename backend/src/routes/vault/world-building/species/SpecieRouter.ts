@@ -7,7 +7,7 @@ export class SpecieRouter extends Router {
 	public constructor(@inject(SpecieService) private specieService: SpecieService) {
 		super();
 	}
-	@Route.GET('/species')
+	@Route.GET('/world-building/species')
 	public async getSpecies() {
 		return await this.specieService.getSpecie();
 	}

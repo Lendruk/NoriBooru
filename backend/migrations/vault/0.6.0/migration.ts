@@ -2,16 +2,16 @@ import { eq } from 'drizzle-orm';
 import fs from 'fs/promises';
 import path from 'path';
 import { mediaItems } from '../../../src/db/vault/schema';
-import { VaultInstance } from '../../../src/lib/VaultInstance';
+import { VaultAPI } from '../../../src/lib/VaultAPI';
 
 /**
  * Migrates 0.5.0 vaults to 0.6.0
  * - Regenerates all .gif thumbnails
  */
-export default async (vault: VaultInstance) => {
+export default async (vault: VaultAPI) => {
 	// Regenerate all .gif thumbnails
 
-	const images = await vault.db.query.mediaItems.findMany({
+	const images = await vault.getDb().query.mediaItems.findMany({
 		where: eq(mediaItems.extension, 'png')
 	});
 	for (const potentialGif of images) {
@@ -26,9 +26,10 @@ export default async (vault: VaultInstance) => {
 			await fs.unlink(
 				path.join(vault.config.path, 'media', 'images', '.thumb', `${potentialGif.fileName}.jpg`)
 			);
-			await fs.writeFile(filePath, fileBuffer);
+			await fs.writeFile(filePath, fileBuffer.toString());
 
-			await vault.db
+			await vault
+				.getDb()
 				.update(mediaItems)
 				.set({ extension: 'gif' })
 				.where(eq(mediaItems.id, potentialGif.id));

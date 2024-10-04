@@ -1,4 +1,4 @@
 import { FastifyRequest } from 'fastify';
-import type { VaultInstance } from '../lib/VaultInstance';
+import { VaultAPI } from '../lib/VaultAPI';
 
-export type VaultRequest = FastifyRequest & { vault?: VaultInstance };
+export type VaultRequest = FastifyRequest & { vault?: VaultAPI };
