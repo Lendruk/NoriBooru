@@ -8,6 +8,7 @@
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import VerticalDrawer from '$lib/components/VerticalDrawer.svelte';
 	import Video from '$lib/components/Video.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
@@ -23,12 +24,12 @@
 	let playlistItems: MediaItem[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>(`/tags`).then((tags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((tags) => {
 			availableTags = tags;
 		});
 
 		if ($page.params.id && $page.params.id !== 'new') {
-			HttpService.get<Playlist>(`/playlists/${$page.params.id}`).then((res) => {
+			HttpService.get<Playlist>(endpoints.getPlaylist({ id: $page.params.id })).then((res) => {
 				playlistName = res.name;
 				randomizeOrder = res.randomizeOrder === 1;
 				playlistItems = res.items;
@@ -47,7 +48,9 @@
 
 	async function onTagSearchChange() {
 		if (tagSearchInputText.length > 0) {
-			const response = await HttpService.get<PopulatedTag[]>(`/tags?name=${tagSearchInputText}`);
+			const response = await HttpService.get<PopulatedTag[]>(
+				endpoints.getTags({ params: `name=${tagSearchInputText}` })
+			);
 
 			foundTags = response;
 			foundTags = foundTags.filter((tag) => !filterTags.find((t) => t.id === tag.id));
@@ -78,12 +81,13 @@
 
 	async function searchMedia() {
 		const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			'/media-items?' +
-				new URLSearchParams({
+			endpoints.getMediaItems({
+				params: new URLSearchParams({
 					// negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)),
 					positiveTags: JSON.stringify(filterTags.map((tag) => tag.id)),
 					archived: 'true'
 				})
+			})
 		);
 		sidebarMediaItems = newItems.mediaItems.filter(
 			(item) => !playlistItems.find((i) => i.id === item.id)

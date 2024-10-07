@@ -4,6 +4,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import TagEditModal from '$lib/components/TagEditModal.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
@@ -30,14 +31,14 @@
 
 	const inboxUrl = '/gallery/inbox';
 	$effect(() => {
-		HttpService.get<number[]>('/media-items/review').then(async (items) => {
+		HttpService.get<number[]>(endpoints.getMediaItemsForReview()).then(async (items) => {
 			mediaIds = items.reverse();
 			const firstItem = await fetchMediaItem(mediaIds[0]);
 			currentMediaItem = firstItem;
 			fetchedMediaItems.set(firstItem.id, firstItem);
 		});
 
-		HttpService.get<PopulatedTag[]>('/tags').then((fetchedTags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((fetchedTags) => {
 			tags = fetchedTags;
 		});
 	});
@@ -49,7 +50,7 @@
 
 	async function fetchMediaItem(id: number): Promise<MediaItemWithTags> {
 		const { mediaItem } = await HttpService.get<{ mediaItem: MediaItemWithTags }>(
-			`/media-items/${id}`
+			endpoints.getMediaItem({ id })
 		);
 		return mediaItem;
 	}

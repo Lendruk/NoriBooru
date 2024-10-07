@@ -6,6 +6,7 @@
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
@@ -127,9 +128,9 @@
 
 	async function fetchResources() {
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
-			HttpService.get<SDLora[]>(`/sd/loras`),
-			HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
-			HttpService.get<PopulatedTag[]>(`/tags`)
+			HttpService.get<SDLora[]>(endpoints.getSDLoras()),
+			HttpService.get<SDCheckpoint[]>(endpoints.getSDCheckpoints()),
+			HttpService.get<PopulatedTag[]>(endpoints.getTags())
 		]);
 
 		loras = sdLoras;
@@ -145,14 +146,18 @@
 	// Querying
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			`/sd/loras?tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+			endpoints.getSDLoras({
+				params: `tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+			})
 		);
 		loras = filteredLoras;
 	}
 
 	async function searchCheckpoints() {
 		const filteredCheckpoints = await HttpService.get<SDCheckpoint[]>(
-			`/sd/checkpoints${queryCheckpointName ? `?name=${queryCheckpointName}` : ''}`
+			endpoints.getSDCheckpoints({
+				params: queryCheckpointName ? `name=${queryCheckpointName}` : ''
+			})
 		);
 		checkpoints = filteredCheckpoints;
 	}

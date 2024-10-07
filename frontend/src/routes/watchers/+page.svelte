@@ -7,6 +7,7 @@
 	import NumberInput from '$lib/components/NumberInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import LinkIcon from '$lib/icons/LinkIcon.svelte';
 	import PauseIcon from '$lib/icons/PauseIcon.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
@@ -152,7 +153,7 @@
 	}
 
 	$effect(() => {
-		HttpService.get<{ watchers: Watcher[] }>(`/watchers`).then(async (res) => {
+		HttpService.get<{ watchers: Watcher[] }>(endpoints.getWatchers()).then(async (res) => {
 			watchers = res.watchers;
 
 			if (watchers.length > 0) {
@@ -175,7 +176,9 @@
 	async function onSocketEvent(wsEvent: WebSocketEvent) {
 		if (wsEvent.event === 'watcher-update' && refreshGallery) {
 			const watcherUpdateEvent = wsEvent.data as WatcherUpdateSocketEvent;
-			const updatedWatcher = await HttpService.get<Watcher>(`/watchers/${watcherUpdateEvent.id}`);
+			const updatedWatcher = await HttpService.get<Watcher>(
+				endpoints.getWatcher({ id: watcherUpdateEvent.id })
+			);
 			console.log('event for watcher', watcherUpdateEvent.id);
 			watchers = watchers.map((watcher) => {
 				if (watcher.id === updatedWatcher.id) {

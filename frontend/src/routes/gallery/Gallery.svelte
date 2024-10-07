@@ -29,6 +29,7 @@
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Video from '$lib/components/Video.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import CheckIcon from '$lib/icons/CheckIcon.svelte';
 	import FilterIcon from '$lib/icons/FilterIcon.svelte';
@@ -129,7 +130,7 @@
 				await populateScreen();
 			});
 		}
-		tags = await HttpService.get<PopulatedTag[]>('/tags');
+		tags = await HttpService.get<PopulatedTag[]>(endpoints.getTags());
 	});
 
 	async function createPlaylist() {
@@ -206,7 +207,9 @@
 		if (isInbox !== undefined) {
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
-		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/media-items?' + params);
+		const res = await HttpService.get<{ mediaItems: MediaItem[] }>(
+			endpoints.getMediaItems({ params })
+		);
 		let fetchedMediaItems = res.mediaItems;
 		if (appendResults) {
 			if (res.mediaItems.length > 0) {
@@ -278,7 +281,9 @@
 	}
 
 	async function fetchMediaItemTags(mediaItemId: number) {
-		const tags = await HttpService.get<PopulatedTag[]>(`/media-items/${mediaItemId}/tags`);
+		const tags = await HttpService.get<PopulatedTag[]>(
+			endpoints.getMediaItemTags({ id: mediaItemId })
+		);
 		mediaItemInTagEdit = { id: mediaItemId, tags };
 	}
 
@@ -338,7 +343,7 @@
 	}
 
 	async function onAddToPlaylistClick(mediaItem: MediaItem) {
-		playlists = await HttpService.get<Playlist[]>('/playlists');
+		playlists = await HttpService.get<Playlist[]>(endpoints.getPlaylists());
 		mediaItemToAddToPlaylist = mediaItem;
 		isPlaylistModalOpen = true;
 	}

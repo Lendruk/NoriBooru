@@ -3,6 +3,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	let tagName = $state('');
@@ -20,7 +21,7 @@
 	let tags: PopulatedTag[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>('/tags').then((res) => {
+		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((res) => {
 			tags = res;
 		});
 	});

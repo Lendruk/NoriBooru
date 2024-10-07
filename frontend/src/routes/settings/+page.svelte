@@ -5,6 +5,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../store';
@@ -15,7 +16,7 @@
 	let civitaiApiKey = $state($vaultStore?.civitaiApiKey ?? '');
 
 	$effect(() => {
-		HttpService.get<{ civitaiApiKey: string }>(`/settings/api-keys`).then((res) => {
+		HttpService.get<{ civitaiApiKey: string }>(endpoints.getApiKeys()).then((res) => {
 			civitaiApiKey = res.civitaiApiKey;
 		});
 	});

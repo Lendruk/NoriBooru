@@ -4,6 +4,7 @@
 	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
 	import XIcon from '$lib/icons/XIcon.svelte';
@@ -40,7 +41,7 @@
 
 	async function getVaults() {
 		const fetchedVaults = await HttpService.get<{ vaults: Vault[]; baseVaultDir: string }>(
-			'/vaults'
+			endpoints.getVaults()
 		);
 		vaults = fetchedVaults.vaults;
 		newVaultPath = fetchedVaults.baseVaultDir;

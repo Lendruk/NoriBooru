@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import TagIcon from '$lib/icons/TagIcon.svelte';
@@ -56,7 +57,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/media-items/${$page.params.id}?${params.toString()}`).then((res) => {
+		}>(endpoints.getMediaItem({ id: $page.params.id, params })).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
@@ -85,7 +86,7 @@
 				next?: string;
 				previous?: string;
 				tags: PopulatedTag[];
-			}>(`/media-items/${$page.params.id}`);
+			}>(endpoints.getMediaItem({ id: $page.params.id }));
 
 			mediaItem = updatedItem.mediaItem;
 			tags = updatedItem.tags;

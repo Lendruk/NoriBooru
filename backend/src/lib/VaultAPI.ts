@@ -88,6 +88,10 @@ export class VaultAPI extends Container {
 		return this.get('db');
 	}
 
+	public getPort(): number | undefined {
+		return this.port;
+	}
+
 	public async init(): Promise<void> {
 		await VaultMigrator.migrateVault(this);
 		await this.watchers.init();

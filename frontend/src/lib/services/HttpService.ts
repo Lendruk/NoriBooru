@@ -3,8 +3,19 @@ import type { Vault } from '$lib/types/Vault';
 import { get } from 'svelte/store';
 import { runningJobs, vaultStore } from '../../store';
 
+type RedirectResponse = {
+	message: string;
+	port: number;
+};
+
+export type ApiEndpoint = {
+	url: string;
+	isGlobal: boolean;
+};
+
 export class HttpService {
-	public static BASE_URL = `http://localhost:8080`;
+	public static GLOBAL_PORT = 8080;
+	public static BASE_URL = `http://localhost`;
 
 	public static getVaultId(): string | undefined {
 		const curVault = get(vaultStore);
@@ -18,20 +29,52 @@ export class HttpService {
 		}
 	}
 
-	public static async get<T>(url: string): Promise<T> {
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
-			method: 'GET',
+	public static getVaultPort(): number | undefined {
+		const curVault = get(vaultStore);
+		if (curVault) {
+			return curVault.port;
+		}
+	}
+
+	private static buildUrl(endpoint: string, port: number): string {
+		return `${this.BASE_URL}:${port}${endpoint}`;
+	}
+
+	private static async request<T>(options: {
+		url: string;
+		method: string;
+		isGlobalRequest?: boolean;
+		body?: Record<string, unknown>;
+	}): Promise<T> {
+		const { url, method, body } = options;
+
+		const port = options.isGlobalRequest ? this.GLOBAL_PORT : this.getVaultPort();
+
+		if (!port) {
+			throw new Error('No vault port found');
+		}
+
+		const response = await fetch(this.buildUrl(url, port), {
+			method,
 			headers: {
 				'Content-Type': 'application/json',
 				vault: this.getVaultId() || ''
-			}
+			},
+			body: body ? JSON.stringify(body) : undefined
 		});
 
-		if (response.status >= 400) {
-			throw new Error(`Error during request status: ${response.status}`);
+		if (response.status === 308) {
+			const responseBody = (await response.json()) as RedirectResponse;
+			vaultStore.update((vault) => ({ ...vault!, port: responseBody.port }));
+			return this.request<T>({ url, method, body, isGlobalRequest: false });
+		} else {
+			return response.json() as Promise<T>;
 		}
+	}
 
-		return response.json() as Promise<T>;
+	public static async get<T>(endpoint: ApiEndpoint): Promise<T> {
+		const { url, isGlobal } = endpoint;
+		return this.request({ url, method: 'GET', isGlobalRequest: isGlobal });
 	}
 
 	public static async post<T>(url: string, body?: Record<string, unknown> | FormData): Promise<T> {

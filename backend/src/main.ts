@@ -4,8 +4,10 @@ import ws from '@fastify/websocket';
 import Fastify from 'fastify';
 import fs from 'fs/promises';
 import 'reflect-metadata';
+import { checkVault } from './hooks/checkVault';
 import { VaultMigrator } from './lib/VaultMigrator';
 import routes from './routes';
+import { VaultRequest } from './types/Request';
 import { getServerConfig } from './utils/getServerConfig';
 
 (async () => {
@@ -36,10 +38,24 @@ app.register(multipart, {
 });
 
 for (const route of routes) {
-	app.register(async function (fastify) {
-		fastify.route(route);
-	});
+	// Temporary fix until routes are converted to the new router abstraction
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	app.route(route as any);
 }
+
+app.setNotFoundHandler(async (request, reply) => {
+	await checkVault(request, reply);
+
+	const castRequest = request as VaultRequest;
+	if (castRequest.vault) {
+		return reply.status(308).send({
+			message: 'Not Found, use the api with the vault port',
+			port: castRequest.vault.getPort()
+		});
+	}
+
+	return reply.status(404).send({ message: 'Not Found' });
+});
 
 app.listen({ port: 8080, host: '0.0.0.0' }, (err) => {
 	if (err) throw err;

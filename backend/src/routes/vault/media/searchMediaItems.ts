@@ -59,7 +59,7 @@ const searchMediaItems = async (request: VaultRequest, reply: FastifyReply) => {
 		return reply.status(400).send('No vault provided');
 	}
 
-	const { db } = vaultInstance;
+	const db = vaultInstance.getDb();
 	const positiveTags = JSON.parse(query.positiveTags ?? '[]') as number[];
 	const positiveQueryType = query.positiveQueryType ?? 'AND';
 	const negativeTags = JSON.parse(query.negativeTags ?? '[]') as number[];
