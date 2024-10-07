@@ -142,14 +142,14 @@
 				{#if mediaItem?.type === 'image'}
 					<img
 						class="max-h-[80vh]"
-						src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+						src={HttpService.buildGetImageUrl(mediaItem.fileName, mediaItem.extension)}
 						alt="gallery-img"
 					/>
 				{/if}
 				{#if mediaItem?.type === 'video'}
 					<video
 						class="bg-cover w-full h-full"
-						src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+						src={HttpService.buildGetVideoUrl(mediaItem.fileName, mediaItem.extension)}
 						controls
 					>
 						<track kind="captions" />
@@ -187,7 +187,7 @@
 {/if}
 {#if isItemFullscreen && mediaItem}
 	<img
-		src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+		src={HttpService.buildGetImageUrl(mediaItem.fileName, mediaItem.extension)}
 		alt="fullscreen"
 		class="absolute top-0 left-0 h-full w-full object-cover z-[100]"
 	/>

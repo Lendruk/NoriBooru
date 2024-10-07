@@ -255,14 +255,14 @@
 						{#if mediaItem.type === 'image'}
 							<img
 								class="bg-cover"
-								src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}
+								src={HttpService.buildGetImageThumbnailUrl(mediaItem.fileName, mediaItem.extension)}
 								alt="gallery-img"
 							/>
 						{/if}
 						{#if mediaItem.type === 'video'}
 							<Video
 								cssClass="bg-cover w-full h-full"
-								src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension}`}
+								src={HttpService.buildGetVideoThumbnailUrl(mediaItem.fileName)}
 							/>
 						{/if}
 					</SidebarMediaItem>

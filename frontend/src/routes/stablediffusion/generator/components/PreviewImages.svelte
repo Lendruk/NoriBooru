@@ -69,7 +69,7 @@
 	>
 		<img
 			class="bg-contain"
-			src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${images[currentIndex].fileName}.png`}
+			src={HttpService.buildGetImageUrl(images[currentIndex].fileName, 'png')}
 		/>
 	</div>
 {/if}
@@ -79,7 +79,7 @@
 			<img
 				on:click={() => onImageClick()}
 				class="bg-contain h-[50%] w-[50%] cursor-pointer z-10"
-				src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${images[currentIndex].fileName}.png`}
+				src={HttpService.buildGetImageUrl(images[currentIndex].fileName, 'png')}
 				alt="gallery-img"
 			/>
 			<div class="absolute flex w-full h-full">

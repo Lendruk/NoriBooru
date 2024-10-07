@@ -3,6 +3,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ImageIcon from '$lib/icons/ImageIcon.svelte';
 	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
@@ -81,7 +82,9 @@
 
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			`/sd/loras?tags=${filterTags.map((tag) => tag.id).join(',')}${filterName ? `&name=${filterName}` : ''}`
+			endpoints.getSDLoras({
+				params: `tags=${filterTags.map((tag) => tag.id).join(',')}${filterName ? `&name=${filterName}` : ''}`
+			})
 		);
 		loras = filteredLoras;
 	}
@@ -101,7 +104,7 @@
 
 	async function refreshLoras() {
 		await HttpService.post(`/sd/refresh-loras`);
-		const updatedLoras = await HttpService.get<SDLora[]>(`/sd/loras`);
+		const updatedLoras = await HttpService.get<SDLora[]>(endpoints.getSDLoras());
 		loras = updatedLoras;
 	}
 
@@ -198,9 +201,7 @@
 				</div>
 				<div class="flex w-[150px] h-[250px] items-center relative justify-center bg-zinc-950">
 					{#if loraInEdit.previewImage}
-						<img
-							src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${loraInEdit.previewImage}.png`}
-						/>
+						<img src={HttpService.buildGetImageUrl(loraInEdit.previewImage, 'png')} />
 					{:else}
 						<ImageIcon />
 					{/if}

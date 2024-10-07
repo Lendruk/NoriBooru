@@ -91,14 +91,14 @@
 			{#if currentMediaItem.type === 'image'}
 				<img
 					class="max-w-full max-h-full"
-					src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetImageUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					alt="gallery-img"
 				/>
 			{/if}
 			{#if currentMediaItem.type === 'video'}
 				<video
 					class="bg-cover w-full h-full"
-					src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetVideoUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					controls
 				>
 					<track kind="captions" />

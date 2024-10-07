@@ -1,4 +1,5 @@
 <script context="module" lang="ts">
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
@@ -22,7 +23,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/media-items/${itemId}`);
+		}>(endpoints.getMediaItem({ id: itemId }));
 		mediaItem = res.mediaItem;
 		isLoading = false;
 	};
@@ -40,7 +41,10 @@
 		{#if mediaItem?.type === 'image'}
 			<div
 				class="bg-contain min-w-full min-h-full bg-no-repeat bg-center"
-				style="background-image: url({`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`});"
+				style="background-image: url({HttpService.buildGetImageUrl(
+					mediaItem.fileName,
+					mediaItem.extension
+				)});"
 			></div>
 		{/if}
 		{#if mediaItem?.type === 'video'}
@@ -48,7 +52,7 @@
 				autoplay
 				muted={false}
 				cssClass="bg-cover w-full h-full"
-				src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+				src={HttpService.buildGetVideoUrl(mediaItem.fileName, mediaItem.extension)}
 			/>
 		{/if}
 	{/if}
