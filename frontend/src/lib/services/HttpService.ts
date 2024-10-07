@@ -1,3 +1,4 @@
+import { endpoints } from '$lib/endpoints';
 import { RunningJob } from '$lib/types/RunningJob';
 import type { Vault } from '$lib/types/Vault';
 import { get } from 'svelte/store';
@@ -48,10 +49,17 @@ export class HttpService {
 	}): Promise<T> {
 		const { url, method, body } = options;
 
-		const port = options.isGlobalRequest ? this.GLOBAL_PORT : this.getVaultPort();
+		let port = options.isGlobalRequest ? this.GLOBAL_PORT : this.getVaultPort();
 
 		if (!port) {
-			throw new Error('No vault port found');
+			const endpoint = endpoints.getVaultPort({ id: this.getVaultId() });
+			const portResponse = await this.request<{ port: number }>({
+				url: endpoint.url,
+				isGlobalRequest: endpoint.isGlobal,
+				method: 'GET'
+			});
+			port = portResponse.port;
+			vaultStore.update((vault) => ({ ...vault!, port: portResponse.port }));
 		}
 
 		const response = await fetch(this.buildUrl(url, port), {
@@ -188,5 +196,21 @@ export class HttpService {
 		}
 
 		return response.json() as Promise<T>;
+	}
+
+	public static buildGetImageThumbnailUrl(fileName: string, extension: string): string {
+		return `${this.BASE_URL}:${this.getVaultPort()}/images/${this.getVaultId()}/thumb/${fileName}.${extension === 'gif' ? 'webp' : 'jpg'}`;
+	}
+
+	public static buildGetVideoThumbnailUrl(fileName: string): string {
+		return `${this.BASE_URL}:${this.getVaultPort()}/videos/${this.getVaultId()}/thumb/${fileName}.mp4`;
+	}
+
+	public static buildGetImageUrl(fileName: string, extension: string): string {
+		return `${this.BASE_URL}:${this.getVaultPort()}/images/${this.getVaultId()}/${fileName}.${extension}`;
+	}
+
+	public static buildGetVideoUrl(fileName: string, extension: string): string {
+		return `${this.BASE_URL}:${this.getVaultPort()}/videos/${this.getVaultId()}/${fileName}.${extension}`;
 	}
 }

@@ -1,6 +1,7 @@
 import checkVaultPath from './checkVaultPath';
 import createVault from './createVault';
 import deleteVault from './deleteVault';
+import getVaultPort from './getVaultPort';
 import getVaults from './getVaults';
 import importVault from './importVault';
 import renameVault from './renameVault';
@@ -12,5 +13,6 @@ export default [
 	renameVault,
 	deleteVault,
 	importVault,
-	unlinkVault
+	unlinkVault,
+	getVaultPort
 ];

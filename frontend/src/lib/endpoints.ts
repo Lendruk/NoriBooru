@@ -13,6 +13,7 @@ type EndpointNames =
 	| 'getMediaItem'
 	| 'getSDLoras'
 	| 'getSDPrompts'
+	| 'getVaultPort'
 	| 'getSDCheckpoints'
 	| 'getMediaItemsForReview'
 	| 'getMediaItems';
@@ -27,6 +28,10 @@ type Endpoints = {
 export const endpoints: Endpoints = {
 	getVaults: () => ({
 		url: '/vaults',
+		isGlobal: true
+	}),
+	getVaultPort: (options) => ({
+		url: `/vault/${options?.id}/port`,
 		isGlobal: true
 	}),
 	getWatchers: () => ({

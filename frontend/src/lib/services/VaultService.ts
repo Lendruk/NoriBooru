@@ -4,7 +4,13 @@ import { vaultStore } from '../../store';
 export class VaultService {
 	public static setVault(vault: Vault): void {
 		vaultStore.set(vault);
-		localStorage.setItem('currentVault', JSON.stringify(vault));
+		localStorage.setItem(
+			'currentVault',
+			JSON.stringify({
+				...vault,
+				port: undefined
+			})
+		);
 	}
 
 	public static removeVault(): void {
