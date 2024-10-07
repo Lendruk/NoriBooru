@@ -7,10 +7,15 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { Container } from 'inversify';
 import { createConnection } from 'net';
 import vaultSchema from '../db/vault';
+import { MediaItemRouter } from '../routes/vault/MediaItemRouter';
+import { PlaylistRouter } from '../routes/vault/PlaylistRouter';
+import { TagRouter } from '../routes/vault/TagRouter';
+import { WatcherRouter } from '../routes/vault/WatcherRouter';
 import { SpecieRouter } from '../routes/vault/world-building/species/SpecieRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';
+import { PlaylistService } from '../services/PlaylistService';
 import { SDService } from '../services/SDService';
 import { TagService } from '../services/TagService';
 import { VaultConfigService } from '../services/VaultConfigService';
@@ -63,6 +68,7 @@ export class VaultAPI extends Container {
 		this.bind(PageParserFactory).toSelf().inSingletonScope();
 		this.bind(PageWatcherService).toSelf().inSingletonScope();
 		this.bind(SDService).toSelf().inSingletonScope();
+		this.bind(PlaylistService).toSelf().inSingletonScope();
 
 		// Worldbuilding
 		this.bind(CharacterService).toSelf().inSingletonScope();
@@ -72,7 +78,11 @@ export class VaultAPI extends Container {
 		this.bind(ItemService).toSelf().inSingletonScope();
 
 		// Routers
-		this.bind<Router>(Router).to(SpecieRouter).inSingletonScope();
+		this.bind(Router).to(SpecieRouter).inSingletonScope();
+		this.bind(Router).to(TagRouter).inSingletonScope();
+		this.bind(Router).to(MediaItemRouter).inSingletonScope();
+		this.bind(Router).to(WatcherRouter).inSingletonScope();
+		this.bind(Router).to(PlaylistRouter).inSingletonScope();
 
 		this.tags = this.get(TagService);
 		this.media = this.get(MediaService);

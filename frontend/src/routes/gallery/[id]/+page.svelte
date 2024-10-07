@@ -48,10 +48,6 @@
 	$effect(() => {
 		const params = new URLSearchParams($page.url.search);
 
-		if (!params.has('inbox')) {
-			params.set('inbox', 'false');
-		}
-
 		HttpService.get<{
 			mediaItem: MediaItemWithTags;
 			next?: string;

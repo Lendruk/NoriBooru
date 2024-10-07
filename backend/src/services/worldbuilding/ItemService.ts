@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
-import { MediaItem } from '../../db/vault/schema';
+import { MediaItemSchema } from '../../db/vault/schema';
 import {
 	worldItems_to_mediaItems,
 	worldItems_to_worldCurrencies,
@@ -65,9 +65,11 @@ export class ItemService extends VaultService {
 		return [];
 	}
 
-	private async mapRawMediaItems(mediaItems: WorldItemToMediaItemSchema[]): Promise<MediaItem[]> {
+	private async mapRawMediaItems(
+		mediaItems: WorldItemToMediaItemSchema[]
+	): Promise<MediaItemSchema[]> {
 		if (mediaItems.length > 0) {
-			const mappedMediaItems: MediaItem[] = [];
+			const mappedMediaItems: MediaItemSchema[] = [];
 			for (const mediaItem of mediaItems) {
 				const mediaItemInstance = await this.mediaService.getMediaItem(mediaItem.mediaItemId);
 				mappedMediaItems.push(mediaItemInstance);

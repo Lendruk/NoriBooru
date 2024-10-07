@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { activeWatchers, ActiveWatcherSchema } from '../db/vault/schema';
-import type { VaultDb } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultAPI';
 import { VaultService } from '../lib/VaultService';
 import { ActiveWatcher } from '../lib/watchers/ActiveWatcher';
 import { PageParserFactory } from '../lib/watchers/PageParserFactory';

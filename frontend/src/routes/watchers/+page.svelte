@@ -153,8 +153,8 @@
 	}
 
 	$effect(() => {
-		HttpService.get<{ watchers: Watcher[] }>(endpoints.getWatchers()).then(async (res) => {
-			watchers = res.watchers;
+		HttpService.get<Watcher[]>(endpoints.getWatchers()).then(async (res) => {
+			watchers = res;
 
 			if (watchers.length > 0) {
 				selectedWatcher = watchers[0];

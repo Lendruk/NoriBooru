@@ -1,7 +1,7 @@
 import { eq, like, sql } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { TagSchema, tags } from '../db/vault/schema';
-import { VaultDb } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultAPI';
 import { VaultService } from '../lib/VaultService';
 import { generateRandomColor } from '../utils/generateRandomColor';
 

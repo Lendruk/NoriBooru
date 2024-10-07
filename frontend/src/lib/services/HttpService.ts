@@ -199,18 +199,18 @@ export class HttpService {
 	}
 
 	public static buildGetImageThumbnailUrl(fileName: string, extension: string): string {
-		return `${this.BASE_URL}:${this.getVaultPort()}/images/${this.getVaultId()}/thumb/${fileName}.${extension === 'gif' ? 'webp' : 'jpg'}`;
+		return `${this.BASE_URL}:${this.getVaultPort()}/images/thumb/${fileName}.${extension === 'gif' ? 'webp' : 'jpg'}`;
 	}
 
 	public static buildGetVideoThumbnailUrl(fileName: string): string {
-		return `${this.BASE_URL}:${this.getVaultPort()}/videos/${this.getVaultId()}/thumb/${fileName}.mp4`;
+		return `${this.BASE_URL}:${this.getVaultPort()}/videos/thumb/${fileName}.mp4`;
 	}
 
 	public static buildGetImageUrl(fileName: string, extension: string): string {
-		return `${this.BASE_URL}:${this.getVaultPort()}/images/${this.getVaultId()}/${fileName}.${extension}`;
+		return `${this.BASE_URL}:${this.getVaultPort()}/images/${fileName}.${extension}`;
 	}
 
 	public static buildGetVideoUrl(fileName: string, extension: string): string {
-		return `${this.BASE_URL}:${this.getVaultPort()}/videos/${this.getVaultId()}/${fileName}.${extension}`;
+		return `${this.BASE_URL}:${this.getVaultPort()}/videos/${fileName}.${extension}`;
 	}
 }

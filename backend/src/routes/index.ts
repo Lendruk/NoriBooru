@@ -5,12 +5,10 @@ import playlistRoutes from './vault/playlists';
 import sdRoutes from './vault/sd';
 import settingsRoutes from './vault/settings';
 import tagRoutes from './vault/tags';
-import videoRoutes from './vault/videos';
 import watcherRoutes from './vault/watchers';
 import websocketHandler from './websockets';
 export default [
 	websocketHandler,
-	...videoRoutes,
 	...imageRoutes,
 	...vaultRoutes,
 	...mediaItemRoutes,

@@ -207,13 +207,11 @@
 		if (isInbox !== undefined) {
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
-		const res = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			endpoints.getMediaItems({ params })
-		);
-		let fetchedMediaItems = res.mediaItems;
+		const res = await HttpService.get<MediaItem[]>(endpoints.getMediaItems({ params }));
+		let fetchedMediaItems = res;
 		if (appendResults) {
-			if (res.mediaItems.length > 0) {
-				mediaItems = mediaItems.concat(res.mediaItems);
+			if (res.length > 0) {
+				mediaItems = mediaItems.concat(res);
 			} else {
 				hasMoreItems = false;
 			}

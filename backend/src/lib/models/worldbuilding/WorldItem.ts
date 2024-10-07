@@ -1,4 +1,4 @@
-import { MediaItem } from '../../../db/vault/schema';
+import { MediaItemSchema } from '../../../db/vault/schema';
 import { WorldCurrency } from './WorldCurrency';
 
 export type ValueModel = {
@@ -14,6 +14,6 @@ export class WorldItem {
 		public createdAt: number,
 		public updatedAt: number,
 		public value: ValueModel[],
-		public mediaItems: MediaItem[]
+		public mediaItems: MediaItemSchema[]
 	) {}
 }
