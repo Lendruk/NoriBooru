@@ -8,7 +8,7 @@ import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
 import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
-import { VaultDb } from '../lib/VaultInstance';
+import { VaultDb } from '../lib/VaultAPI';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
 import { TagService } from './TagService';

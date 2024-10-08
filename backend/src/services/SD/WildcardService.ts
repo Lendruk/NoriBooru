@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject } from 'inversify';
-import { sdWildcards, SDWildcardSchema } from '../db/vault/schema';
-import type { VaultDb } from '../lib/VaultInstance';
-import { VaultService } from '../lib/VaultService';
+import { sdWildcards, SDWildcardSchema } from '../../db/vault/schema';
+import { VaultDb } from '../../lib/VaultAPI';
+import { VaultService } from '../../lib/VaultService';
 
 export type SDWildcard = {
 	id: string;

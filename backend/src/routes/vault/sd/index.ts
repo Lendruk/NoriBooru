@@ -1,10 +1,5 @@
 import civtaiRoutes from './civtai';
 import deleteCheckpoint from './deleteCheckpoint';
-import getCheckpoints from './getCheckpoints';
-import getHighResUpscalers from './getHighResUpscalers';
-import getProgress from './getProgress';
-import getSamplers from './getSamplers';
-import getSchedulers from './getSchedulers';
 import installSDUi from './installSDUi';
 import interruptGeneration from './interruptGeneration';
 import loraRoutes from './loras';
@@ -25,14 +20,9 @@ export default [
 	startSDUi,
 	stopSDUi,
 	markSDAsInactive,
-	getCheckpoints,
-	getSamplers,
-	getSchedulers,
 	promptSD,
-	getHighResUpscalers,
 	interruptGeneration,
 	refreshCheckpoints,
-	getProgress,
 	unloadCheckpoint,
 	updateCheckpoint,
 	deleteCheckpoint,
