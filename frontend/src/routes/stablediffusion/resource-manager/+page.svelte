@@ -132,7 +132,7 @@
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
 			HttpService.get<SDLora[]>(endpoints.sdLoras()),
 			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
-			HttpService.get<PopulatedTag[]>(endpoints.getTags())
+			HttpService.get<PopulatedTag[]>(endpoints.tags())
 		]);
 
 		loras = sdLoras;

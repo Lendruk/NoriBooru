@@ -130,7 +130,7 @@
 				await populateScreen();
 			});
 		}
-		tags = await HttpService.get<PopulatedTag[]>(endpoints.getTags());
+		tags = await HttpService.get<PopulatedTag[]>(endpoints.tags());
 	});
 
 	async function createPlaylist() {
@@ -207,7 +207,7 @@
 		if (isInbox !== undefined) {
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
-		const res = await HttpService.get<MediaItem[]>(endpoints.getMediaItems({ params }));
+		const res = await HttpService.get<MediaItem[]>(endpoints.mediaItems({ params }));
 		let fetchedMediaItems = res;
 		if (appendResults) {
 			if (res.length > 0) {

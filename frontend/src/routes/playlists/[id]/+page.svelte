@@ -24,7 +24,7 @@
 	let playlistItems: MediaItem[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((tags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((tags) => {
 			availableTags = tags;
 		});
 
@@ -49,7 +49,7 @@
 	async function onTagSearchChange() {
 		if (tagSearchInputText.length > 0) {
 			const response = await HttpService.get<PopulatedTag[]>(
-				endpoints.getTags({ params: `name=${tagSearchInputText}` })
+				endpoints.tags({ params: `name=${tagSearchInputText}` })
 			);
 
 			foundTags = response;
@@ -81,7 +81,7 @@
 
 	async function searchMedia() {
 		const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			endpoints.getMediaItems({
+			endpoints.mediaItems({
 				params: new URLSearchParams({
 					// negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)),
 					positiveTags: JSON.stringify(filterTags.map((tag) => tag.id)),

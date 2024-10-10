@@ -41,7 +41,7 @@
 
 	async function getVaults() {
 		const fetchedVaults = await HttpService.get<{ vaults: Vault[]; baseVaultDir: string }>(
-			endpoints.getVaults()
+			endpoints.vaults()
 		);
 		vaults = fetchedVaults.vaults;
 		newVaultPath = fetchedVaults.baseVaultDir;
@@ -85,7 +85,7 @@
 		}
 
 		try {
-			const vault = await HttpService.post<Vault>(endpoints.getVaults(), {
+			const vault = await HttpService.post<Vault>(endpoints.vaults(), {
 				name: newVaultName,
 				path: newVaultPath
 			});

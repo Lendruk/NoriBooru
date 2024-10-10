@@ -1,10 +1,10 @@
 import type { ApiEndpoint } from './services/HttpService';
 
 type EndpointNames =
-	| 'getVaults'
-	| 'getWatchers'
+	| 'vaults'
+	| 'watchers'
 	| 'watcher'
-	| 'getTags'
+	| 'tags'
 	| 'mediaItemTags'
 	| 'tag'
 	| 'playlist'
@@ -40,7 +40,7 @@ type EndpointNames =
 	| 'refreshSDLoras'
 	| 'checkVaultPath'
 	| 'importVault'
-	| 'getMediaItems';
+	| 'mediaItems';
 
 type Endpoints = {
 	[key in EndpointNames]: (options?: {
@@ -50,7 +50,7 @@ type Endpoints = {
 };
 
 export const endpoints: Endpoints = {
-	getVaults: () => ({
+	vaults: () => ({
 		url: '/vaults',
 		isGlobal: true
 	}),
@@ -62,7 +62,7 @@ export const endpoints: Endpoints = {
 		url: `/vault/${options?.id}/port`,
 		isGlobal: true
 	}),
-	getWatchers: () => ({
+	watchers: () => ({
 		url: '/watchers',
 		isGlobal: false
 	}),
@@ -82,7 +82,7 @@ export const endpoints: Endpoints = {
 		url: `/watchers/${options?.id}`,
 		isGlobal: false
 	}),
-	getTags: (options) => ({
+	tags: (options) => ({
 		url: `/tags${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
@@ -90,7 +90,7 @@ export const endpoints: Endpoints = {
 		url: `/tags/${options?.id}`,
 		isGlobal: false
 	}),
-	getMediaItems: (options) => ({
+	mediaItems: (options) => ({
 		url: `/media-items${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),

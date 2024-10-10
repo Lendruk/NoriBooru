@@ -37,7 +37,7 @@
 				}
 
 				// Create new tag
-				const newTag = await HttpService.post<PopulatedTag>(endpoints.getTags(), {
+				const newTag = await HttpService.post<PopulatedTag>(endpoints.tags(), {
 					name: value,
 					color: '#ffffff',
 					parentId: undefined

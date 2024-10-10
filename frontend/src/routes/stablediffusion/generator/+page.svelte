@@ -108,7 +108,7 @@
 			HttpService.get<SDScheduler[]>(endpoints.sdSchedulers()),
 			HttpService.get<SDUpscaler[]>(endpoints.sdUpscalers()),
 			HttpService.get<SDLora[]>(endpoints.sdLoras()),
-			HttpService.get<PopulatedTag[]>(endpoints.getTags()),
+			HttpService.get<PopulatedTag[]>(endpoints.tags()),
 			HttpService.get<SDWildcard[]>(endpoints.wildCards())
 		]);
 

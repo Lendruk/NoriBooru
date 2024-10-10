@@ -21,13 +21,13 @@
 	let tags: PopulatedTag[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((res) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((res) => {
 			tags = res;
 		});
 	});
 
 	async function createTag() {
-		const newTag = await HttpService.post<PopulatedTag>(endpoints.getTags(), {
+		const newTag = await HttpService.post<PopulatedTag>(endpoints.tags(), {
 			name: tagName,
 			color: tagColor,
 			parentId: tagParentId

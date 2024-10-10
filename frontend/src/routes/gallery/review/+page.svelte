@@ -38,7 +38,7 @@
 			fetchedMediaItems.set(firstItem.id, firstItem);
 		});
 
-		HttpService.get<PopulatedTag[]>(endpoints.getTags()).then((fetchedTags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((fetchedTags) => {
 			tags = fetchedTags;
 		});
 	});
