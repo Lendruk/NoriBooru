@@ -4,7 +4,7 @@ import { VaultConfig } from '../../types/VaultConfig';
 
 @injectable()
 export class SettingsRouter extends Router {
-	public constructor(@inject('config') private config: VaultConfig) {
+	public constructor(@inject('config') private readonly config: VaultConfig) {
 		super();
 	}
 

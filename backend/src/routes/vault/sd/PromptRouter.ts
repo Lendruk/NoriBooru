@@ -1,7 +1,7 @@
 import { FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
-import { PromptService } from '../../../services/SD/PromptService';
+import { CreatePromptOptions, PromptService } from '../../../services/SD/PromptService';
 
 @injectable()
 export class PromptRouter extends Router {
@@ -12,6 +12,12 @@ export class PromptRouter extends Router {
 	@Route.GET('/sd/prompts')
 	public async getPrompts() {
 		return await this.promptService.getPrompts();
+	}
+
+	@Route.POST('/sd/prompts')
+	public async createPrompt(request: FastifyRequest) {
+		const body = request.body as CreatePromptOptions;
+		return await this.promptService.createPrompt(body);
 	}
 
 	@Route.DELETE('/sd/prompts/:id')

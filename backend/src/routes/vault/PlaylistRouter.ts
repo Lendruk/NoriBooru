@@ -1,7 +1,14 @@
-import { FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../lib/Router';
 import { PlaylistService } from '../../services/PlaylistService';
+
+type PlaylistCreationRequest = {
+	name: string;
+	randomizeOrder: boolean;
+	timePerItem: number;
+	items: number[];
+};
 
 @injectable()
 export class PlaylistRouter extends Router {
@@ -18,6 +25,18 @@ export class PlaylistRouter extends Router {
 	public async getPlaylist(request: FastifyRequest) {
 		const { id } = request.params as { id: string };
 		return await this.playlistService.getPlaylist(Number.parseInt(id));
+	}
+
+	@Route.POST('/playlists')
+	public async createPlaylist(request: FastifyRequest, reply: FastifyReply) {
+		const body = request.body as PlaylistCreationRequest;
+		const playlist = await this.playlistService.createPlaylist(
+			body.name,
+			body.randomizeOrder,
+			body.timePerItem,
+			body.items
+		);
+		return reply.send(playlist);
 	}
 
 	@Route.DELETE('/playlists/:id')

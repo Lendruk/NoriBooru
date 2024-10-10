@@ -50,7 +50,7 @@
 	}
 
 	async function createWildcard() {
-		const newWildcard = await HttpService.post<SDWildcard>(`/sd/wildcards`, {
+		const newWildcard = await HttpService.post<SDWildcard>(endpoints.wildCards(), {
 			name: modalWildcardName,
 			values: modalWildcardValues
 		});

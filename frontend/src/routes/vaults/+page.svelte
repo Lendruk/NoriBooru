@@ -57,7 +57,7 @@
 		if (path != '') {
 			vaultPathCheckTimeout = setTimeout(async () => {
 				try {
-					const result = await HttpService.post<{ message: string }>('/vaults/check-path', {
+					const result = await HttpService.post<{ message: string }>(endpoints.checkVaultPath(), {
 						path,
 						checkingForExistingVault
 					});
@@ -85,7 +85,7 @@
 		}
 
 		try {
-			const vault = await HttpService.post<Vault>('/vaults', {
+			const vault = await HttpService.post<Vault>(endpoints.getVaults(), {
 				name: newVaultName,
 				path: newVaultPath
 			});
@@ -109,7 +109,7 @@
 		}
 
 		try {
-			const importedVault = await HttpService.post<Vault>(`/vaults/import`, {
+			const importedVault = await HttpService.post<Vault>(endpoints.importVault(), {
 				path: vaultImportPath
 			});
 			vaultImportOpen = false;

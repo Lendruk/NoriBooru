@@ -80,7 +80,7 @@
 	async function createWatcher() {
 		if (!isUrlValid) return;
 
-		const newWatcher = await HttpService.post<Watcher>(`/watchers`, {
+		const newWatcher = await HttpService.post<Watcher>(endpoints.getWatchers(), {
 			url: modalWatcherUrl,
 			requestInterval,
 			inactivityTimeout,

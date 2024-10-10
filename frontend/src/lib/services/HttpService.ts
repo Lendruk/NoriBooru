@@ -45,18 +45,31 @@ export class HttpService {
 		url: string;
 		method: string;
 		isGlobalRequest?: boolean;
-		body?: Record<string, unknown>;
+		body?: Record<string, unknown> | FormData;
+		headers?: Record<string, string>;
 	}): Promise<T> {
 		const { url, method, body } = options;
+		let { headers } = options;
+
+		if (!headers) {
+			headers = {};
+		}
 
 		let port = options.isGlobalRequest ? this.GLOBAL_PORT : this.getVaultPort();
+
+		if (!(body instanceof FormData)) {
+			headers['Content-Type'] = 'application/json';
+		} else {
+			headers['Content-Type'] = 'multipart/form-data';
+		}
 
 		if (!port) {
 			const endpoint = endpoints.getVaultPort({ id: this.getVaultId() });
 			const portResponse = await this.request<{ port: number }>({
 				url: endpoint.url,
 				isGlobalRequest: endpoint.isGlobal,
-				method: 'GET'
+				method: 'GET',
+				headers
 			});
 			port = portResponse.port;
 			vaultStore.update((vault) => ({ ...vault!, port: portResponse.port }));
@@ -66,7 +79,8 @@ export class HttpService {
 			method,
 			headers: {
 				'Content-Type': 'application/json',
-				vault: this.getVaultId() || ''
+				vault: this.getVaultId() || '',
+				...headers
 			},
 			body: body ? JSON.stringify(body) : undefined
 		});
@@ -88,31 +102,12 @@ export class HttpService {
 		return this.request({ url, method: 'GET', isGlobalRequest: isGlobal });
 	}
 
-	public static async post<T>(url: string, body?: Record<string, unknown> | FormData): Promise<T> {
-		const headers: Record<string, string> = {
-			vault: this.getVaultId() || ''
-		};
-
-		if (!(body instanceof FormData)) {
-			headers['Content-Type'] = 'application/json';
-		}
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
-			method: 'POST',
-			headers,
-			body: body instanceof FormData ? body : JSON.stringify(body ?? {})
-		});
-
-		if (response.status >= 400) {
-			let errorBody: { message: string } = { message: '' };
-			try {
-				errorBody = (await response.json()) as { message: string };
-			} catch {
-				throw new Error(`Error during request status: ${response.status}`);
-			}
-			throw new Error(errorBody.message);
-		}
-
-		return response.json() as Promise<T>;
+	public static async post<T>(
+		endpoint: ApiEndpoint,
+		body?: Record<string, unknown> | FormData
+	): Promise<T> {
+		const { url, isGlobal } = endpoint;
+		return this.request({ url, method: 'POST', isGlobalRequest: isGlobal, body });
 	}
 
 	public static async postJob<T>(

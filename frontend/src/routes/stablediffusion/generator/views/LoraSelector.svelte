@@ -103,7 +103,7 @@
 	}
 
 	async function refreshLoras() {
-		await HttpService.post(`/sd/refresh-loras`);
+		await HttpService.post(endpoints.refreshSDLoras());
 		const updatedLoras = await HttpService.get<SDLora[]>(endpoints.sdLoras());
 		loras = updatedLoras;
 	}

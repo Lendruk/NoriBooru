@@ -27,7 +27,7 @@
 	});
 
 	async function createTag() {
-		const newTag = await HttpService.post<PopulatedTag>('/tags', {
+		const newTag = await HttpService.post<PopulatedTag>(endpoints.getTags(), {
 			name: tagName,
 			color: tagColor,
 			parentId: tagParentId

@@ -4,6 +4,14 @@ import { ActiveWatcherSchema } from '../../db/vault/schema';
 import { Route, Router } from '../../lib/Router';
 import { PageWatcherService } from '../../services/PageWatcherService';
 
+type CreateWatcherOptions = {
+	url?: string;
+	description?: string;
+	requestInterval: number;
+	itemsPerRequest: number;
+	inactivityTimeout: number;
+};
+
 @injectable()
 export class WatcherRouter extends Router {
 	public constructor(@inject(PageWatcherService) private watcherService: PageWatcherService) {
@@ -19,6 +27,23 @@ export class WatcherRouter extends Router {
 	public async getWatcher(request: FastifyRequest): Promise<ActiveWatcherSchema> {
 		const { id } = request.params as { id: string };
 		return await this.watcherService.getWatcher(id);
+	}
+
+	@Route.POST('/watchers')
+	public async createWatcher(request: FastifyRequest, reply: FastifyReply) {
+		const body = request.body as CreateWatcherOptions;
+
+		if (!body?.url) {
+			return reply.status(400).send('No url provided');
+		}
+		const watcher = await this.watcherService.createWatcher(
+			body.url,
+			body.description ?? '',
+			body.requestInterval,
+			body.itemsPerRequest,
+			body.inactivityTimeout
+		);
+		return watcher.toSchema();
 	}
 
 	@Route.DELETE('/watchers/:id')

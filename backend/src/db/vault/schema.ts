@@ -136,6 +136,8 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	createdAt: integer('created_at').notNull()
 });
 
+export type SDPromptSchema = InferSelectModel<typeof sdPrompts>;
+
 export const lorasToMediaItems = sqliteTable(
 	'loras_to_mediaItems',
 	{

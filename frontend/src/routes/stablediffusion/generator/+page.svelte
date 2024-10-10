@@ -7,6 +7,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import ChevronUp from '$lib/icons/ChevronUp.svelte';
 	import SaveIcon from '$lib/icons/SaveIcon.svelte';
@@ -92,7 +93,7 @@
 		if (!vault.hasInstalledSD) return;
 
 		$isSdStarting = true;
-		await HttpService.post(`/sd/start`);
+		await HttpService.post(endpoints.sdStart());
 		const [
 			fetchedSamplers,
 			fetchedCheckpoints,
@@ -102,13 +103,13 @@
 			fetchedTags,
 			fetchedWildcards
 		] = await Promise.all([
-			HttpService.get<SDSampler[]>(`/sd/samplers`),
-			HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
-			HttpService.get<SDScheduler[]>(`/sd/schedulers`),
-			HttpService.get<SDUpscaler[]>(`/sd/highres/upscalers`),
-			HttpService.get<SDLora[]>(`/sd/loras`),
-			HttpService.get<PopulatedTag[]>('/tags'),
-			HttpService.get<SDWildcard[]>('/sd/wildcards')
+			HttpService.get<SDSampler[]>(endpoints.sdSamplers()),
+			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
+			HttpService.get<SDScheduler[]>(endpoints.sdSchedulers()),
+			HttpService.get<SDUpscaler[]>(endpoints.sdUpscalers()),
+			HttpService.get<SDLora[]>(endpoints.sdLoras()),
+			HttpService.get<PopulatedTag[]>(endpoints.getTags()),
+			HttpService.get<SDWildcard[]>(endpoints.wildCards())
 		]);
 
 		allTags = fetchedTags;
@@ -202,7 +203,12 @@
 		try {
 			const result = await HttpService.post<{
 				items: { fileName: string; id: number; metadata: MediaItemMetadata; isArchived: boolean }[];
-			}>(`/sd/prompt`, { prompt: prompt.build(), autoTag, checkpointId, loras: usedLoras });
+			}>(endpoints.sdPrompts(), {
+				prompt: prompt.build(),
+				autoTag,
+				checkpointId,
+				loras: usedLoras
+			});
 			generatedImages = result.items;
 			if ($page.url.searchParams.has('inputMetadata')) {
 				goto('/stablediffusion/generator');
@@ -215,11 +221,11 @@
 	}
 
 	async function interrupt() {
-		await HttpService.post('/sd/interrupt');
+		await HttpService.post(endpoints.sdInterrupt());
 	}
 
 	async function savePrompt(name: string) {
-		const newPrompt = await HttpService.post<SavedPrompt>('/sd/prompts', {
+		const newPrompt = await HttpService.post<SavedPrompt>(endpoints.sdPrompts(), {
 			name,
 			cfgScale,
 			checkpoint: checkpointId,
@@ -325,13 +331,13 @@
 
 	async function stopSdUi() {
 		isSdStopping.set(true);
-		await HttpService.post(`/sd/stop`);
+		await HttpService.post(endpoints.stopSDUi());
 		isSdStopping.set(false);
 		goto('/');
 	}
 
 	beforeNavigate(async () => {
-		await HttpService.post(`/sd/inactive`);
+		await HttpService.post(endpoints.maskSDInactive());
 	});
 
 	onMount(() => {

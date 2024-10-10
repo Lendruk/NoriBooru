@@ -9,6 +9,7 @@ import { createConnection } from 'net';
 import vaultSchema from '../db/vault';
 import { MediaItemRouter } from '../routes/vault/MediaItemRouter';
 import { PlaylistRouter } from '../routes/vault/PlaylistRouter';
+import { CivitaiRouter } from '../routes/vault/sd/CivitaiRouter';
 import { LoraRouter } from '../routes/vault/sd/LoraRouter';
 import { PromptRouter } from '../routes/vault/sd/PromptRouter';
 import { SDCheckpointRouter } from '../routes/vault/sd/SDCheckpointRouter';
@@ -101,6 +102,7 @@ export class VaultAPI extends Container {
 		this.bind(Router).to(WildcardRouter).inSingletonScope();
 		this.bind(Router).to(PromptRouter).inSingletonScope();
 		this.bind(Router).to(LoraRouter).inSingletonScope();
+		this.bind(Router).to(CivitaiRouter).inSingletonScope();
 
 		this.tags = this.get(TagService);
 		this.media = this.get(MediaService);

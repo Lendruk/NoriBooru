@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '../services/HttpService';
 	import type { PopulatedTag } from '../types/PopulatedTag';
 	import Tag from './Tag.svelte';
@@ -36,7 +37,7 @@
 				}
 
 				// Create new tag
-				const newTag = await HttpService.post<PopulatedTag>('/tags', {
+				const newTag = await HttpService.post<PopulatedTag>(endpoints.getTags(), {
 					name: value,
 					color: '#ffffff',
 					parentId: undefined

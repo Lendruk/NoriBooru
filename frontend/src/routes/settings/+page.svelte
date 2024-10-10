@@ -22,7 +22,7 @@
 	});
 
 	async function setCivitaiApiKey() {
-		await HttpService.post(`/sd/civitai/register`, { key: civitaiApiKey });
+		await HttpService.post(endpoints.registerCivitaiAPIKey(), { key: civitaiApiKey });
 	}
 
 	async function renameVault() {
@@ -55,7 +55,7 @@
 		}
 		isPerformingDestructiveAction = true;
 		currentAction = 'Uninstalling SDUI...';
-		await HttpService.post(`/sd/uninstall`);
+		await HttpService.post(endpoints.sdUninstall());
 		VaultService.setVault({ ...$vaultStore!, hasInstalledSD: false });
 		createToast('SDUI uninstalled successfully!');
 		isPerformingDestructiveAction = false;
@@ -64,7 +64,7 @@
 	async function unlinkVault() {
 		isPerformingDestructiveAction = true;
 		currentAction = 'Unlinking vault...';
-		await HttpService.post(`/vaults/unlink`);
+		await HttpService.post(endpoints.unlinkVault());
 		VaultService.removeVault();
 		goto('/vaults');
 		isPerformingDestructiveAction = false;

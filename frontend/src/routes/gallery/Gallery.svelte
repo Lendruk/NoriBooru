@@ -134,7 +134,7 @@
 	});
 
 	async function createPlaylist() {
-		const newPlaylist = await HttpService.post<Playlist>('/playlists', {
+		const newPlaylist = await HttpService.post<Playlist>(endpoints.playlists(), {
 			name: playlistCreationName,
 			randomizeOrder: false,
 			timePerItem: 0,

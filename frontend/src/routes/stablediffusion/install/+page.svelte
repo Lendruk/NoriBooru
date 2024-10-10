@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
 	import Button from '$lib/components/Button.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../../store';
@@ -10,7 +11,7 @@
 	async function installSD() {
 		installing = true;
 		if (!$vaultStore?.hasInstalledSD) {
-			await HttpService.post(`/sd/install`);
+			await HttpService.post(endpoints.sdInstall());
 			VaultService.setVault({ ...$vaultStore!, hasInstalledSD: true });
 			setTimeout(() => {
 				goto('/stablediffusion/generator');

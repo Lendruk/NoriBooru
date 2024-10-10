@@ -16,7 +16,7 @@
 	let currentOpenPromptName: string | undefined;
 
 	async function getSavedPrompts() {
-		const response = await HttpService.get<SavedPrompt[]>(endpoints.getSDPrompts());
+		const response = await HttpService.get<SavedPrompt[]>(endpoints.sdPrompts());
 		prompts = response;
 
 		currentOpenPrompt = prompts[0];

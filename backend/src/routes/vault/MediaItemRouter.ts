@@ -1,12 +1,16 @@
+import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createReadStream } from 'fs';
+import { createReadStream, createWriteStream } from 'fs';
 import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
 import path from 'path';
+import { pipeline } from 'stream/promises';
 import { mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../../db/vault/schema';
+import { Job } from '../../lib/Job';
 import { Route, Router } from '../../lib/Router';
 import { VaultDb } from '../../lib/VaultAPI';
+import { JobService } from '../../services/JobService';
 import {
 	MediaItem,
 	MediaItemDetail,
@@ -15,6 +19,11 @@ import {
 } from '../../services/MediaService';
 import { TagService } from '../../services/TagService';
 import { VaultConfig } from '../../types/VaultConfig';
+type MediaItemJobUpdatePayload = {
+	totalFiles: number;
+	currentFileIndex: number;
+	currentFileName: string;
+};
 
 @injectable()
 export class MediaItemRouter extends Router {
@@ -22,7 +31,8 @@ export class MediaItemRouter extends Router {
 		@inject(MediaService) private mediaService: MediaService,
 		@inject('config') private config: VaultConfig,
 		@inject('db') private db: VaultDb,
-		@inject(TagService) private tagService: TagService
+		@inject(TagService) private tagService: TagService,
+		@inject(JobService) private jobs: JobService
 	) {
 		super();
 	}
@@ -30,6 +40,72 @@ export class MediaItemRouter extends Router {
 	@Route.GET('/media-items')
 	public async getMediaItems(request: FastifyRequest): Promise<MediaItem[]> {
 		return await this.mediaService.getMediaItems(request.query as MediaSearchQuery | undefined);
+	}
+
+	@Route.POST('/media-items')
+	public async createMediaItem(request: FastifyRequest, reply: FastifyReply) {
+		const mediaImportJob = new Job('media-import', 'Media import', async (job) => {
+			const parts = request.parts();
+			const updatePayload: MediaItemJobUpdatePayload = {
+				totalFiles: 0,
+				currentFileIndex: 0,
+				currentFileName: ''
+			};
+			job.setData(updatePayload);
+
+			for await (const part of parts) {
+				if (part.type === 'file') {
+					updatePayload.currentFileIndex++;
+					updatePayload.currentFileName = part.filename;
+					job.setData(updatePayload);
+					const id = randomUUID();
+					const fileType = part.mimetype.includes('image') ? 'image' : 'video';
+					const currentFileExtension = part.mimetype.split('/')[1];
+					const finalExtension =
+						fileType === 'image'
+							? this.getExtensionForImage(currentFileExtension)
+							: currentFileExtension;
+					const finalPath = path.join(
+						this.config.path,
+						'media',
+						part.mimetype.includes('image') ? 'images' : 'videos',
+						`${id}.${finalExtension}`
+					);
+
+					try {
+						await pipeline(part.file, createWriteStream(finalPath));
+
+						await this.mediaService.createMediaItemFromFile({
+							fileExtension: finalExtension,
+							originalFileName: part.filename,
+							preCalculatedId: id
+						});
+					} catch (error) {
+						console.log(`Failed to upload file - ${part.filename}`);
+						console.log(error);
+
+						// Cleanup any possible leftover files
+						try {
+							await fs.unlink(finalPath);
+						} catch {
+							// Nothing
+						}
+					}
+				} else if (part.fieldname === 'totalItems') {
+					updatePayload.totalFiles = Number.parseInt(part.value as string);
+				}
+			}
+		});
+
+		this.jobs.registerJob(mediaImportJob);
+		this.jobs.runJob(mediaImportJob.id);
+
+		return reply.send({
+			message: 'Job registered successfully!',
+			id: mediaImportJob.id,
+			name: mediaImportJob.name,
+			tag: mediaImportJob.tag
+		});
 	}
 
 	@Route.GET('/media-items/:id')
@@ -259,4 +335,11 @@ export class MediaItemRouter extends Router {
 
 		return reply.send({ message: 'Item archival status switched' });
 	}
+
+	private getExtensionForImage = (currentExtension: string): string => {
+		if (currentExtension === 'gif') {
+			return 'gif';
+		}
+		return 'png';
+	};
 }

@@ -20,6 +20,39 @@ export class PlaylistService extends VaultService {
 		super(db);
 	}
 
+	public async createPlaylist(
+		name: string,
+		randomizeOrder: boolean,
+		timePerItem: number,
+		itemIds: number[]
+	): Promise<PlaylistWithItems> {
+		const playlist = (
+			await this.db
+				.insert(playlists)
+				.values({
+					name: name,
+					createdAt: Date.now(),
+					randomizeOrder: randomizeOrder ? 1 : 0,
+					timePerItem: timePerItem
+				})
+				.returning()
+		)[0];
+
+		let items: { playlistId: number; mediaItemId: number; itemIndex: number }[] = [];
+		if (items.length > 0) {
+			items = await this.db
+				.insert(playlists_mediaItems_table)
+				.values(
+					itemIds.map((item, index) => ({
+						playlistId: playlist.id,
+						mediaItemId: item,
+						itemIndex: index
+					}))
+				)
+				.returning();
+		}
+		return { ...playlist, items: items.map((item) => item.mediaItemId) };
+	}
 	public async getPlaylists(): Promise<PlaylistWithItems[]> {
 		const playlists = await this.db.query.playlists.findMany();
 		const finalPlaylists: PlaylistWithItems[] = [];
