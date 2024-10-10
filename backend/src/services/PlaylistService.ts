@@ -106,4 +106,11 @@ export class PlaylistService extends VaultService {
 
 		return playlist;
 	}
+
+	public async deletePlaylist(id: number): Promise<void> {
+		await this.db
+			.delete(playlists_mediaItems_table)
+			.where(eq(playlists_mediaItems_table.playlistId, id));
+		await this.db.delete(playlists).where(eq(playlists.id, id));
+	}
 }

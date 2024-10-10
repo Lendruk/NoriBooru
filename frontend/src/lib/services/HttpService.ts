@@ -75,6 +75,9 @@ export class HttpService {
 			const responseBody = (await response.json()) as RedirectResponse;
 			vaultStore.update((vault) => ({ ...vault!, port: responseBody.port }));
 			return this.request<T>({ url, method, body, isGlobalRequest: false });
+		}
+		if (response.status > 400) {
+			throw new Error(`Error during request status: ${response.status}`);
 		} else {
 			return response.json() as Promise<T>;
 		}
@@ -164,21 +167,9 @@ export class HttpService {
 		return response.json() as Promise<T>;
 	}
 
-	public static async delete<T>(url: string, body?: Record<string, unknown>): Promise<T> {
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json',
-				vault: this.getVaultId() || ''
-			},
-			body: JSON.stringify(body)
-		});
-
-		if (response.status >= 400) {
-			throw new Error(`Error during request status: ${response.status}`);
-		}
-
-		return response.json() as Promise<T>;
+	public static async delete<T>(endpoint: ApiEndpoint, body?: Record<string, unknown>): Promise<T> {
+		const { url, isGlobal } = endpoint;
+		return this.request({ url, method: 'DELETE', isGlobalRequest: isGlobal, body });
 	}
 
 	public static async patch<T>(url: string, body?: Record<string, unknown>): Promise<T> {

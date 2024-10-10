@@ -3,19 +3,22 @@ import type { ApiEndpoint } from './services/HttpService';
 type EndpointNames =
 	| 'getVaults'
 	| 'getWatchers'
-	| 'getWatcher'
+	| 'watcher'
 	| 'getTags'
-	| 'getMediaItemTags'
-	| 'getTag'
-	| 'getPlaylist'
-	| 'getPlaylists'
+	| 'mediaItemTags'
+	| 'tag'
+	| 'playlist'
+	| 'playlists'
 	| 'getApiKeys'
-	| 'getMediaItem'
-	| 'getSDLoras'
+	| 'mediaItem'
+	| 'sdLoras'
 	| 'getSDPrompts'
 	| 'getVaultPort'
-	| 'getSDCheckpoints'
+	| 'sdCheckpoints'
 	| 'getMediaItemsForReview'
+	| 'wildCard'
+	| 'vault'
+	| 'sdPrompt'
 	| 'getMediaItems';
 
 type Endpoints = {
@@ -30,6 +33,10 @@ export const endpoints: Endpoints = {
 		url: '/vaults',
 		isGlobal: true
 	}),
+	vault: (options) => ({
+		url: `/vault/${options?.id}`,
+		isGlobal: true
+	}),
 	getVaultPort: (options) => ({
 		url: `/vault/${options?.id}/port`,
 		isGlobal: true
@@ -38,15 +45,15 @@ export const endpoints: Endpoints = {
 		url: '/watchers',
 		isGlobal: false
 	}),
-	getPlaylists: () => ({
+	playlists: () => ({
 		url: '/playlists',
 		isGlobal: false
 	}),
-	getPlaylist: (options) => ({
+	playlist: (options) => ({
 		url: `/playlists/${options?.id}`,
 		isGlobal: false
 	}),
-	getWatcher: (options) => ({
+	watcher: (options) => ({
 		url: `/watchers/${options?.id}`,
 		isGlobal: false
 	}),
@@ -54,7 +61,7 @@ export const endpoints: Endpoints = {
 		url: `/tags${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
-	getTag: (options) => ({
+	tag: (options) => ({
 		url: `/tags/${options?.id}`,
 		isGlobal: false
 	}),
@@ -66,11 +73,11 @@ export const endpoints: Endpoints = {
 		url: `/media-items/review${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
-	getMediaItem: (options) => ({
+	mediaItem: (options) => ({
 		url: `/media-items/${options?.id}${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
-	getMediaItemTags: (options) => ({
+	mediaItemTags: (options) => ({
 		url: `/media-items/${options?.id}/tags`,
 		isGlobal: false
 	}),
@@ -78,16 +85,24 @@ export const endpoints: Endpoints = {
 		url: `/settings/api-keys`,
 		isGlobal: false
 	}),
-	getSDLoras: (options) => ({
+	sdLoras: (options) => ({
 		url: `/sd/loras${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
-	getSDCheckpoints: (options) => ({
+	sdCheckpoints: (options) => ({
 		url: `/sd/checkpoints${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
 	getSDPrompts: () => ({
 		url: `/sd/prompts`,
+		isGlobal: false
+	}),
+	sdPrompt: (options) => ({
+		url: `/sd/prompts/${options?.id ? `${options.id}` : ''}`,
+		isGlobal: false
+	}),
+	wildCard: (options) => ({
+		url: `/sd/wildcards/${options?.id ? `${options.id}` : ''}`,
 		isGlobal: false
 	})
 };

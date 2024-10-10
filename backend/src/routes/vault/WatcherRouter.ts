@@ -20,4 +20,10 @@ export class WatcherRouter extends Router {
 		const { id } = request.params as { id: string };
 		return await this.watcherService.getWatcher(id);
 	}
+
+	@Route.DELETE('/watchers/:id')
+	public async deleteWatcher(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		await this.watcherService.deleteWatcher(id);
+	}
 }

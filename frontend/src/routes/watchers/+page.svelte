@@ -45,7 +45,7 @@
 	let inactivityTimeout = $state(INACTIVITY_TIMEOUT_DEFAULT); // ms
 
 	async function deleteWatcher(watcherId: string) {
-		await HttpService.delete(`/watchers/${watcherId}`);
+		await HttpService.delete(endpoints.watcher({ id: watcherId }));
 		watchers = watchers.filter((watcher) => watcher.id !== watcherId);
 
 		if (selectedWatcher?.id === watcherId) {
@@ -177,7 +177,7 @@
 		if (wsEvent.event === 'watcher-update' && refreshGallery) {
 			const watcherUpdateEvent = wsEvent.data as WatcherUpdateSocketEvent;
 			const updatedWatcher = await HttpService.get<Watcher>(
-				endpoints.getWatcher({ id: watcherUpdateEvent.id })
+				endpoints.watcher({ id: watcherUpdateEvent.id })
 			);
 			console.log('event for watcher', watcherUpdateEvent.id);
 			watchers = watchers.map((watcher) => {

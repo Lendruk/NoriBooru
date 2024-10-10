@@ -19,7 +19,7 @@
 
 	$effect(() => {
 		if ($page.params.id) {
-			HttpService.get<Playlist>(endpoints.getPlaylist({ id: $page.params.id })).then((res) => {
+			HttpService.get<Playlist>(endpoints.playlist({ id: $page.params.id })).then((res) => {
 				timePerItem = res.timePerItem ?? 0;
 				items = res.items ?? [];
 

@@ -82,7 +82,7 @@
 
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			endpoints.getSDLoras({
+			endpoints.sdLoras({
 				params: `tags=${filterTags.map((tag) => tag.id).join(',')}${filterName ? `&name=${filterName}` : ''}`
 			})
 		);
@@ -104,7 +104,7 @@
 
 	async function refreshLoras() {
 		await HttpService.post(`/sd/refresh-loras`);
-		const updatedLoras = await HttpService.get<SDLora[]>(endpoints.getSDLoras());
+		const updatedLoras = await HttpService.get<SDLora[]>(endpoints.sdLoras());
 		loras = updatedLoras;
 	}
 

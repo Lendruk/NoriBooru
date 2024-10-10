@@ -23,7 +23,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(endpoints.getMediaItem({ id: itemId }));
+		}>(endpoints.mediaItem({ id: itemId }));
 		mediaItem = res.mediaItem;
 		isLoading = false;
 	};

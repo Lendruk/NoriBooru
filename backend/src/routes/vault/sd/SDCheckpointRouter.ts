@@ -16,4 +16,10 @@ export class SDCheckpointRouter extends Router {
 		const { name } = request.query as { name: string };
 		return await this.sdCheckpointService.getSDCheckpoints(name);
 	}
+
+	@Route.DELETE('/sd/checkpoints/:id')
+	public async deleteCheckpoint(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		await this.sdCheckpointService.deleteCheckpoint(id);
+	}
 }

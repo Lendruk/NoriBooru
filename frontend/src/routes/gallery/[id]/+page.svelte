@@ -53,7 +53,7 @@
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(endpoints.getMediaItem({ id: $page.params.id, params })).then((res) => {
+		}>(endpoints.mediaItem({ id: $page.params.id, params })).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
@@ -70,7 +70,7 @@
 	}
 
 	async function removeTagFromMedia(tag: PopulatedTag) {
-		await HttpService.delete(`/media-items/${mediaItem?.id}/tags`, tag);
+		await HttpService.delete(endpoints.mediaItemTags({ id: mediaItem?.id }), tag);
 		mediaItem!.tags = mediaItem!.tags.filter((t) => t.id !== tag.id);
 	}
 
@@ -82,7 +82,7 @@
 				next?: string;
 				previous?: string;
 				tags: PopulatedTag[];
-			}>(endpoints.getMediaItem({ id: $page.params.id }));
+			}>(endpoints.mediaItem({ id: $page.params.id }));
 
 			mediaItem = updatedItem.mediaItem;
 			tags = updatedItem.tags;
@@ -94,7 +94,7 @@
 
 	async function deleteMediaItem() {
 		if (mediaItem) {
-			await HttpService.delete(`/media-items/${JSON.stringify([mediaItem.id])}`);
+			await HttpService.delete(endpoints.mediaItem({ id: JSON.stringify([mediaItem.id]) }));
 			let idToFetch: string = '';
 			if (previous) {
 				idToFetch = previous;

@@ -20,4 +20,10 @@ export class TagRouter extends Router {
 
 		return await this.tagService.getAllTags(nameToQuery);
 	}
+
+	@Route.DELETE('/tags/:id')
+	public async deleteTag(request: FastifyRequest) {
+		const { id } = request.params as { id: number };
+		await this.tagService.deleteTag(id);
+	}
 }

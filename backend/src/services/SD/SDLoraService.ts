@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
+import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
-import { SDLoraSchema, tagsToLoras } from '../../db/vault/schema';
+import { sdLoras, SDLoraSchema, tagsToLoras } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 import { SDLora } from '../../types/sd/SDLora';
@@ -38,6 +39,14 @@ export class SDLoraService extends VaultService {
 			}
 		}
 		return finalLoraArr;
+	}
+
+	public async deleteLora(loraId: string): Promise<void> {
+		const lora = await this.db.query.sdLoras.findFirst({ where: eq(sdLoras.id, loraId) });
+		if (lora) {
+			await fs.unlink(lora.path);
+			await this.db.delete(sdLoras).where(eq(sdLoras.id, loraId));
+		}
 	}
 
 	private matchesNameQuery = (loraName: string, nameQuery?: string): boolean => {

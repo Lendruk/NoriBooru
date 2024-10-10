@@ -98,7 +98,9 @@
 
 		try {
 			await HttpService.delete(
-				`/sd/${deletionResourceType === 'LORA' ? 'loras' : 'checkpoints'}/${deletionResource?.id}`
+				deletionResourceType === 'LORA'
+					? endpoints.sdLoras({ id: deletionResource?.id })
+					: endpoints.sdCheckpoints({ id: deletionResource?.id })
 			);
 
 			if (deletionResourceType === 'LORA') {
@@ -128,8 +130,8 @@
 
 	async function fetchResources() {
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
-			HttpService.get<SDLora[]>(endpoints.getSDLoras()),
-			HttpService.get<SDCheckpoint[]>(endpoints.getSDCheckpoints()),
+			HttpService.get<SDLora[]>(endpoints.sdLoras()),
+			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
 			HttpService.get<PopulatedTag[]>(endpoints.getTags())
 		]);
 
@@ -146,7 +148,7 @@
 	// Querying
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			endpoints.getSDLoras({
+			endpoints.sdLoras({
 				params: `tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
 			})
 		);
@@ -155,7 +157,7 @@
 
 	async function searchCheckpoints() {
 		const filteredCheckpoints = await HttpService.get<SDCheckpoint[]>(
-			endpoints.getSDCheckpoints({
+			endpoints.sdCheckpoints({
 				params: queryCheckpointName ? `name=${queryCheckpointName}` : ''
 			})
 		);

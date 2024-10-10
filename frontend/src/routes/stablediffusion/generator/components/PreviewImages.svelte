@@ -2,6 +2,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
@@ -27,7 +28,7 @@
 
 	async function deleteItem() {
 		const { id } = images[currentIndex];
-		await HttpService.delete(`/media-items/${JSON.stringify([id])}`);
+		await HttpService.delete(endpoints.mediaItem({ id }));
 
 		if (images.length === 1) {
 			images = [];

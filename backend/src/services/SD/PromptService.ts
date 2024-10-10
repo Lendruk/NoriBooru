@@ -1,4 +1,6 @@
+import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
+import { sdPrompts } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 
@@ -52,5 +54,9 @@ export class PromptService extends VaultService {
 					}
 				: null
 		}));
+	}
+
+	public async deletePrompt(promptId: string): Promise<void> {
+		await this.db.delete(sdPrompts).where(eq(sdPrompts.id, promptId));
 	}
 }

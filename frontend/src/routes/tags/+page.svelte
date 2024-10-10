@@ -54,7 +54,7 @@
 	}
 
 	async function deleteTag(id: number) {
-		await HttpService.delete(`/tags/${id}`);
+		await HttpService.delete(endpoints.tag({ id }));
 		tags = tags.filter((tag) => tag.id !== id);
 	}
 </script>

@@ -1,5 +1,4 @@
 import civtaiRoutes from './civtai';
-import deleteCheckpoint from './deleteCheckpoint';
 import installSDUi from './installSDUi';
 import interruptGeneration from './interruptGeneration';
 import loraRoutes from './loras';
@@ -25,7 +24,6 @@ export default [
 	refreshCheckpoints,
 	unloadCheckpoint,
 	updateCheckpoint,
-	deleteCheckpoint,
 	...promptCruds,
 	...loraRoutes,
 	...wildcardRoutes,

@@ -13,6 +13,7 @@ import {
 	mediaItems,
 	MediaItemSchema,
 	mediaItemsMetadata,
+	playlists_mediaItems_table,
 	tags,
 	TagSchema,
 	tagsToMediaItems,
@@ -761,6 +762,52 @@ export class MediaService extends VaultService {
 
 			if (aiTag) {
 				await this.addTagToMediaItem(id, aiTag.id);
+			}
+		}
+	}
+
+	public async deleteMediaItem(id: number): Promise<void> {
+		const mediaItem = await this.db.query.mediaItems.findFirst({
+			where: eq(mediaItems.id, id)
+		});
+		if (mediaItem) {
+			const mediaTags = await this.db.query.tagsToMediaItems.findMany({
+				where: eq(tagsToMediaItems.mediaItemId, id)
+			});
+			for (const mediaTag of mediaTags) {
+				const tag = await this.db.query.tags.findFirst({
+					where: eq(tags.id, mediaTag.tagId)
+				});
+				console.log(tag);
+			}
+			await this.db.delete(tagsToMediaItems).where(eq(tagsToMediaItems.mediaItemId, id));
+			await this.db.delete(mediaItems).where(eq(mediaItems.id, id));
+			await this.db
+				.delete(playlists_mediaItems_table)
+				.where(eq(playlists_mediaItems_table.mediaItemId, id));
+			// Delete the file
+			try {
+				await Promise.all([
+					fs.unlink(
+						path.join(
+							this.config.path,
+							'media',
+							mediaItem.type + 's',
+							`${mediaItem.fileName}.${mediaItem.extension}`
+						)
+					),
+					fs.unlink(
+						path.join(
+							this.config.path,
+							'media',
+							mediaItem.type + 's',
+							'.thumb',
+							`${mediaItem.fileName}.${mediaItem.type === 'video' ? 'mp4' : `${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}`
+						)
+					)
+				]);
+			} catch (error) {
+				// TODO - Add fall back for error in file deletion
 			}
 		}
 	}

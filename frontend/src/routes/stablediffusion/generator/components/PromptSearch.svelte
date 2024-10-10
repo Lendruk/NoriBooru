@@ -38,7 +38,7 @@
 	}
 
 	async function deleteSavedPrompt(id: string) {
-		await HttpService.delete(`/sd/prompts/${id}`);
+		await HttpService.delete(endpoints.sdPrompt({ id }));
 
 		if (id === currentOpenPrompt?.id) {
 			currentOpenPrompt = undefined;

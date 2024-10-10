@@ -174,7 +174,7 @@
 	}
 
 	async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.delete(`/media-items/${mediaItemId}/tags`, { ...tag });
+		await HttpService.delete(endpoints.mediaItemTags({ id: mediaItemId }), { ...tag });
 		const tagIndex = mediaItemInTagEdit!.tags.findIndex((mediaTag) => mediaTag.id === tag.id);
 		mediaItemInTagEdit!.tags.splice(tagIndex, 1);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
@@ -248,7 +248,7 @@
 	}
 
 	async function deleteItems(mediaItemIds: number[]) {
-		await HttpService.delete(`/media-items/${JSON.stringify(mediaItemIds)}`);
+		await HttpService.delete(endpoints.mediaItem({ id: JSON.stringify(mediaItemIds) }));
 		mediaItems = mediaItems.filter((item) => !mediaItemIds.includes(item.id));
 	}
 
@@ -280,7 +280,7 @@
 
 	async function fetchMediaItemTags(mediaItemId: number) {
 		const tags = await HttpService.get<PopulatedTag[]>(
-			endpoints.getMediaItemTags({ id: mediaItemId })
+			endpoints.mediaItemTags({ id: mediaItemId })
 		);
 		mediaItemInTagEdit = { id: mediaItemId, tags };
 	}
@@ -341,7 +341,7 @@
 	}
 
 	async function onAddToPlaylistClick(mediaItem: MediaItem) {
-		playlists = await HttpService.get<Playlist[]>(endpoints.getPlaylists());
+		playlists = await HttpService.get<Playlist[]>(endpoints.playlists());
 		mediaItemToAddToPlaylist = mediaItem;
 		isPlaylistModalOpen = true;
 	}

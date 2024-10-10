@@ -41,7 +41,7 @@
 	async function deleteVault() {
 		isPerformingDestructiveAction = true;
 		currentAction = 'Deleting vault...';
-		await HttpService.delete(`/vaults/${$vaultStore?.id}`);
+		await HttpService.delete(endpoints.vault({ id: $vaultStore?.id }));
 		VaultService.removeVault();
 		goto('/vaults');
 		isPerformingDestructiveAction = false;

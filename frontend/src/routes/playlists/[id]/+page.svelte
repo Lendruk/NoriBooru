@@ -29,7 +29,7 @@
 		});
 
 		if ($page.params.id && $page.params.id !== 'new') {
-			HttpService.get<Playlist>(endpoints.getPlaylist({ id: $page.params.id })).then((res) => {
+			HttpService.get<Playlist>(endpoints.playlist({ id: $page.params.id })).then((res) => {
 				playlistName = res.name;
 				randomizeOrder = res.randomizeOrder === 1;
 				playlistItems = res.items;

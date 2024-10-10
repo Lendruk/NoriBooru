@@ -7,10 +7,14 @@ import path from 'path';
 import { mediaItems, tagsToMediaItems } from '../../db/vault/schema';
 import { Route, Router } from '../../lib/Router';
 import { VaultDb } from '../../lib/VaultAPI';
-import { MediaItem, MediaItemDetail, MediaService } from '../../services/MediaService';
+import {
+	MediaItem,
+	MediaItemDetail,
+	MediaSearchQuery,
+	MediaService
+} from '../../services/MediaService';
 import { TagService } from '../../services/TagService';
 import { VaultConfig } from '../../types/VaultConfig';
-import { MediaSearchQuery } from './media/searchMediaItems';
 
 @injectable()
 export class MediaItemRouter extends Router {
@@ -154,6 +158,32 @@ export class MediaItemRouter extends Router {
 		} else {
 			return reply.header('Content-Type', 'image/mp4').send(video);
 		}
+	}
+
+	@Route.DELETE('/media-items/:ids')
+	public async deleteMediaItem(request: FastifyRequest, reply: FastifyReply) {
+		const { ids } = request.params as { ids: string };
+		const maybeArray = JSON.parse(ids);
+
+		let parsedIdArray: string[] = [];
+		if (Array.isArray(maybeArray)) {
+			parsedIdArray = maybeArray;
+		} else {
+			parsedIdArray = [maybeArray];
+		}
+
+		try {
+			for (const rawId of parsedIdArray) {
+				const parsedId = Number.parseInt(rawId ?? '');
+				if (parsedId) {
+					await this.mediaService.deleteMediaItem(parsedId);
+				}
+			}
+		} catch (error) {
+			console.log(error);
+			return reply.status(400).send({ message: error });
+		}
+		return reply.send({ message: 'Media item deleted successfully' });
 	}
 
 	@Route.GET('/videos/:fileName')

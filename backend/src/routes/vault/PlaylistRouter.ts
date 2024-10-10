@@ -19,4 +19,10 @@ export class PlaylistRouter extends Router {
 		const { id } = request.params as { id: string };
 		return await this.playlistService.getPlaylist(Number.parseInt(id));
 	}
+
+	@Route.DELETE('/playlists/:id')
+	public async deletePlaylist(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		await this.playlistService.deletePlaylist(Number.parseInt(id));
+	}
 }

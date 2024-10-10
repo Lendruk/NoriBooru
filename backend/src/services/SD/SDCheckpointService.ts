@@ -1,4 +1,5 @@
-import { like } from 'drizzle-orm';
+import { eq, like } from 'drizzle-orm';
+import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
 import { sdCheckpoints, SDCheckpointSchema } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
@@ -18,5 +19,15 @@ export class SDCheckpointService extends VaultService {
 				.where(like(sdCheckpoints.name, `%${nameQuery}%`));
 		}
 		return await this.db.query.sdCheckpoints.findMany();
+	}
+
+	public async deleteCheckpoint(id: string): Promise<void> {
+		const checkpoint = await this.db.query.sdCheckpoints.findFirst({
+			where: eq(sdCheckpoints.id, id)
+		});
+		if (checkpoint) {
+			await fs.unlink(checkpoint.path);
+			await this.db.delete(sdCheckpoints).where(eq(sdCheckpoints.id, id));
+		}
 	}
 }

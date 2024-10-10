@@ -50,7 +50,7 @@
 
 	async function fetchMediaItem(id: number): Promise<MediaItemWithTags> {
 		const { mediaItem } = await HttpService.get<{ mediaItem: MediaItemWithTags }>(
-			endpoints.getMediaItem({ id })
+			endpoints.mediaItem({ id })
 		);
 		return mediaItem;
 	}
@@ -150,7 +150,7 @@
 		}
 
 		if (itemsToDelete.length > 0) {
-			promises.push(HttpService.delete(`/media-items/${JSON.stringify(itemsToDelete)}`));
+			promises.push(HttpService.delete(endpoints.mediaItem({ id: JSON.stringify(itemsToDelete) })));
 		}
 
 		if (tagsToApply.size > 0) {

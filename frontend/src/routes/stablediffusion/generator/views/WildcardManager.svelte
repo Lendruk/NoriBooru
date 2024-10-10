@@ -4,6 +4,7 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import EditIcon from '$lib/icons/editIcon.svelte';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
@@ -81,7 +82,7 @@
 	}
 
 	async function deleteWildcard(id: string) {
-		await HttpService.delete(`/sd/wildcards/${id}`);
+		await HttpService.delete(endpoints.wildCard({ id }));
 		const index = wildcards.findIndex((wildcard) => wildcard.id === id);
 		if (index !== -1) {
 			wildcards.splice(index, 1);
