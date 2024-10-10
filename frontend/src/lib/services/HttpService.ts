@@ -121,7 +121,14 @@ export class HttpService {
 		if (!(body instanceof FormData)) {
 			headers['Content-Type'] = 'application/json';
 		}
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
+
+		const port = this.getVaultPort();
+
+		if (!port) {
+			throw new Error('Port not found');
+		}
+
+		const response = await fetch(this.buildUrl(url, port), {
 			method: 'POST',
 			headers,
 			body: body instanceof FormData ? body : JSON.stringify(body ?? {})
@@ -145,21 +152,9 @@ export class HttpService {
 		});
 		return newJob;
 	}
-	public static async put<T>(url: string, body: Record<string, unknown>): Promise<T> {
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				vault: this.getVaultId() || ''
-			},
-			body: JSON.stringify(body)
-		});
-
-		if (response.status >= 400) {
-			throw new Error(`Error during request status: ${response.status}`);
-		}
-
-		return response.json() as Promise<T>;
+	public static async put<T>(endpoint: ApiEndpoint, body: Record<string, unknown>): Promise<T> {
+		const { url, isGlobal } = endpoint;
+		return this.request({ url, method: 'PUT', isGlobalRequest: isGlobal, body });
 	}
 
 	public static async delete<T>(endpoint: ApiEndpoint, body?: Record<string, unknown>): Promise<T> {

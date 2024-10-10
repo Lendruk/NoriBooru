@@ -78,6 +78,34 @@ export class PromptService extends VaultService {
 		return prompt;
 	}
 
+	public async updatePrompt(id: string, options: CreatePromptOptions): Promise<SDPromptSchema> {
+		const prompt = (
+			await this.db
+				.update(sdPrompts)
+				.set({
+					name: options.name,
+					cfgScale: options.cfgScale,
+					checkpoint: options.checkpoint,
+					createdAt: new Date().getTime(),
+					height: options.height,
+					width: options.width,
+					id: randomUUID(),
+					negativePrompt: options.negativePrompt,
+					positivePrompt: options.positivePrompt,
+					isHighResEnabled: options.highRes ? 1 : 0,
+					sampler: options.sampler,
+					steps: options.steps,
+					highResDenoisingStrength: options.highRes?.denoisingStrength,
+					highResSteps: options.highRes?.steps,
+					highResUpscaleBy: options.highRes?.upscaleBy,
+					highResUpscaler: options.highRes?.upscaler
+				})
+				.where(eq(sdPrompts.id, id))
+				.returning()
+		)[0];
+		return prompt;
+	}
+
 	public async getPrompts(): Promise<SDPrompt[]> {
 		const prompts = await this.db.query.sdPrompts.findMany();
 

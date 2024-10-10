@@ -53,6 +53,40 @@ export class PlaylistService extends VaultService {
 		}
 		return { ...playlist, items: items.map((item) => item.mediaItemId) };
 	}
+
+	public async updatePlaylist(
+		id: number,
+		name: string,
+		randomizeOrder: boolean,
+		timePerItem: number,
+		items: number[]
+	): Promise<PlaylistWithPopulatedItems> {
+		// This is inefficient improve in future
+		await this.db
+			.delete(playlists_mediaItems_table)
+			.where(eq(playlists_mediaItems_table.playlistId, id));
+		await this.db
+			.update(playlists)
+			.set({
+				name: name,
+				randomizeOrder: randomizeOrder ? 1 : 0,
+				timePerItem: timePerItem
+			})
+			.where(eq(playlists.id, id));
+		await this.db
+			.insert(playlists_mediaItems_table)
+			.values(
+				items.map((item, index) => ({
+					playlistId: id,
+					mediaItemId: item,
+					itemIndex: index
+				}))
+			)
+			.returning();
+
+		return await this.getPlaylist(id);
+	}
+
 	public async getPlaylists(): Promise<PlaylistWithItems[]> {
 		const playlists = await this.db.query.playlists.findMany();
 		const finalPlaylists: PlaylistWithItems[] = [];

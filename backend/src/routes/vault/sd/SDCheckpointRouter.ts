@@ -1,7 +1,10 @@
 import { FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
-import { SDCheckpointService } from '../../../services/SD/SDCheckpointService';
+import {
+	SDCheckpointService,
+	UpdateCheckpointRequest
+} from '../../../services/SD/SDCheckpointService';
 
 @injectable()
 export class SDCheckpointRouter extends Router {
@@ -15,6 +18,14 @@ export class SDCheckpointRouter extends Router {
 	public async getSDCheckpoints(request: FastifyRequest) {
 		const { name } = request.query as { name: string };
 		return await this.sdCheckpointService.getSDCheckpoints(name);
+	}
+
+	@Route.PUT('/sd/checkpoints/:id')
+	public async updateCheckpoint(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as UpdateCheckpointRequest;
+		const checkpoint = await this.sdCheckpointService.updateCheckpoint(id, body);
+		return checkpoint;
 	}
 
 	@Route.DELETE('/sd/checkpoints/:id')

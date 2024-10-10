@@ -51,7 +51,7 @@
 
 	async function setPreviewImage(lora: SDLora) {
 		if (lastGen && loraInEdit) {
-			await HttpService.put(`/sd/loras/${lora.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: lora.id }), {
 				previewImage: lastGen.fileName
 			});
 			loraInEdit.previewImage = lastGen.fileName!;
@@ -63,7 +63,7 @@
 	async function addTagToLora(tag: PopulatedTag) {
 		if (loraInEdit) {
 			loraInEdit.tags = loraInEdit.tags.concat(tag);
-			await HttpService.put(`/sd/loras/${loraInEdit.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: loraInEdit.id }), {
 				tags: loraInEdit.tags.map((t) => t.id)
 			});
 		}
@@ -74,7 +74,7 @@
 			const index = loraInEdit.tags.findIndex((t) => t.id === tag.id);
 			loraInEdit.tags.splice(index, 1);
 			loraInEdit.tags = loraInEdit.tags;
-			await HttpService.put(`/sd/loras/${loraInEdit.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: loraInEdit.id }), {
 				tags: loraInEdit.tags.map((t) => t.id)
 			});
 		}

@@ -28,7 +28,7 @@
 	async function updatePrompt() {
 		if (!currentOpenPrompt) return;
 
-		await HttpService.put(`/sd/prompts/${currentOpenPrompt.id}`, {
+		await HttpService.put(endpoints.sdPrompt({ id: currentOpenPrompt.id }), {
 			...currentOpenPrompt,
 			name: currentOpenPromptName
 		});

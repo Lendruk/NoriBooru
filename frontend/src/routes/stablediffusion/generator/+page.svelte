@@ -249,7 +249,7 @@
 	}
 
 	async function updatePrompt() {
-		await HttpService.put(`/sd/prompts/${promptId}`, {
+		await HttpService.put(endpoints.sdPrompt({ id: promptId }), {
 			name: promptName,
 			cfgScale,
 			checkpoint: checkpointId,

@@ -20,6 +20,13 @@ export class WildcardRouter extends Router {
 		return await this.wildcardService.createWildcard(body.name, body.values);
 	}
 
+	@Route.PUT('/sd/wildcards/:id')
+	public async updateWildcard(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as { name: string; values: string[] };
+		return await this.wildcardService.updateWildcard(id, body);
+	}
+
 	@Route.DELETE('/sd/wildcards/:id')
 	public async deleteWildcard(request: FastifyRequest) {
 		const { id } = request.params as { id: string };

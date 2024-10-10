@@ -96,11 +96,14 @@
 	async function updateWatcher() {
 		if (!isUrlValid) return;
 
-		const updatedWatcher = await HttpService.put<Watcher>(`/watchers/${selectedWatcher?.id}`, {
-			requestInterval,
-			inactivityTimeout,
-			itemsPerRequest
-		});
+		const updatedWatcher = await HttpService.put<Watcher>(
+			endpoints.watcher({ id: selectedWatcher?.id }),
+			{
+				requestInterval,
+				inactivityTimeout,
+				itemsPerRequest
+			}
+		);
 
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === updatedWatcher.id) {

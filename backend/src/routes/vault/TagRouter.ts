@@ -27,6 +27,17 @@ export class TagRouter extends Router {
 		return await this.tagService.createTag(body.name, body.color, body.parentId);
 	}
 
+	@Route.PUT('/tags/:id')
+	public async updateTag(request: FastifyRequest) {
+		const { id } = request.params as { id: number };
+		const body = request.body as { name: string; color: string; parentId?: number };
+		return await this.tagService.updateTag(id, {
+			color: body.color,
+			name: body.name,
+			parentId: body.parentId
+		});
+	}
+
 	@Route.DELETE('/tags/:id')
 	public async deleteTag(request: FastifyRequest) {
 		const { id } = request.params as { id: number };

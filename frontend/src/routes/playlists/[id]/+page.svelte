@@ -138,7 +138,7 @@
 	}
 
 	async function updatePlaylist() {
-		await HttpService.put(`/playlists/${$page.params.id}`, {
+		await HttpService.put(endpoints.playlist({ id: $page.params.id }), {
 			name: playlistName,
 			randomizeOrder,
 			timePerItem,

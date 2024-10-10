@@ -40,7 +40,7 @@
 	}
 
 	async function updateTag() {
-		const updatedTag = await HttpService.put<PopulatedTag>(`/tags/${tagInEditId}`, {
+		const updatedTag = await HttpService.put<PopulatedTag>(endpoints.tag({ id: tagInEditId }), {
 			name: tagInEditName,
 			parentId: tagInEditParent,
 			color: tagInEditColor

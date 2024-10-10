@@ -6,6 +6,7 @@
 	import TextArea from '$lib/components/TextArea.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
@@ -22,7 +23,7 @@
 	async function updateCheckpoint() {
 		isLoading = true;
 		try {
-			await HttpService.put(`/sd/checkpoints/${checkpoint.id}`, {
+			await HttpService.put(endpoints.sdCheckpoint({ id: checkpoint.id }), {
 				name: checkpointName,
 				description: checkpointDescription,
 				origin: checkpointOrigin,

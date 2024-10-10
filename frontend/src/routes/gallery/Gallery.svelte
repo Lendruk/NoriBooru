@@ -181,7 +181,9 @@
 	}
 
 	async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.put(`/media-items/${JSON.stringify([mediaItemId])}/tags`, { ...tag });
+		await HttpService.put(endpoints.mediaItemTags({ id: JSON.stringify([mediaItemId]) }), {
+			...tag
+		});
 		mediaItemInTagEdit!.tags.push(tag);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}

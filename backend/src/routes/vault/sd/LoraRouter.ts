@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
-import { SDLoraService } from '../../../services/SD/SDLoraService';
+import { SDLoraService, UpdateLoraRequest } from '../../../services/SD/SDLoraService';
 import { SDService } from '../../../services/SDService';
 
 @injectable()
@@ -30,6 +30,14 @@ export class LoraRouter extends Router {
 	public async refreshLoras(_: FastifyRequest, reply: FastifyReply) {
 		await this.sdService.refreshLoras();
 		return reply.send({ message: 'Loras refreshed successfully' });
+	}
+
+	@Route.PUT('/sd/loras/:id')
+	public async updateLora(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as UpdateLoraRequest;
+		const lora = await this.loraService.updateLora(id, body);
+		return lora;
 	}
 
 	@Route.DELETE('/sd/loras/:id')

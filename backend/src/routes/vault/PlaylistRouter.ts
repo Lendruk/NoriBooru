@@ -10,6 +10,13 @@ type PlaylistCreationRequest = {
 	items: number[];
 };
 
+type PlaylistUpdateRequest = {
+	name: string;
+	randomizeOrder: boolean;
+	timePerItem: number;
+	items: number[];
+};
+
 @injectable()
 export class PlaylistRouter extends Router {
 	public constructor(@inject(PlaylistService) private playlistService: PlaylistService) {
@@ -37,6 +44,20 @@ export class PlaylistRouter extends Router {
 			body.items
 		);
 		return reply.send(playlist);
+	}
+
+	@Route.PUT('/playlists/:id')
+	public async updatePlaylist(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as PlaylistUpdateRequest;
+		const playlist = await this.playlistService.updatePlaylist(
+			Number.parseInt(id),
+			body.name,
+			body.randomizeOrder,
+			body.timePerItem,
+			body.items
+		);
+		return playlist;
 	}
 
 	@Route.DELETE('/playlists/:id')

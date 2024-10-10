@@ -40,6 +40,8 @@ type EndpointNames =
 	| 'refreshSDLoras'
 	| 'checkVaultPath'
 	| 'importVault'
+	| 'sdLora'
+	| 'sdCheckpoint'
 	| 'mediaItems';
 
 type Endpoints = {
@@ -114,8 +116,16 @@ export const endpoints: Endpoints = {
 		url: `/sd/loras${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
+	sdLora: (options) => ({
+		url: `/sd/loras/${options?.id ? `${options.id}` : ''}`,
+		isGlobal: false
+	}),
 	sdCheckpoints: (options) => ({
 		url: `/sd/checkpoints${options?.params ? `?${options.params}` : ''}`,
+		isGlobal: false
+	}),
+	sdCheckpoint: (options) => ({
+		url: `/sd/checkpoints/${options?.id ? `${options.id}` : ''}`,
 		isGlobal: false
 	}),
 	sdPrompts: () => ({

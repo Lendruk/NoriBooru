@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { createReadStream, createWriteStream } from 'fs';
 import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
 import path from 'path';
 import { pipeline } from 'stream/promises';
-import { mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../../db/vault/schema';
+import { mediaItems, mediaItemsMetadata, TagSchema, tagsToMediaItems } from '../../db/vault/schema';
 import { Job } from '../../lib/Job';
 import { Route, Router } from '../../lib/Router';
 import { VaultDb } from '../../lib/VaultAPI';
@@ -144,6 +144,35 @@ export class MediaItemRouter extends Router {
 		}
 
 		return finalTags;
+	}
+
+	@Route.PUT('/media-items/:id/tags')
+	public async addTagsToMediaItems(request: FastifyRequest, reply: FastifyReply) {
+		const { id } = request.params as { id: string };
+		const parsedIdArray: string[] = JSON.parse(id);
+		const body = request.body as TagSchema | { tags: TagSchema[] };
+
+		try {
+			if (parsedIdArray && Array.isArray(parsedIdArray)) {
+				let tagsToInsert: TagSchema[] = [];
+				if ('tags' in body) {
+					tagsToInsert = body.tags;
+				} else {
+					tagsToInsert = [body];
+				}
+
+				for (const tag of tagsToInsert) {
+					for (const id of parsedIdArray) {
+						const parsedMediaId = Number.parseInt(id);
+						await this.mediaService.addTagToMediaItem(parsedMediaId, tag.id);
+					}
+				}
+			}
+		} catch (error) {
+			return reply.status(400).send({ message: error });
+		}
+
+		return reply.send({ message: 'Tag added successfully' });
 	}
 
 	@Route.GET('/media-items/review')
@@ -334,6 +363,28 @@ export class MediaItemRouter extends Router {
 		}
 
 		return reply.send({ message: 'Item archival status switched' });
+	}
+
+	@Route.DELETE('/media-items/:id/tags')
+	public async removeTagsFromMediaItems(request: FastifyRequest, reply: FastifyReply) {
+		const { id } = request.params as { id: string };
+		const body = request.body as TagSchema;
+		try {
+			if (id) {
+				await this.db
+					.delete(tagsToMediaItems)
+					.where(
+						and(
+							eq(tagsToMediaItems.tagId, body.id),
+							eq(tagsToMediaItems.mediaItemId, Number.parseInt(id))
+						)
+					);
+			}
+		} catch (error) {
+			return reply.status(400).send({ message: error });
+		}
+
+		return reply.send({ message: 'Tag removed successfully' });
 	}
 
 	private getExtensionForImage = (currentExtension: string): string => {

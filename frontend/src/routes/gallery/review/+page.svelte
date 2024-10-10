@@ -159,7 +159,9 @@
 			for (const pair of tagsToApply) {
 				const id = pair[0];
 				const tags = pair[1];
-				promises.push(HttpService.put(`/media-items/${JSON.stringify([id])}/tags`, { tags }));
+				promises.push(
+					HttpService.put(endpoints.mediaItemTags({ id: JSON.stringify([id]) }), { tags })
+				);
 			}
 		}
 

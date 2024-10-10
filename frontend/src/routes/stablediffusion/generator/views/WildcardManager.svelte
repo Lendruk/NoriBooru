@@ -64,10 +64,13 @@
 	}
 
 	async function updateWildcard() {
-		const updatedWildcard = await HttpService.put<SDWildcard>(`/sd/wildcards/${modalWildcardId}`, {
-			name: modalWildcardName,
-			values: modalWildcardValues
-		});
+		const updatedWildcard = await HttpService.put<SDWildcard>(
+			endpoints.wildCard({ id: modalWildcardId }),
+			{
+				name: modalWildcardName,
+				values: modalWildcardValues
+			}
+		);
 		const index = wildcards.findIndex((wildcard) => wildcard.id === modalWildcardId);
 		wildcards[index].name = updatedWildcard.name;
 		wildcards[index].values = updatedWildcard.values;

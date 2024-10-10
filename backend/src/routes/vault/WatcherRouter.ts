@@ -4,8 +4,15 @@ import { ActiveWatcherSchema } from '../../db/vault/schema';
 import { Route, Router } from '../../lib/Router';
 import { PageWatcherService } from '../../services/PageWatcherService';
 
-type CreateWatcherOptions = {
+type CreateWatcherRequestBody = {
 	url?: string;
+	description?: string;
+	requestInterval: number;
+	itemsPerRequest: number;
+	inactivityTimeout: number;
+};
+
+type UpdateWatcherRequestBody = {
 	description?: string;
 	requestInterval: number;
 	itemsPerRequest: number;
@@ -31,13 +38,27 @@ export class WatcherRouter extends Router {
 
 	@Route.POST('/watchers')
 	public async createWatcher(request: FastifyRequest, reply: FastifyReply) {
-		const body = request.body as CreateWatcherOptions;
+		const body = request.body as CreateWatcherRequestBody;
 
 		if (!body?.url) {
 			return reply.status(400).send('No url provided');
 		}
 		const watcher = await this.watcherService.createWatcher(
 			body.url,
+			body.description ?? '',
+			body.requestInterval,
+			body.itemsPerRequest,
+			body.inactivityTimeout
+		);
+		return watcher.toSchema();
+	}
+
+	@Route.PUT('/watchers/:id')
+	public async updateWatcher(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as UpdateWatcherRequestBody;
+		const watcher = await this.watcherService.updateWatcher(
+			id,
 			body.description ?? '',
 			body.requestInterval,
 			body.itemsPerRequest,
