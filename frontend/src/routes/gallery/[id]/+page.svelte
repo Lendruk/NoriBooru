@@ -76,7 +76,7 @@
 
 	async function attemptAutoTag() {
 		if (mediaItem) {
-			await HttpService.patch(`/media-items/${mediaItem.id}/auto-tag`);
+			await HttpService.patch(endpoints.autoTagMediaItem({ id: mediaItem.id }));
 			const updatedItem = await HttpService.get<{
 				mediaItem: MediaItemWithTags;
 				next?: string;

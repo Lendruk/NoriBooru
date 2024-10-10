@@ -811,4 +811,13 @@ export class MediaService extends VaultService {
 			}
 		}
 	}
+
+	public async toggleArchival(ids: number[], isArchived: boolean): Promise<void> {
+		for (const id of ids) {
+			await this.db
+				.update(mediaItems)
+				.set({ isArchived: isArchived ? 1 : 0 })
+				.where(eq(mediaItems.id, id));
+		}
+	}
 }

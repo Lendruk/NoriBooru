@@ -47,7 +47,9 @@
 		const { id } = images[currentIndex];
 		const isArchived = !images[currentIndex].isArchived;
 		images[currentIndex].isArchived = isArchived;
-		await HttpService.patch(`/media-items/${JSON.stringify([id])}`, { isArchived: isArchived });
+		await HttpService.patch(endpoints.mediaItem({ id: JSON.stringify([id]) }), {
+			isArchived: isArchived
+		});
 		images = images;
 		createToast(`Image ${isArchived ? 'archived' : 'un-archived'} successfully!`);
 	}

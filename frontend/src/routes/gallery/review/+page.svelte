@@ -145,7 +145,9 @@
 		let promises: Promise<unknown>[] = [];
 		if (itemsToArchive.length > 0) {
 			promises.push(
-				HttpService.patch(`/media-items/${JSON.stringify(itemsToArchive)}`, { isArchived: true })
+				HttpService.patch(endpoints.mediaItem({ id: JSON.stringify(itemsToArchive) }), {
+					isArchived: true
+				})
 			);
 		}
 

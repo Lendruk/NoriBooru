@@ -120,7 +120,7 @@
 	}
 
 	async function pauseWatcher(watcherId: string) {
-		await HttpService.patch(`/watchers/${watcherId}/pause`);
+		await HttpService.patch(endpoints.pauseWatcher({ id: watcherId }));
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === watcherId) {
 				watcher.status = 'paused';
@@ -131,7 +131,7 @@
 	}
 
 	async function resumeWatcher(watcherId: string) {
-		await HttpService.patch(`/watchers/${watcherId}/resume`);
+		await HttpService.patch(endpoints.resumeWatcher({ id: watcherId }));
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === watcherId) {
 				watcher.status = 'running';

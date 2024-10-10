@@ -262,7 +262,9 @@
 	}
 
 	async function toggleArchivedStatus(mediaItemIds: number[], isArchived: boolean) {
-		await HttpService.patch(`/media-items/${JSON.stringify(mediaItemIds)}`, { isArchived });
+		await HttpService.patch(endpoints.mediaItem({ id: JSON.stringify(mediaItemIds) }), {
+			isArchived
+		});
 		mediaItems = mediaItems.map((item) =>
 			mediaItemIds.includes(item.id) ? { ...item, isArchived } : item
 		);
@@ -347,7 +349,7 @@
 	}
 
 	async function addMediaItemToPlaylist(playlistId: number, mediaItemId: number) {
-		await HttpService.patch(`/playlists/${playlistId}/add-item`, { item: mediaItemId });
+		await HttpService.patch(endpoints.addPlaylistItem({ id: playlistId }), { item: mediaItemId });
 		playlists = playlists.map((playlist) => {
 			if (playlist.id === playlistId) {
 				playlist.items.push(mediaItemId);

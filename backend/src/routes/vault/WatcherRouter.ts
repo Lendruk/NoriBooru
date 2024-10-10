@@ -1,4 +1,4 @@
-import { FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { ActiveWatcherSchema } from '../../db/vault/schema';
 import { Route, Router } from '../../lib/Router';
@@ -25,5 +25,19 @@ export class WatcherRouter extends Router {
 	public async deleteWatcher(request: FastifyRequest) {
 		const { id } = request.params as { id: string };
 		await this.watcherService.deleteWatcher(id);
+	}
+
+	@Route.PATCH('/watchers/:id/resume')
+	public async resumeWathcer(request: FastifyRequest, reply: FastifyReply) {
+		const { id } = request.params as { id: string };
+		this.watcherService.resumeWatcher(id);
+		return reply.send({ message: 'Watcher resumed successfully' });
+	}
+
+	@Route.PATCH('/watchers/:id/pause')
+	public async pauseWatcher(request: FastifyRequest, reply: FastifyReply) {
+		const { id } = request.params as { id: string };
+		this.watcherService.pauseWatcher(id);
+		return reply.send({ message: 'Watcher paused successfully' });
 	}
 }

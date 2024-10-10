@@ -25,4 +25,11 @@ export class PlaylistRouter extends Router {
 		const { id } = request.params as { id: string };
 		await this.playlistService.deletePlaylist(Number.parseInt(id));
 	}
+
+	@Route.PATCH('/playlists/:id/add-item')
+	public async addPlaylistItem(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		const body = request.body as { item: number };
+		await this.playlistService.addMediaItemToPlaylist(Number.parseInt(id), body.item);
+	}
 }

@@ -4,7 +4,7 @@ import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
 import path from 'path';
-import { mediaItems, tagsToMediaItems } from '../../db/vault/schema';
+import { mediaItems, mediaItemsMetadata, tagsToMediaItems } from '../../db/vault/schema';
 import { Route, Router } from '../../lib/Router';
 import { VaultDb } from '../../lib/VaultAPI';
 import {
@@ -222,5 +222,41 @@ export class MediaItemRouter extends Router {
 			.header('Content-Type', `video/${videoPath.split('.').pop()!}`)
 			.header('accept-ranges', 'bytes')
 			.send(videoStream);
+	}
+
+	@Route.PATCH('/media-items/:id/auto-tag')
+	public async autoTagMediaItem(request: FastifyRequest, reply: FastifyReply) {
+		try {
+			const { id: rawId } = request.params as { id: string };
+			const id = Number.parseInt(rawId);
+			const metadata = await this.db.query.mediaItemsMetadata.findFirst({
+				where: eq(mediaItemsMetadata.mediaItem, id)
+			});
+			if (metadata?.positivePrompt) {
+				await this.mediaService.tagMediaItemFromPrompt([id], metadata.positivePrompt);
+			}
+		} catch (error) {
+			return reply.status(400).send({ message: error });
+		}
+
+		return reply.send({ message: 'Tag added successfully' });
+	}
+
+	@Route.PATCH('/media-items/:ids')
+	public async toggleArchival(request: FastifyRequest, reply: FastifyReply) {
+		const { ids } = request.params as { ids: string };
+		const parsedIdArray: string[] = JSON.parse(ids);
+		const { isArchived } = request.body as { isArchived: boolean };
+		try {
+			await this.mediaService.toggleArchival(
+				parsedIdArray.map((id) => Number.parseInt(id)),
+				isArchived
+			);
+		} catch (error) {
+			console.log(error);
+			return reply.status(400).send(error);
+		}
+
+		return reply.send({ message: 'Item archival status switched' });
 	}
 }

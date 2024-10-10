@@ -19,6 +19,10 @@ type EndpointNames =
 	| 'wildCard'
 	| 'vault'
 	| 'sdPrompt'
+	| 'pauseWatcher'
+	| 'resumeWatcher'
+	| 'autoTagMediaItem'
+	| 'addPlaylistItem'
 	| 'getMediaItems';
 
 type Endpoints = {
@@ -43,6 +47,10 @@ export const endpoints: Endpoints = {
 	}),
 	getWatchers: () => ({
 		url: '/watchers',
+		isGlobal: false
+	}),
+	addPlaylistItem: (options) => ({
+		url: `/playlists/${options?.id ? `${options.id}` : ''}/add-item`,
 		isGlobal: false
 	}),
 	playlists: () => ({
@@ -103,6 +111,18 @@ export const endpoints: Endpoints = {
 	}),
 	wildCard: (options) => ({
 		url: `/sd/wildcards/${options?.id ? `${options.id}` : ''}`,
+		isGlobal: false
+	}),
+	pauseWatcher: (options) => ({
+		url: `/watchers/${options?.id ? `${options.id}` : ''}/pause`,
+		isGlobal: false
+	}),
+	resumeWatcher: (options) => ({
+		url: `/watchers/${options?.id ? `${options.id}` : ''}/resume`,
+		isGlobal: false
+	}),
+	autoTagMediaItem: (options) => ({
+		url: `/media-items/${options?.id ? `${options.id}` : ''}/auto-tag`,
 		isGlobal: false
 	})
 };

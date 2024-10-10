@@ -113,4 +113,25 @@ export class PlaylistService extends VaultService {
 			.where(eq(playlists_mediaItems_table.playlistId, id));
 		await this.db.delete(playlists).where(eq(playlists.id, id));
 	}
+
+	public async addMediaItemToPlaylist(id: number, mediaItemId: number): Promise<void> {
+		// Get latest item index
+		const latestItemIndex = await this.db.query.playlists_mediaItems_table.findFirst({
+			where: eq(playlists_mediaItems_table.playlistId, id),
+			orderBy: playlists_mediaItems_table.itemIndex
+		});
+
+		if (!latestItemIndex) {
+			throw new Error('No items found in playlist');
+		}
+
+		await this.db
+			.insert(playlists_mediaItems_table)
+			.values({
+				playlistId: id,
+				mediaItemId,
+				itemIndex: latestItemIndex.itemIndex + 1
+			})
+			.returning();
+	}
 }

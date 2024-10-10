@@ -172,21 +172,9 @@ export class HttpService {
 		return this.request({ url, method: 'DELETE', isGlobalRequest: isGlobal, body });
 	}
 
-	public static async patch<T>(url: string, body?: Record<string, unknown>): Promise<T> {
-		const response = await fetch(`${HttpService.BASE_URL}${url}`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json',
-				vault: this.getVaultId() || ''
-			},
-			body: JSON.stringify(body ?? {})
-		});
-
-		if (response.status >= 400) {
-			throw new Error(`Error during request status: ${response.status}`);
-		}
-
-		return response.json() as Promise<T>;
+	public static async patch<T>(endpoint: ApiEndpoint, body?: Record<string, unknown>): Promise<T> {
+		const { url, isGlobal } = endpoint;
+		return this.request({ url, method: 'PATCH', isGlobalRequest: isGlobal, body });
 	}
 
 	public static buildGetImageThumbnailUrl(fileName: string, extension: string): string {
