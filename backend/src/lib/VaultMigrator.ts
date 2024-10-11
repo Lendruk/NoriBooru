@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import fs from 'fs/promises';
 import migrationFunctionMap from '../../migrations/vault';
+import { VaultConfigService } from '../services/VaultConfigService';
 import { VaultAPI, VaultDb } from './VaultAPI';
 
 export type MigrationFunction = (vault: VaultAPI) => Promise<void> | void;
@@ -52,26 +53,25 @@ export class VaultMigrator {
 	}
 
 	public static async migrateVault(vault: VaultAPI): Promise<void> {
-		const { version } = vault.config.getConfig();
+		const { version, name } = vault.getConfig();
 		let nextMigration = this.getNextMigration(version);
+		const configService = vault.get(VaultConfigService);
 
 		while (nextMigration) {
 			console.log(
-				`Migrating vault ${vault.config.name} (version ${vault.config.version}) to version ${nextMigration?.version}`
+				`Migrating vault ${name} (version ${version}) to version ${nextMigration?.version}`
 			);
 			try {
 				await this.applyMigration(vault, nextMigration);
-				nextMigration = this.getNextMigration(vault.config.version);
+				nextMigration = this.getNextMigration(version);
 			} catch (error) {
 				console.log(error);
-				console.log(
-					`Failed to migrate vault ${vault.config.name} to version ${nextMigration?.version}`
-				);
-				await vault.config.saveConfig();
+				console.log(`Failed to migrate vault ${name} to version ${nextMigration?.version}`);
+				await configService.saveConfig();
 				break;
 			}
 		}
-		await vault.config.saveConfig();
+		await configService.saveConfig();
 	}
 
 	private static executeSQLMigration(db: VaultDb, sqlInput: string): void {
@@ -90,7 +90,7 @@ export class VaultMigrator {
 			await migration.migrationFunction(vault);
 		}
 
-		vault.config.version = migration.version;
+		vault.getConfig().version = migration.version;
 	}
 
 	private static getNextMigration(currentVersion: Version): Migration | undefined {

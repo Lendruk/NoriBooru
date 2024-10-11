@@ -3,7 +3,7 @@ import multipart from '@fastify/multipart';
 import ws from '@fastify/websocket';
 import Database from 'better-sqlite3';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify, { FastifyInstance, FastifyReply, RouteOptions } from 'fastify';
 import { Container } from 'inversify';
 import { createConnection } from 'net';
 import vaultSchema from '../db/vault';
@@ -18,6 +18,7 @@ import { WildcardRouter } from '../routes/vault/sd/WildcardRouter';
 import { SettingsRouter } from '../routes/vault/SettingsRouter';
 import { TagRouter } from '../routes/vault/TagRouter';
 import { WatcherRouter } from '../routes/vault/WatcherRouter';
+import { WebsocketRouter } from '../routes/vault/WebsocketRouter';
 import { SpecieRouter } from '../routes/vault/world-building/species/SpecieRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
@@ -37,7 +38,7 @@ import { CurrencyService } from '../services/worldbuilding/CurrencyService';
 import { ItemService } from '../services/worldbuilding/ItemService';
 import { SpecieService } from '../services/worldbuilding/SpecieService';
 import { VaultConfig } from '../types/VaultConfig';
-import { RouteDefinition, RouteHandler, Router } from './Router';
+import { RouteDefinition, RouteHandler, Router, WebsocketHandler } from './Router';
 import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
 
@@ -46,18 +47,6 @@ export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 export class VaultAPI extends Container {
 	private port: number | undefined;
 	private fastifyApp!: FastifyInstance;
-
-	// For retro-compatibility with the old VaultInstance
-	// We will supply direct access to the services
-	// Removed as we port the routes to use the Router abstraction
-	public tags: TagService;
-	public media: MediaService;
-	public wildcards: WildcardService;
-	public websockets: WebsocketService;
-	public jobs: JobService;
-	public stableDiffusion: SDService;
-	public config: VaultConfigService;
-	public watchers: PageWatcherService;
 
 	public constructor(config: VaultConfig) {
 		super();
@@ -103,19 +92,15 @@ export class VaultAPI extends Container {
 		this.bind(Router).to(PromptRouter).inSingletonScope();
 		this.bind(Router).to(LoraRouter).inSingletonScope();
 		this.bind(Router).to(CivitaiRouter).inSingletonScope();
-
-		this.tags = this.get(TagService);
-		this.media = this.get(MediaService);
-		this.wildcards = this.get(WildcardService);
-		this.watchers = this.get(PageWatcherService);
-		this.websockets = this.get(WebsocketService);
-		this.jobs = this.get(JobService);
-		this.stableDiffusion = this.get(SDService);
-		this.config = this.get(VaultConfigService);
+		this.bind(Router).to(WebsocketRouter).inSingletonScope();
 	}
 
 	public getDb(): VaultDb {
 		return this.get('db');
+	}
+
+	public getConfig(): VaultConfig {
+		return this.get('config');
 	}
 
 	public getPort(): number | undefined {
@@ -124,7 +109,7 @@ export class VaultAPI extends Container {
 
 	public async init(): Promise<void> {
 		await VaultMigrator.migrateVault(this);
-		await this.watchers.init();
+		await this.get(PageWatcherService).init();
 		await this.listen();
 	}
 
@@ -136,17 +121,6 @@ export class VaultAPI extends Container {
 			bodyLimit: 100000000 // ~100mb
 		});
 
-		const routers = this.getAll<Router>(Router);
-		for (const router of routers) {
-			for (const route of Reflect.getMetadata('routes', router) as RouteDefinition[]) {
-				app.route({
-					handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
-					method: route.method,
-					url: route.url
-				});
-			}
-		}
-
 		app.register(ws);
 		app.register(cors);
 		app.register(multipart, {
@@ -155,6 +129,42 @@ export class VaultAPI extends Container {
 				fileSize: 107374182400
 			}
 		});
+
+		const routers = this.getAll<Router>(Router);
+		for (const router of routers) {
+			for (const route of Reflect.getMetadata('routes', router) as RouteDefinition[]) {
+				const handler: Partial<RouteOptions> = {};
+
+				if (route.type === 'HTTP') {
+					handler.handler = (router[route.handler as keyof Router] as RouteHandler).bind(router);
+				} else {
+					handler.handler = (_, reply: FastifyReply) => {
+						reply.status(501).send('Websocket endpoint only');
+					};
+					handler.wsHandler = (router[route.handler as keyof Router] as WebsocketHandler).bind(
+						router
+					);
+				}
+
+				if (route.type === 'WEBSOCKET') {
+					app.register(async () => {
+						app.route({
+							websocket: true,
+							handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
+							method: route.method,
+							url: route.url
+						});
+					});
+				} else {
+					app.route({
+						websocket: false,
+						handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
+						method: route.method,
+						url: route.url
+					});
+				}
+			}
+		}
 
 		console.log(
 			`Starting API for vault ${this.get<VaultConfig>('config').id} on port: ${this.port}`

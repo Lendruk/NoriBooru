@@ -41,6 +41,17 @@ export class HttpService {
 		return `${this.BASE_URL}:${port}${endpoint}`;
 	}
 
+	public static async refreshPort(): Promise<number> {
+		const endpoint = endpoints.getVaultPort({ id: this.getVaultId() });
+		const portResponse = await this.request<{ port: number }>({
+			url: endpoint.url,
+			isGlobalRequest: endpoint.isGlobal,
+			method: 'GET'
+		});
+		vaultStore.update((vault) => ({ ...vault!, port: portResponse.port }));
+		return portResponse.port;
+	}
+
 	private static async request<T>(options: {
 		url: string;
 		method: string;
@@ -64,15 +75,7 @@ export class HttpService {
 		}
 
 		if (!port) {
-			const endpoint = endpoints.getVaultPort({ id: this.getVaultId() });
-			const portResponse = await this.request<{ port: number }>({
-				url: endpoint.url,
-				isGlobalRequest: endpoint.isGlobal,
-				method: 'GET',
-				headers
-			});
-			port = portResponse.port;
-			vaultStore.update((vault) => ({ ...vault!, port: portResponse.port }));
+			port = await this.refreshPort();
 		}
 
 		const response = await fetch(this.buildUrl(url, port), {
