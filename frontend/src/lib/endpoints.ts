@@ -42,6 +42,7 @@ type EndpointNames =
 	| 'importVault'
 	| 'sdLora'
 	| 'sdCheckpoint'
+	| 'renameVault'
 	| 'mediaItems';
 
 type Endpoints = {
@@ -57,11 +58,11 @@ export const endpoints: Endpoints = {
 		isGlobal: true
 	}),
 	vault: (options) => ({
-		url: `/vault/${options?.id}`,
+		url: `/vaults/${options?.id}`,
 		isGlobal: true
 	}),
 	getVaultPort: (options) => ({
-		url: `/vault/${options?.id}/port`,
+		url: `/vaults/${options?.id}/port`,
 		isGlobal: true
 	}),
 	watchers: () => ({
@@ -213,11 +214,15 @@ export const endpoints: Endpoints = {
 		isGlobal: false
 	}),
 	checkVaultPath: () => ({
-		url: `/vault/check-path`,
+		url: `/vaults/check-path`,
 		isGlobal: true
 	}),
 	importVault: () => ({
-		url: `/vault/import`,
+		url: `/vaults/import`,
 		isGlobal: true
+	}),
+	renameVault: () => ({
+		url: `/settings/rename`,
+		isGlobal: false
 	})
 };

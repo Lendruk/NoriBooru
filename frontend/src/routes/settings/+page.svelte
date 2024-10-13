@@ -31,7 +31,7 @@
 			return;
 		}
 
-		await HttpService.put(endpoints.vaults(), {
+		await HttpService.put(endpoints.renameVault(), {
 			name: vaultName
 		});
 		VaultService.setVault({ ...$vaultStore!, name: vaultName });

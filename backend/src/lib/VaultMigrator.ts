@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import fs from 'fs/promises';
+import { injectable } from 'inversify';
 import migrationFunctionMap from '../../migrations/vault';
 import { VaultConfigService } from '../services/VaultConfigService';
 import { VaultAPI, VaultDb } from './VaultAPI';
@@ -14,11 +15,12 @@ export type Migration = {
 
 export type Version = `${number}.${number}.${number}`;
 
+@injectable()
 export class VaultMigrator {
-	private static availableMigrations: Migration[] = [];
-	private static migrationDir = `${process.cwd()}/migrations/vault`;
+	private availableMigrations: Migration[] = [];
+	private migrationDir = `${process.cwd()}/migrations/vault`;
 
-	public static async init(): Promise<void> {
+	public async init(): Promise<void> {
 		const versions = await fs.readdir(this.migrationDir);
 		for (const version of versions) {
 			// We dont want the init.sql file
@@ -52,7 +54,7 @@ export class VaultMigrator {
 		}
 	}
 
-	public static async migrateVault(vault: VaultAPI): Promise<void> {
+	public async migrateVault(vault: VaultAPI): Promise<void> {
 		const { version, name } = vault.getConfig();
 		let nextMigration = this.getNextMigration(version);
 		const configService = vault.get(VaultConfigService);
@@ -63,7 +65,7 @@ export class VaultMigrator {
 			);
 			try {
 				await this.applyMigration(vault, nextMigration);
-				nextMigration = this.getNextMigration(version);
+				nextMigration = this.getNextMigration(nextMigration.version);
 			} catch (error) {
 				console.log(error);
 				console.log(`Failed to migrate vault ${name} to version ${nextMigration?.version}`);
@@ -74,14 +76,14 @@ export class VaultMigrator {
 		await configService.saveConfig();
 	}
 
-	private static executeSQLMigration(db: VaultDb, sqlInput: string): void {
+	private executeSQLMigration(db: VaultDb, sqlInput: string): void {
 		const splitStatements = sqlInput.split('--- StatementBreak');
 		for (const statement of splitStatements) {
 			db.run(sql.raw(`${statement}`));
 		}
 	}
 
-	private static async applyMigration(vault: VaultAPI, migration: Migration): Promise<void> {
+	private async applyMigration(vault: VaultAPI, migration: Migration): Promise<void> {
 		if (migration.sql) {
 			this.executeSQLMigration(vault.getDb(), migration.sql);
 		}
@@ -93,7 +95,7 @@ export class VaultMigrator {
 		vault.getConfig().version = migration.version;
 	}
 
-	private static getNextMigration(currentVersion: Version): Migration | undefined {
+	private getNextMigration(currentVersion: Version): Migration | undefined {
 		const nextMigration = this.availableMigrations.find(
 			(migration) => migration.version > currentVersion
 		);

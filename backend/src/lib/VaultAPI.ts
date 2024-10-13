@@ -1,10 +1,5 @@
-import cors from '@fastify/cors';
-import multipart from '@fastify/multipart';
-import ws from '@fastify/websocket';
 import Database from 'better-sqlite3';
 import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
-import Fastify, { FastifyInstance, FastifyReply, RouteOptions } from 'fastify';
-import { Container } from 'inversify';
 import { createConnection } from 'net';
 import vaultSchema from '../db/vault';
 import { MediaItemRouter } from '../routes/vault/MediaItemRouter';
@@ -38,16 +33,14 @@ import { CurrencyService } from '../services/worldbuilding/CurrencyService';
 import { ItemService } from '../services/worldbuilding/ItemService';
 import { SpecieService } from '../services/worldbuilding/SpecieService';
 import { VaultConfig } from '../types/VaultConfig';
-import { RouteDefinition, RouteHandler, Router, WebsocketHandler } from './Router';
+import { IoCAPI } from './IoCAPI';
+import { Router } from './Router';
 import { VaultMigrator } from './VaultMigrator';
 import { PageParserFactory } from './watchers/PageParserFactory';
 
 export type VaultDb = BetterSQLite3Database<typeof vaultSchema>;
 
-export class VaultAPI extends Container {
-	private port: number | undefined;
-	private fastifyApp!: FastifyInstance;
-
+export class VaultAPI extends IoCAPI {
 	public constructor(config: VaultConfig) {
 		super();
 
@@ -56,6 +49,9 @@ export class VaultAPI extends Container {
 		const db = drizzle(newDb, { schema: vaultSchema });
 		this.bind('db').toConstantValue(db);
 		this.bind('config').toConstantValue(config);
+
+		// Core
+		this.bind(VaultMigrator).toSelf().inSingletonScope();
 
 		// Services
 		this.bind(VaultConfigService).toSelf().inSingletonScope();
@@ -108,70 +104,11 @@ export class VaultAPI extends Container {
 	}
 
 	public async init(): Promise<void> {
-		await VaultMigrator.migrateVault(this);
+		await this.get(VaultMigrator).init();
+		await this.get(VaultMigrator).migrateVault(this);
 		await this.get(PageWatcherService).init();
-		await this.listen();
-	}
-
-	private async listen(): Promise<void> {
 		this.port = await this.findOpenPort();
-
-		const app = Fastify({
-			logger: true,
-			bodyLimit: 100000000 // ~100mb
-		});
-
-		app.register(ws);
-		app.register(cors);
-		app.register(multipart, {
-			limits: {
-				files: 100000,
-				fileSize: 107374182400
-			}
-		});
-
-		const routers = this.getAll<Router>(Router);
-		for (const router of routers) {
-			for (const route of Reflect.getMetadata('routes', router) as RouteDefinition[]) {
-				const handler: Partial<RouteOptions> = {};
-
-				if (route.type === 'HTTP') {
-					handler.handler = (router[route.handler as keyof Router] as RouteHandler).bind(router);
-				} else {
-					handler.handler = (_, reply: FastifyReply) => {
-						reply.status(501).send('Websocket endpoint only');
-					};
-					handler.wsHandler = (router[route.handler as keyof Router] as WebsocketHandler).bind(
-						router
-					);
-				}
-
-				if (route.type === 'WEBSOCKET') {
-					app.register(async () => {
-						app.route({
-							websocket: true,
-							handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
-							method: route.method,
-							url: route.url
-						});
-					});
-				} else {
-					app.route({
-						websocket: false,
-						handler: (router[route.handler as keyof Router] as RouteHandler).bind(router),
-						method: route.method,
-						url: route.url
-					});
-				}
-			}
-		}
-
-		console.log(
-			`Starting API for vault ${this.get<VaultConfig>('config').id} on port: ${this.port}`
-		);
-		app.listen({ port: this.port, host: '0.0.0.0' }, (err) => {
-			if (err) throw err;
-		});
+		await this.listen();
 	}
 
 	private async findOpenPort(): Promise<number> {
