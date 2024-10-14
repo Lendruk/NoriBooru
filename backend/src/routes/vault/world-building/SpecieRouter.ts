@@ -1,9 +1,9 @@
 import { FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { z } from 'zod';
-import { Route, Router } from '../../../../lib/Router';
-import { uuidSchema } from '../../../../schemas/paramIdSchema';
-import { SpecieService } from '../../../../services/worldbuilding/SpecieService';
+import { Route, Router } from '../../../lib/Router';
+import { uuidSchema } from '../../../schemas/paramIdSchema';
+import { SpecieService } from '../../../services/worldbuilding/SpecieService';
 
 @injectable()
 export class SpecieRouter extends Router {

@@ -8,7 +8,7 @@ import {
 	WorldItemToCurrencySchema,
 	WorldItemToMediaItemSchema
 } from '../../db/vault/worldBuildingSchema';
-import { VaultDb } from '../../lib/VaultInstance';
+import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 import { ValueModel, WorldItem } from '../../lib/models/worldbuilding/WorldItem';
 import { MediaService } from '../MediaService';

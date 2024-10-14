@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { worldCharacters, WorldCharacterSchema } from '../../db/vault/worldBuildingSchema';
-import { VaultDb } from '../../lib/VaultInstance';
+import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 import { WorldCharacter } from '../../lib/models/worldbuilding/WorldCharacter';
 import { CultureService } from './CultureService';

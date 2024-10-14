@@ -14,7 +14,9 @@ import { SettingsRouter } from '../routes/vault/SettingsRouter';
 import { TagRouter } from '../routes/vault/TagRouter';
 import { WatcherRouter } from '../routes/vault/WatcherRouter';
 import { WebsocketRouter } from '../routes/vault/WebsocketRouter';
-import { SpecieRouter } from '../routes/vault/world-building/species/SpecieRouter';
+import { CultureRouter } from '../routes/vault/world-building/CultureRouter';
+import { CurrencyRouter } from '../routes/vault/world-building/CurrencyRouter';
+import { SpecieRouter } from '../routes/vault/world-building/SpecieRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';
@@ -75,8 +77,11 @@ export class VaultAPI extends IoCAPI {
 		this.bind(SpecieService).toSelf().inSingletonScope();
 		this.bind(ItemService).toSelf().inSingletonScope();
 
-		// Routers
 		this.bind(Router).to(SpecieRouter).inSingletonScope();
+		this.bind(Router).to(CultureRouter).inSingletonScope();
+		this.bind(Router).to(CurrencyRouter).inSingletonScope();
+
+		// Routers
 		this.bind(Router).to(TagRouter).inSingletonScope();
 		this.bind(Router).to(MediaItemRouter).inSingletonScope();
 		this.bind(Router).to(WatcherRouter).inSingletonScope();

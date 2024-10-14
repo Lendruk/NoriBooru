@@ -2,9 +2,9 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { worldCultures, WorldCultureSchema } from '../../db/vault/worldBuildingSchema';
-import { VaultDb } from '../../lib/VaultInstance';
-import { VaultService } from '../../lib/VaultService';
 import { WorldCulture } from '../../lib/models/worldbuilding/WorldCulture';
+import { VaultDb } from '../../lib/VaultAPI';
+import { VaultService } from '../../lib/VaultService';
 
 @injectable()
 export class CultureService extends VaultService {
