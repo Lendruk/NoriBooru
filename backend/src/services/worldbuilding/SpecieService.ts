@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { worldSpecies, WorldSpecieSchema } from '../../db/vault/worldBuildingSchema';
 import { WorldSpecie } from '../../lib/models/worldbuilding/WorldSpecie';
-import { VaultDb } from '../../lib/VaultInstance';
+import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 
 @injectable()
