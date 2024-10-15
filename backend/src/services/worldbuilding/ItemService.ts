@@ -1,7 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
+import { randomUUID } from 'node:crypto';
 import { MediaItemSchema } from '../../db/vault/schema';
 import {
+	worldItems,
 	worldItems_to_mediaItems,
 	worldItems_to_worldCurrencies,
 	WorldItemSchema,
@@ -31,6 +33,104 @@ export class ItemService extends VaultService {
 			mappedItems.push(await this.mapDbSchema(rawItem));
 		}
 		return mappedItems;
+	}
+
+	public async createItem(
+		name: string,
+		description: string,
+		mediaItems: number[],
+		values: { currencyId: string; amount: number }[]
+	): Promise<WorldItem> {
+		const item = await this.db.transaction(async (transaction) => {
+			try {
+				const [newItem] = await transaction
+					.insert(worldItems)
+					.values({
+						createdAt: Date.now(),
+						updatedAt: Date.now(),
+						id: randomUUID(),
+						name,
+						description
+					})
+					.returning();
+
+				for (const mediaItemId of mediaItems) {
+					await transaction.insert(worldItems_to_mediaItems).values({
+						worldItemId: newItem.id,
+						mediaItemId
+					});
+				}
+
+				for (const value of values) {
+					await transaction.insert(worldItems_to_worldCurrencies).values({
+						worldItemId: newItem.id,
+						worldCurrencyId: value.currencyId,
+						amount: value.amount
+					});
+				}
+
+				return newItem;
+			} catch {
+				transaction.rollback();
+			}
+		});
+
+		if (!item) {
+			throw new Error('There was an error during the item creation');
+		}
+
+		return await this.mapDbSchema(item);
+	}
+
+	public async updateItem(
+		id: string,
+		name: string,
+		description: string,
+		mediaItems: number[],
+		values: { currencyId: string; amount: number }[]
+	): Promise<WorldItem> {
+		const item = await this.db.transaction(async (transaction) => {
+			try {
+				const [newItem] = await transaction
+					.update(worldItems)
+					.set({
+						updatedAt: Date.now(),
+						name,
+						description
+					})
+					.where(eq(worldItems.id, id))
+					.returning();
+
+				for (const mediaItemId of mediaItems) {
+					await transaction.insert(worldItems_to_mediaItems).values({
+						worldItemId: newItem.id,
+						mediaItemId
+					});
+				}
+
+				for (const value of values) {
+					await transaction.insert(worldItems_to_worldCurrencies).values({
+						worldItemId: newItem.id,
+						worldCurrencyId: value.currencyId,
+						amount: value.amount
+					});
+				}
+
+				return newItem;
+			} catch {
+				transaction.rollback();
+			}
+		});
+
+		if (!item) {
+			throw new Error('There was an error during the item update');
+		}
+
+		return await this.mapDbSchema(item);
+	}
+
+	public async deleteItem(id: string): Promise<void> {
+		await this.db.delete(worldItems).where(eq(worldItems.id, id));
 	}
 
 	private async mapDbSchema(rawItem: WorldItemSchema): Promise<WorldItem> {

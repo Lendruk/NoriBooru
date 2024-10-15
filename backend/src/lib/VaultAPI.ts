@@ -17,6 +17,7 @@ import { WebsocketRouter } from '../routes/vault/WebsocketRouter';
 import { CultureRouter } from '../routes/vault/world-building/CultureRouter';
 import { CurrencyRouter } from '../routes/vault/world-building/CurrencyRouter';
 import { SpecieRouter } from '../routes/vault/world-building/SpecieRouter';
+import { WorldItemRouter } from '../routes/vault/world-building/WorldItemRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';
@@ -94,6 +95,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(Router).to(LoraRouter).inSingletonScope();
 		this.bind(Router).to(CivitaiRouter).inSingletonScope();
 		this.bind(Router).to(WebsocketRouter).inSingletonScope();
+		this.bind(Router).to(WorldItemRouter).inSingletonScope();
 	}
 
 	public getDb(): VaultDb {
