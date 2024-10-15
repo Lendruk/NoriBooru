@@ -435,7 +435,7 @@
 	{/if}
 	<div class="flex flex-1 relative">
 		{#if isFilterSelectionVisible}
-			<div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
+			<div class="bg-zinc-900 rounded-lg p-2 mr-2 flex flex-col w-[40%]">
 				<div class="text-3xl mb-4 sticky">Filters</div>
 				<div class="flex flex-col mb-2">
 					<div class="mb-2 flex justify-between">

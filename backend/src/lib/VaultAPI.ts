@@ -31,6 +31,7 @@ import { SDService } from '../services/SDService';
 import { TagService } from '../services/TagService';
 import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
+import { ArticleService } from '../services/worldbuilding/ArticleService';
 import { CharacterService } from '../services/worldbuilding/CharacterService';
 import { CultureService } from '../services/worldbuilding/CultureService';
 import { CurrencyService } from '../services/worldbuilding/CurrencyService';
@@ -78,17 +79,19 @@ export class VaultAPI extends IoCAPI {
 		this.bind(CurrencyService).toSelf().inSingletonScope();
 		this.bind(SpecieService).toSelf().inSingletonScope();
 		this.bind(ItemService).toSelf().inSingletonScope();
+		this.bind(ArticleService).toSelf().inSingletonScope();
 
 		this.bind(Router).to(SpecieRouter).inSingletonScope();
 		this.bind(Router).to(CultureRouter).inSingletonScope();
 		this.bind(Router).to(CurrencyRouter).inSingletonScope();
+		this.bind(Router).to(WorldItemRouter).inSingletonScope();
+		this.bind(Router).to(ArticleRouter).inSingletonScope();
 
 		// Routers
 		this.bind(Router).to(TagRouter).inSingletonScope();
 		this.bind(Router).to(MediaItemRouter).inSingletonScope();
 		this.bind(Router).to(WatcherRouter).inSingletonScope();
 		this.bind(Router).to(PlaylistRouter).inSingletonScope();
-		this.bind(Router).to(ArticleRouter).inSingletonScope();
 		this.bind(Router).to(SettingsRouter).inSingletonScope();
 		this.bind(Router).to(SDCheckpointRouter).inSingletonScope();
 		this.bind(Router).to(SDRouter).inSingletonScope();
@@ -97,7 +100,6 @@ export class VaultAPI extends IoCAPI {
 		this.bind(Router).to(LoraRouter).inSingletonScope();
 		this.bind(Router).to(CivitaiRouter).inSingletonScope();
 		this.bind(Router).to(WebsocketRouter).inSingletonScope();
-		this.bind(Router).to(WorldItemRouter).inSingletonScope();
 	}
 
 	public getDb(): VaultDb {
