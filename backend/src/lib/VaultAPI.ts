@@ -14,6 +14,7 @@ import { SettingsRouter } from '../routes/vault/SettingsRouter';
 import { TagRouter } from '../routes/vault/TagRouter';
 import { WatcherRouter } from '../routes/vault/WatcherRouter';
 import { WebsocketRouter } from '../routes/vault/WebsocketRouter';
+import { ArticleRouter } from '../routes/vault/world-building/ArticleRouter';
 import { CultureRouter } from '../routes/vault/world-building/CultureRouter';
 import { CurrencyRouter } from '../routes/vault/world-building/CurrencyRouter';
 import { SpecieRouter } from '../routes/vault/world-building/SpecieRouter';
@@ -87,6 +88,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(Router).to(MediaItemRouter).inSingletonScope();
 		this.bind(Router).to(WatcherRouter).inSingletonScope();
 		this.bind(Router).to(PlaylistRouter).inSingletonScope();
+		this.bind(Router).to(ArticleRouter).inSingletonScope();
 		this.bind(Router).to(SettingsRouter).inSingletonScope();
 		this.bind(Router).to(SDCheckpointRouter).inSingletonScope();
 		this.bind(Router).to(SDRouter).inSingletonScope();

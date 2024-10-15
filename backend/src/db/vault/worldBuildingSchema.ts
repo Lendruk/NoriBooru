@@ -19,6 +19,8 @@ export const worldArticles = sqliteTable('world_articles', {
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldArticleSchema = InferSelectModel<typeof worldArticles>;
+
 export const worldSpecies = sqliteTable('world_species', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
@@ -88,7 +90,7 @@ export const worldArticles_to_tags = sqliteTable(
 			.references(() => worldArticles.id, {
 				onDelete: 'cascade'
 			}),
-		tagId: text('tag_id')
+		tagId: integer('tag_id')
 			.notNull()
 			.references(() => tags.id, { onDelete: 'cascade' })
 	},
