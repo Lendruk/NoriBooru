@@ -1,9 +1,8 @@
 import { WebSocket } from '@fastify/websocket';
-import { FastifyReply, HTTPMethods } from 'fastify';
+import { FastifyReply, FastifyRequest, HTTPMethods } from 'fastify';
 import { injectable } from 'inversify';
-import { VaultRequest } from '../types/Request';
 
-export type RouteHandler = (request: VaultRequest, reply: FastifyReply) => Promise<void>;
+export type RouteHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 
 export type WebsocketHandler = (connection: WebSocket) => Promise<void> | void;
 
