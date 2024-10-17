@@ -19,6 +19,7 @@ import { CultureRouter } from '../routes/vault/world-building/CultureRouter';
 import { CurrencyRouter } from '../routes/vault/world-building/CurrencyRouter';
 import { SpecieRouter } from '../routes/vault/world-building/SpecieRouter';
 import { WorldItemRouter } from '../routes/vault/world-building/WorldItemRouter';
+import { WorldRouter } from '../routes/vault/world-building/WorldRouter';
 import { JobService } from '../services/JobService';
 import { MediaService } from '../services/MediaService';
 import { PageWatcherService } from '../services/PageWatcherService';
@@ -37,6 +38,7 @@ import { CultureService } from '../services/worldbuilding/CultureService';
 import { CurrencyService } from '../services/worldbuilding/CurrencyService';
 import { ItemService } from '../services/worldbuilding/ItemService';
 import { SpecieService } from '../services/worldbuilding/SpecieService';
+import { WorldService } from '../services/worldbuilding/WorldService';
 import { VaultConfig } from '../types/VaultConfig';
 import { IoCAPI } from './IoCAPI';
 import { Router } from './Router';
@@ -80,12 +82,14 @@ export class VaultAPI extends IoCAPI {
 		this.bind(SpecieService).toSelf().inSingletonScope();
 		this.bind(ItemService).toSelf().inSingletonScope();
 		this.bind(ArticleService).toSelf().inSingletonScope();
+		this.bind(WorldService).toSelf().inSingletonScope();
 
 		this.bind(Router).to(SpecieRouter).inSingletonScope();
 		this.bind(Router).to(CultureRouter).inSingletonScope();
 		this.bind(Router).to(CurrencyRouter).inSingletonScope();
 		this.bind(Router).to(WorldItemRouter).inSingletonScope();
 		this.bind(Router).to(ArticleRouter).inSingletonScope();
+		this.bind(Router).to(WorldRouter).inSingletonScope();
 
 		// Routers
 		this.bind(Router).to(TagRouter).inSingletonScope();

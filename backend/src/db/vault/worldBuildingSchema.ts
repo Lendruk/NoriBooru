@@ -11,6 +11,8 @@ export const world = sqliteTable('world', {
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldSchema = InferSelectModel<typeof world>;
+
 // Base Tables
 export const worldArticles = sqliteTable('world_articles', {
 	id: text('id').primaryKey(),
