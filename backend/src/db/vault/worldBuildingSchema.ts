@@ -79,11 +79,50 @@ export type WorldCurrencySchema = InferSelectModel<typeof worldCurrencies>;
 export const worldMaps = sqliteTable('world_maps', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
+	description: text('description'),
 	createdAt: integer('created_at').notNull(),
 	updatedAt: integer('updated_at').notNull()
 });
 
+export type WorldMapSchema = InferSelectModel<typeof worldMaps>;
+
+export const worldLocations = sqliteTable('world_locations', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	locationType: text('location_type').notNull(),
+	sourceId: text('source_id'),
+	createdAt: integer('created_at').notNull(),
+	updatedAt: integer('updated_at').notNull()
+});
+
+export type WorldLocationSchema = InferSelectModel<typeof worldLocations>;
+
+export const mapLayers = sqliteTable('map_layers', {
+	id: text('id').primaryKey(),
+	name: text('string'),
+	mapId: text('id').references(() => worldMaps.id, { onDelete: 'cascade' })
+});
+
+export type MapLayerSchema = InferSelectModel<typeof mapLayers>;
+
 // Relation tables
+export const worldLocations_to_worldMaps = sqliteTable('worldLocations_to_worldMaps', {
+	locationId: text('location_id')
+		.notNull()
+		.references(() => worldLocations.id, { onDelete: 'cascade' }),
+	mapId: text('map_id')
+		.notNull()
+		.references(() => worldMaps.id, { onDelete: 'cascade' }),
+	mapLayer: text('map_layer')
+		.notNull()
+		.references(() => mapLayers.id, { onDelete: 'cascade' }),
+	x: integer('x').notNull(),
+	y: integer('y').notNull()
+});
+
+export type WorldLocationToMapSchema = InferSelectModel<typeof worldLocations_to_worldMaps>;
+
 export const worldArticles_to_tags = sqliteTable(
 	'world_articles_to_tags',
 	{

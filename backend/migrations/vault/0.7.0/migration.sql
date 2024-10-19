@@ -59,13 +59,42 @@ CREATE TABLE IF NOT EXISTS `world_currencies` (
 CREATE TABLE IF NOT EXISTS `world_maps` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
+	`description` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --- StatementBreak
+CREATE TABLE IF NOT EXISTS `world_locations` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text,
+	`description` text,
+	`location_type` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `map_layers` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text,
+	`map_id` text NOT NULL,
+	FOREIGN KEY (`map_id`) REFERENCES `world_maps`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--- StatementBreak
+CREATE TABLE IF NOT EXISTS `worldLocations_to_worldMaps` (
+	`location_id` text NOT NULL,
+	`map_id` text NOT NULL,
+	`map_layer` text NOT NULL,
+	`x` integer NOT NULL,
+	`y` integer NOT NULL,
+	PRIMARY KEY(`location_id`, `map_id`, `map_layer`),
+	FOREIGN KEY (`location_id`) REFERENCES `world_locations`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`map_id`) REFERENCES `world_maps`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`map_layer`) REFERENCES `map_layers`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--- StatementBreak
 CREATE TABLE IF NOT EXISTS `world_articles_to_tags` (
 	`world_article_id` text NOT NULL,
-	`tag_id` text NOT NULL,
+	`tag_id` integer NOT NULL,
 	PRIMARY KEY(`world_article_id`, `tag_id`),
 	FOREIGN KEY (`world_article_id`) REFERENCES `world_articles`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade
