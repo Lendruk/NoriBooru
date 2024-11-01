@@ -1,31 +1,36 @@
 <script lang="ts">
 	import { HttpService } from '$lib/services/HttpService';
-	import { Application, Assets } from 'pixi.js';
+	import { Application, Assets, Sprite } from 'pixi.js';
 	import ContextMenu from './Components/ContextMenu.svelte';
-	import { DragableSprite } from './Components/DragableSprite';
-	import { LocationPin } from './Components/LocationPin';
-	import { ZoomableContainer } from './Components/ZoomableContainer';
+	import { DraggableContainer } from './Components/DraggableContainer';
+	import { LocationPinFactory } from './Components/LocationPin';
 
 	const app = new Application();
 
 	let pixiContainer: HTMLDivElement | undefined = $state(undefined);
-	let zoomableContainer: ZoomableContainer = $state(new ZoomableContainer());
-	let background: DragableSprite = $state(new DragableSprite());
+	let draggableContainer: DraggableContainer = $state(new DraggableContainer());
+	let background: Sprite = $state(new Sprite());
 	let isContextMenuOpen = $state(false);
 
 	let contextMenuTop = $state(0);
 	let contextMenuLeft = $state(0);
 
-	let items: LocationPin[] = $state([]);
+	let items: Sprite[] = $state([]);
 
-	function onNewPinClick() {
-		const locationPin = new LocationPin();
-		locationPin.x = contextMenuLeft - 10;
-		locationPin.y = contextMenuTop;
-		console.log(locationPin);
+	async function onNewPinClick() {
+		const locationPin = await LocationPinFactory.createPin(contextMenuLeft - 10, contextMenuTop);
+		console.log('new pin');
+		console.log('container pos');
+		console.log(draggableContainer.x);
+		console.log(draggableContainer.y);
+		console.log('context location');
+		console.log(contextMenuLeft - 10);
+		console.log(contextMenuTop);
+		console.log('pin location');
+		console.log(locationPin.x);
+		console.log(locationPin.y);
 		items.push(locationPin);
-		console.log('test');
-		zoomableContainer.addChild(locationPin);
+		draggableContainer.addChild(locationPin);
 	}
 
 	async function init() {
@@ -35,14 +40,14 @@
 		const texture = await Assets.load(
 			HttpService.buildGetImageUrl('7d252fc6-e8c7-4da8-9903-6aaa8452d8a6', 'png')
 		);
-		background = new DragableSprite(texture);
+		background = new Sprite(texture);
 		background.x = 0;
 		background.y = 0;
 
-		zoomableContainer.interactive = true;
-		zoomableContainer.addChild(background);
+		draggableContainer.interactive = true;
+		draggableContainer.addChild(background);
 
-		zoomableContainer.on('rightclick', (event) => {
+		draggableContainer.on('rightclick', (event) => {
 			contextMenuTop = event.y;
 			contextMenuLeft = event.x + 10;
 			isContextMenuOpen = true;
@@ -52,7 +57,7 @@
 			event.preventDefault();
 		});
 
-		app.stage.addChild(zoomableContainer);
+		app.stage.addChild(draggableContainer);
 	}
 	$effect(() => {
 		init();
