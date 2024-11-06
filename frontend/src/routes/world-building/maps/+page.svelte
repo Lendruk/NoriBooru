@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { HttpService } from '$lib/services/HttpService';
+	import type { Vector2 } from '$lib/Vector2';
 	import { Application, Assets, Sprite } from 'pixi.js';
 	import ContextMenu from './Components/ContextMenu.svelte';
 	import { DraggableContainer } from './Components/DraggableContainer';
 	import { LocationPinFactory } from './Components/LocationPin';
-
 	const app = new Application();
 
 	let pixiContainer: HTMLDivElement | undefined = $state(undefined);
@@ -12,23 +12,16 @@
 	let background: Sprite = $state(new Sprite());
 	let isContextMenuOpen = $state(false);
 
-	let contextMenuTop = $state(0);
-	let contextMenuLeft = $state(0);
+	let contextMenuLocalPosition = $state<Vector2>({ x: 0, y: 0 });
+	let contextMenuGlobalPosition = $state<Vector2>({ x: 0, y: 0 });
 
 	let items: Sprite[] = $state([]);
 
 	async function onNewPinClick() {
-		const locationPin = await LocationPinFactory.createPin(contextMenuLeft - 10, contextMenuTop);
-		console.log('new pin');
-		console.log('container pos');
-		console.log(draggableContainer.x);
-		console.log(draggableContainer.y);
-		console.log('context location');
-		console.log(contextMenuLeft - 10);
-		console.log(contextMenuTop);
-		console.log('pin location');
-		console.log(locationPin.x);
-		console.log(locationPin.y);
+		const locationPin = await LocationPinFactory.createPin(
+			contextMenuLocalPosition.x,
+			contextMenuLocalPosition.y
+		);
 		items.push(locationPin);
 		draggableContainer.addChild(locationPin);
 	}
@@ -41,15 +34,19 @@
 			HttpService.buildGetImageUrl('7d252fc6-e8c7-4da8-9903-6aaa8452d8a6', 'png')
 		);
 		background = new Sprite(texture);
+		background.interactive = true;
 		background.x = 0;
 		background.y = 0;
 
 		draggableContainer.interactive = true;
 		draggableContainer.addChild(background);
 
-		draggableContainer.on('rightclick', (event) => {
-			contextMenuTop = event.y;
-			contextMenuLeft = event.x + 10;
+		background.on('rightclick', (event) => {
+			const localPosition = background.toLocal(event.data.global);
+			contextMenuGlobalPosition.y = event.y;
+			contextMenuGlobalPosition.x = event.x + 10;
+			contextMenuLocalPosition.x = localPosition.x;
+			contextMenuLocalPosition.y = localPosition.y;
 			isContextMenuOpen = true;
 		});
 
@@ -68,8 +65,8 @@
 	<div class="flex flex-1" bind:this={pixiContainer}></div>
 	<ContextMenu
 		{onNewPinClick}
-		bind:top={contextMenuTop}
-		bind:left={contextMenuLeft}
+		bind:top={contextMenuGlobalPosition.y}
+		bind:left={contextMenuGlobalPosition.x}
 		bind:isContextMenuOpen
 	/>
 </div>
