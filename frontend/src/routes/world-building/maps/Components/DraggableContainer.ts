@@ -24,6 +24,7 @@ export class DraggableContainer extends ZoomableContainer {
 		this.dragOffset = event.getLocalPosition(this.parent);
 		this.dragOffset.x -= this.x;
 		this.dragOffset.y -= this.y;
+		event.stopPropagation();
 	}
 
 	private onDragMove(event: FederatedPointerEvent) {
@@ -32,6 +33,7 @@ export class DraggableContainer extends ZoomableContainer {
 			const newPosition = event.getLocalPosition(this.parent);
 			this.x = newPosition.x - this.dragOffset.x;
 			this.y = newPosition.y - this.dragOffset.y;
+			event.stopPropagation();
 		}
 	}
 
