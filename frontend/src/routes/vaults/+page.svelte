@@ -12,6 +12,7 @@
 	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
+	import type { World } from '$lib/types/Worldbuilding/World';
 	import { runningJobs } from '../../store';
 
 	let vaults: Vault[] = $state([]);
@@ -120,8 +121,14 @@
 		}
 	}
 
-	function publishVaultToLocalStorage(vault: Vault) {
+	async function publishVaultToLocalStorage(vault: Vault) {
 		VaultService.setVault(vault);
+
+		try {
+			const world = await HttpService.get<World | undefined>(endpoints.world());
+			VaultService.setVault({ ...vault, world });
+		} catch {}
+
 		goto('/');
 		WebsocketService.registerWebsocket();
 	}

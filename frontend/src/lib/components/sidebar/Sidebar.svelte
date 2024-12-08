@@ -88,38 +88,7 @@
 			name: 'World Building',
 			path: '',
 			navHref: '',
-			subRoutes: [
-				{
-					name: 'Characters',
-					path: '/world-building/characters',
-					navHref: '/world-building/characters',
-					icon: UserIcon
-				},
-				{
-					name: 'Locations',
-					path: '/world-building/locations',
-					navHref: '/world-building/locations',
-					icon: LocationPinIcon
-				},
-				{
-					name: 'Nations',
-					path: '/world-building/nations',
-					navHref: '/world-building/nations',
-					icon: FlagIcon
-				},
-				{
-					name: 'Maps',
-					path: '/world-building/maps',
-					navHref: '/world-building/maps',
-					icon: MapIcon
-				},
-				{
-					name: 'Items',
-					path: '/world-building/items',
-					navHref: '/world-building/items',
-					icon: SwordIcon
-				}
-			],
+			subRoutes: [],
 			icon: WorldIcon
 		},
 		{
@@ -159,8 +128,62 @@
 			];
 		}
 
-		const index = routes.findIndex((route) => route.name === 'Stable Diffusion');
-		routes[index].subRoutes = stableDiffusionRoutes;
+		let worldBuildingRoutes: Route[] = [];
+		if ($vaultStore?.world) {
+			worldBuildingRoutes = [
+				{
+					name: 'World',
+					path: '/world-building/world/current',
+					navHref: '/world-building/world/current',
+					icon: WorldIcon
+				},
+				{
+					name: 'Characters',
+					path: '/world-building/characters',
+					navHref: '/world-building/characters',
+					icon: UserIcon
+				},
+				{
+					name: 'Locations',
+					path: '/world-building/locations',
+					navHref: '/world-building/locations',
+					icon: LocationPinIcon
+				},
+				{
+					name: 'Nations',
+					path: '/world-building/nations',
+					navHref: '/world-building/nations',
+					icon: FlagIcon
+				},
+				{
+					name: 'Maps',
+					path: '/world-building/maps',
+					navHref: '/world-building/maps',
+					icon: MapIcon
+				},
+				{
+					name: 'Items',
+					path: '/world-building/items',
+					navHref: '/world-building/items',
+					icon: SwordIcon
+				}
+			];
+		} else {
+			worldBuildingRoutes = [
+				{
+					name: 'Create World',
+					path: '/world-building/world/new',
+					navHref: '/world-building/world/new',
+					icon: WorldIcon
+				}
+			];
+		}
+
+		const sdIndex = routes.findIndex((route) => route.name === 'Stable Diffusion');
+		routes[sdIndex].subRoutes = stableDiffusionRoutes;
+
+		const wbIndex = routes.findIndex((route) => route.name === 'World Building');
+		routes[wbIndex].subRoutes = worldBuildingRoutes;
 		routes = routes;
 	}
 

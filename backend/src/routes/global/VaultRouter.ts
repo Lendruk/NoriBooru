@@ -29,6 +29,7 @@ export class VaultRouter extends Router {
 				const vaultData = JSON.parse(
 					(await fs.readFile(`${vault.path}/vault.config.json`)).toString()
 				) as VaultConfig;
+
 				vaultsWithConfig.push(vaultData);
 			} catch {
 				// No vault config - prune unexistent vault

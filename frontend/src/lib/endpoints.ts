@@ -43,6 +43,8 @@ type EndpointNames =
 	| 'sdLora'
 	| 'sdCheckpoint'
 	| 'renameVault'
+	| 'worldMaps'
+	| 'world'
 	| 'mediaItems';
 
 type Endpoints = {
@@ -223,6 +225,14 @@ export const endpoints: Endpoints = {
 	}),
 	renameVault: () => ({
 		url: `/settings/rename`,
+		isGlobal: false
+	}),
+	worldMaps: () => ({
+		url: `/world-building/maps`,
+		isGlobal: false
+	}),
+	world: () => ({
+		url: `/world-building/world`,
 		isGlobal: false
 	})
 };
