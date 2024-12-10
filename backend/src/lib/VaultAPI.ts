@@ -17,6 +17,7 @@ import { WebsocketRouter } from '../routes/vault/WebsocketRouter';
 import { ArticleRouter } from '../routes/vault/world-building/ArticleRouter';
 import { CultureRouter } from '../routes/vault/world-building/CultureRouter';
 import { CurrencyRouter } from '../routes/vault/world-building/CurrencyRouter';
+import { MapRouter } from '../routes/vault/world-building/MapRouter';
 import { SpecieRouter } from '../routes/vault/world-building/SpecieRouter';
 import { WorldItemRouter } from '../routes/vault/world-building/WorldItemRouter';
 import { WorldRouter } from '../routes/vault/world-building/WorldRouter';
@@ -37,6 +38,7 @@ import { CharacterService } from '../services/worldbuilding/CharacterService';
 import { CultureService } from '../services/worldbuilding/CultureService';
 import { CurrencyService } from '../services/worldbuilding/CurrencyService';
 import { ItemService } from '../services/worldbuilding/ItemService';
+import { MapService } from '../services/worldbuilding/MapService';
 import { SpecieService } from '../services/worldbuilding/SpecieService';
 import { WorldService } from '../services/worldbuilding/WorldService';
 import { VaultConfig } from '../types/VaultConfig';
@@ -83,6 +85,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(ItemService).toSelf().inSingletonScope();
 		this.bind(ArticleService).toSelf().inSingletonScope();
 		this.bind(WorldService).toSelf().inSingletonScope();
+		this.bind(MapService).toSelf().inSingletonScope();
 
 		this.bind(Router).to(SpecieRouter).inSingletonScope();
 		this.bind(Router).to(CultureRouter).inSingletonScope();
@@ -90,6 +93,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(Router).to(WorldItemRouter).inSingletonScope();
 		this.bind(Router).to(ArticleRouter).inSingletonScope();
 		this.bind(Router).to(WorldRouter).inSingletonScope();
+		this.bind(Router).to(MapRouter).inSingletonScope();
 
 		// Routers
 		this.bind(Router).to(TagRouter).inSingletonScope();
