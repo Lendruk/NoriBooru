@@ -1,16 +1,18 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import SeedIcon from '$lib/icons/SeedIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemMetadata } from '$lib/types/MediaItem';
+	import {
+		ArchiveIcon,
+		ArrowLeft,
+		ArrowRight,
+		Button,
+		createToast,
+		InboxIcon,
+		SeedIcon,
+		Tooltip,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	// export let imageName: string;
 	// export let imageId: number;

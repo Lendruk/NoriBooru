@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import TextArea from '$lib/components/TextArea.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import type { World } from '$lib/types/Worldbuilding/World';
+	import {
+		Button,
+		createToast,
+		LabeledComponent,
+		TextArea,
+		TextInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../../../store';
 
 	let worldName = $state('');

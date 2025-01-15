@@ -2,16 +2,7 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import Button from '$lib/components/Button.svelte';
-	import Checkbox from '$lib/components/Checkbox.svelte';
-	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ChevronDown from '$lib/icons/ChevronDown.svelte';
-	import ChevronUp from '$lib/icons/ChevronUp.svelte';
-	import SaveIcon from '$lib/icons/SaveIcon.svelte';
-	import SearchIcon from '$lib/icons/SearchIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
@@ -25,6 +16,17 @@
 	import type { Vault } from '$lib/types/Vault';
 	import { processPrompt } from '$lib/utils/promptUtils';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
+	import {
+		Button,
+		Checkbox,
+		ChevronDown,
+		ChevronUp,
+		createToast,
+		LoadingSpinner,
+		SaveIcon,
+		SearchIcon,
+		Tooltip
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
 	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';

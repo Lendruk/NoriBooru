@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/components/Button.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagEditModal from '$lib/components/TagEditModal.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import DoorOpen from '$lib/icons/DoorOpen.svelte';
-	import InfoIcon from '$lib/icons/InfoIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		ArchiveIcon,
+		ArrowLeft,
+		ArrowRight,
+		Button,
+		DoorOpen,
+		InfoIcon,
+		Modal,
+		TagIcon,
+		Tooltip,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	type ReviewAction = 'Archive' | 'Delete';
 
 	let currentMediaIndex = $state(0);

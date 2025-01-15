@@ -1,21 +1,23 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import DurationPicker from '$lib/components/DurationPicker.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Link from '$lib/components/Link.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import NumberInput from '$lib/components/NumberInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import LinkIcon from '$lib/icons/LinkIcon.svelte';
-	import PauseIcon from '$lib/icons/PauseIcon.svelte';
-	import PenIcon from '$lib/icons/PenIcon.svelte';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { WebSocketEvent } from '$lib/services/WebsocketService';
 	import type { Watcher } from '$lib/types/Watcher';
+	import {
+		Button,
+		createToast,
+		DurationPicker,
+		LabeledComponent,
+		Link,
+		LinkIcon,
+		Modal,
+		NumberInput,
+		PauseIcon,
+		PenIcon,
+		PlayIcon,
+		TextInput,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onDestroy } from 'svelte';
 	import type { Unsubscriber } from 'svelte/store';
 	import { socketEvents$ } from '../../store';

@@ -1,11 +1,10 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import { Button, Modal } from '@lendruk/personal-svelte-ui-lib';
 	let tagName = $state('');
 	let tagColor = $state('#ffffff');
 	let tagParentId = $state<number | undefined>(undefined);

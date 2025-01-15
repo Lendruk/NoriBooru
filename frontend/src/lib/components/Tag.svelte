@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { ArrowRight, EditIcon } from '@lendruk/personal-svelte-ui-lib';
 	import type { MouseEventHandler } from 'svelte/elements';
-	import ArrowRight from '../icons/ArrowRight.svelte';
-	import EditIcon from '../icons/editIcon.svelte';
 	import type { PopulatedTag } from '../types/PopulatedTag';
 
 	export let tag: PopulatedTag;

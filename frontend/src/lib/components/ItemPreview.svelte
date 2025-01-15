@@ -3,8 +3,7 @@
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import LoadingSpinner from './LoadingSpinner.svelte';
-	import Video from './Video.svelte';
+	import { LoadingSpinner, Video } from '@lendruk/personal-svelte-ui-lib';
 
 	let isOpen = $state(false);
 	let isLoading = $state(false);

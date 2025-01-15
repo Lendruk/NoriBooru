@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import Modal from './Modal.svelte';
+	import { Modal } from '@lendruk/personal-svelte-ui-lib';
 	import TagSearchInput from './TagSearchInput.svelte';
 
 	export let showModal = false;

@@ -1,17 +1,19 @@
 <script lang="ts">
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ImageIcon from '$lib/icons/ImageIcon.svelte';
-	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
-	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
-	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
+	import {
+		ImageIcon,
+		LabeledComponent,
+		Modal,
+		RefreshIcon,
+		SettingsIcon,
+		TextInput,
+		UploadIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onDestroy, onMount } from 'svelte';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import loadingSpinner from '$lib/assets/tail-spin.svg';
-	import Button from '$lib/components/Button.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
+	import { Button } from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../../store';
 	let installing = false;
 

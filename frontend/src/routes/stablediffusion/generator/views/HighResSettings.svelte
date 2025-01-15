@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Select from '$lib/components/Select.svelte';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
+	import { Select } from '@lendruk/personal-svelte-ui-lib';
 	export { cssClass as class };
 
 	export let selectedUpscaler: string;

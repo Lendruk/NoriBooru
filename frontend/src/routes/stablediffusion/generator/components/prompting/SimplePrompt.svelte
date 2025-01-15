@@ -1,6 +1,5 @@
 <script lang="ts">
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import TextArea from '$lib/components/TextArea.svelte';
+	import { LabeledComponent, TextArea } from '@lendruk/personal-svelte-ui-lib';
 
 	export let positivePrompt: string;
 	export let negativePrompt: string;

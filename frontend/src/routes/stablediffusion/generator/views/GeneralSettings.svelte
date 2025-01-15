@@ -1,15 +1,17 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import NumberInput from '$lib/components/NumberInput.svelte';
-	import Select from '$lib/components/Select.svelte';
-	import SliderInput from '$lib/components/SliderInput.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import DiceEmoji from '$lib/icons/DiceEmoji.svelte';
-	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
+	import {
+		Button,
+		DiceEmoji,
+		LabeledComponent,
+		NumberInput,
+		RefreshIcon,
+		Select,
+		SliderInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	import RefinerSelection from '../components/RefinerSelection.svelte';
 

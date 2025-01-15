@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
+	import { TrashIcon } from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 
 	export let resources: { name: string; id: string; previewImage?: string }[];

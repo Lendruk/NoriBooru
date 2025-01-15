@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemMetadata, MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		ArrowLeft,
+		ArrowRight,
+		Button,
+		createToast,
+		TagIcon,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../GalleryItemButton.svelte';
 
 	let foundTags: PopulatedTag[] = $state([]);

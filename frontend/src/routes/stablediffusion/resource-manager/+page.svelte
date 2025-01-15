@@ -1,17 +1,19 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDLora } from '$lib/types/SD/SDLora';
+	import {
+		Button,
+		createToast,
+		LabeledComponent,
+		LoadingBackground,
+		Modal,
+		TextInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
 	import CheckpointEdit from './components/CheckpointEdit.svelte';

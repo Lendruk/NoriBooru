@@ -19,28 +19,30 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Link from '$lib/components/Link.svelte';
 	import MassTagEditModal from '$lib/components/MassTagEditModal.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import Select from '$lib/components/Select.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Video from '$lib/components/Video.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import CheckIcon from '$lib/icons/CheckIcon.svelte';
-	import FilterIcon from '$lib/icons/FilterIcon.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import XIcon from '$lib/icons/XIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		ArchiveIcon,
+		Button,
+		CheckIcon,
+		FilterIcon,
+		InboxIcon,
+		LabeledComponent,
+		Link,
+		Modal,
+		Select,
+		TagIcon,
+		TextInput,
+		TrashIcon,
+		Video,
+		XIcon,
+		createToast
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 

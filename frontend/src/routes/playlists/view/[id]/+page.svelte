@@ -2,13 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { endpoints } from '$lib/endpoints';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import PauseIcon from '$lib/icons/PauseIcon.svelte';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
+	import { ArrowLeft, ArrowRight, PauseIcon, PlayIcon } from '@lendruk/personal-svelte-ui-lib';
 
 	let currentMediaIndex = $state(0);
 	let isPaused = $state(false);

@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import EditIcon from '$lib/icons/editIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SimplePlaylist } from '$lib/types/SimplePlaylist';
+	import { EditIcon, PlayIcon, SimpleTable, TrashIcon } from '@lendruk/personal-svelte-ui-lib';
 
 	let playlists: SimplePlaylist[] = $state([]);
 

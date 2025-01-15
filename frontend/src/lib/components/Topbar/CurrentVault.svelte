@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { DoorOpen } from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../../store';
-	import DoorOpen from '../../icons/DoorOpen.svelte';
 
 	let isVaultSelectionOpen = false;
 

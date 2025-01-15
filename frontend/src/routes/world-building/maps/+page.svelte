@@ -1,8 +1,8 @@
 <script lang="ts">
-	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { WorldMap } from '$lib/types/Worldbuilding/WorldMap';
+	import { SimpleTable } from '@lendruk/personal-svelte-ui-lib';
 
 	let maps: WorldMap[] = $state([]);
 	let mapInPreview: WorldMap | undefined = $state(undefined);

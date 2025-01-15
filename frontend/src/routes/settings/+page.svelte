@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
+	import {
+		Button,
+		createToast,
+		LabeledComponent,
+		LoadingSpinner,
+		TextInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../store';
 
 	let vaultName = $state($vaultStore?.name ?? '');

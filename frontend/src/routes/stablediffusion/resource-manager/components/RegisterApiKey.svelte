@@ -1,11 +1,13 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
+	import {
+		Button,
+		createToast,
+		LoadingBackground,
+		TextInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../../../store';
 
 	let key: string;

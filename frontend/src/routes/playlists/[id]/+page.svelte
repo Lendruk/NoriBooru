@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import Checkbox from '$lib/components/Checkbox.svelte';
-	import SimpleTable from '$lib/components/SimpleTable.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import VerticalDrawer from '$lib/components/VerticalDrawer.svelte';
-	import Video from '$lib/components/Video.svelte';
 	import { endpoints } from '$lib/endpoints';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		Button,
+		Checkbox,
+		createToast,
+		SimpleTable,
+		TrashIcon,
+		VerticalDrawer,
+		Video
+	} from '@lendruk/personal-svelte-ui-lib';
 	import SidebarMediaItem from './SidebarMediaItem.svelte';
 	import TableImage from './TableImage.svelte';
 

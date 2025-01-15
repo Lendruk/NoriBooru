@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { setItemPreview } from '$lib/components/ItemPreview.svelte';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import CheckIcon from '$lib/icons/CheckIcon.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import PenIcon from '$lib/icons/PenIcon.svelte';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import type { MediaItem } from '$lib/types/MediaItem';
+	import {
+		ArchiveIcon,
+		CheckIcon,
+		InboxIcon,
+		PenIcon,
+		PlayIcon,
+		TagIcon,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { vaultStore } from '../../store';
 	import GalleryItemButton from './GalleryItemButton.svelte';
 

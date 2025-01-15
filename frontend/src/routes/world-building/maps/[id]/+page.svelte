@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { Vector2 } from '$lib/Vector2';
+	import { Button } from '@lendruk/personal-svelte-ui-lib';
 	import { Application, Assets, Sprite } from 'pixi.js';
 	import ContextMenu from '../Components/ContextMenu.svelte';
 	import { DraggableContainer } from '../Components/DraggableContainer';

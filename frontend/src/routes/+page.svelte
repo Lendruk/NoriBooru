@@ -1,10 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import UploadIcon from '$lib/icons/UploadIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
+	import { Button, createToast, TrashIcon, UploadIcon } from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from './gallery/GalleryItemButton.svelte';
 	let previewFiles: { name: string; URL: string; originalFile: File }[] = $state([]);
 
