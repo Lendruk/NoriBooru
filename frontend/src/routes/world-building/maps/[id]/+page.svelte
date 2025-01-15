@@ -6,8 +6,8 @@
 	import ContextMenu from '../Components/ContextMenu.svelte';
 	import { DraggableContainer } from '../Components/DraggableContainer';
 	import { LocationPinFactory } from '../Components/LocationPin';
-	const app = new Application();
 
+	let app = new Application();
 	let pixiContainer: HTMLDivElement | undefined = $state(undefined);
 	let draggableContainer: DraggableContainer = $state(new DraggableContainer());
 	let background: Sprite = $state(new Sprite());
@@ -38,7 +38,7 @@
 	}
 
 	async function init() {
-		await app.init();
+		await app.init({ width: pixiContainer?.clientWidth, height: pixiContainer?.clientHeight });
 		console.log('App initialized');
 		pixiContainer!.appendChild(app.canvas);
 		const texture = await Assets.load(
@@ -87,6 +87,7 @@
 			Poi menu
 		{/if}
 	</ContextMenu>
+	<div>Toolbox</div>
 </div>
 
 <svelte:window on:click={() => (isMapContextMenuOpen = false)} />
