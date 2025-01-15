@@ -7,10 +7,19 @@ import { createConnection } from 'net';
 import path from 'path';
 import kill from 'tree-kill';
 import { promisify } from 'util';
-import { sdCheckpoints, sdLoras, sdPrompts, sdWildcards } from '../db/vault/schema';
-import { VaultDb } from '../lib/VaultInstance';
+import {
+	MediaItemMetadataSchema,
+	sdCheckpoints,
+	sdLoras,
+	sdPrompts,
+	sdWildcards
+} from '../db/vault/schema';
+import { VaultDb } from '../lib/VaultAPI';
 import { RawSDCheckpoint } from '../types/sd/RawSDCheckpoint';
 import { RawSDLora } from '../types/sd/RawSDLora';
+import { SDPromptRequest } from '../types/sd/SDPromptRequest';
+import { SDPromptResponse } from '../types/sd/SDPromptResponse';
+import { MediaService } from './MediaService';
 import { TagService } from './TagService';
 import { VaultConfigService } from './VaultConfigService';
 import { WebsocketService } from './WebsocketService';
@@ -19,6 +28,13 @@ type ProcessEntry = {
 	process: ChildProcessWithoutNullStreams;
 	isActive: boolean;
 	port: number;
+};
+
+type PromptResponse = {
+	fileName: string;
+	id: number;
+	metadata: MediaItemMetadataSchema;
+	isArchived: boolean;
 };
 
 @injectable()
@@ -35,10 +51,11 @@ export class SDService {
 	private inactiveProcessTimer?: NodeJS.Timeout;
 
 	public constructor(
-		@inject(VaultConfigService) private vaultConfig: VaultConfigService,
-		@inject('db') private db: VaultDb,
-		@inject(WebsocketService) private websocketService: WebsocketService,
-		@inject(TagService) private tagService: TagService
+		@inject(VaultConfigService) private readonly vaultConfig: VaultConfigService,
+		@inject('db') private readonly db: VaultDb,
+		@inject(WebsocketService) private readonly websocketService: WebsocketService,
+		@inject(TagService) private readonly tagService: TagService,
+		@inject(MediaService) private readonly mediaService: MediaService
 	) {}
 
 	public async startSDUi(): Promise<number> {
@@ -286,6 +303,56 @@ export class SDService {
 
 	public getSdPort(): number | undefined {
 		return this.sdProcess?.port;
+	}
+
+	public async promptSD(
+		autoTag: boolean,
+		checkpointId: string,
+		loras: string[],
+		prompt: SDPromptRequest
+	): Promise<PromptResponse[]> {
+		const result = await fetch(`http://localhost:${this.getSdPort()}/sdapi/v1/txt2img`, {
+			method: 'POST',
+			body: JSON.stringify(prompt),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		const body = (await result.json()) as SDPromptResponse;
+		const items: PromptResponse[] = [];
+
+		for (const image of body.images) {
+			const { fileName, id } = await this.mediaService.createItemFromBase64({
+				base64EncodedImage: image,
+				fileExtension: 'png',
+				sdCheckPointId: checkpointId,
+				loras
+			});
+			const metadata = await this.mediaService.getItemMetadata(id);
+			items.push({ fileName, id, metadata, isArchived: false });
+		}
+
+		// Prompt tags
+		// Can be optimized
+		if (autoTag) {
+			await this.mediaService.tagMediaItemFromPrompt(
+				items.map((item) => item.id),
+				prompt.prompt
+			);
+		}
+		return items;
+	}
+
+	public async unloadCurrentCheckpoint(): Promise<void> {
+		await fetch(`http://localhost:${this.getSdPort()}/sdapi/v1/unload-checkpoint`, {
+			method: 'POST'
+		});
+	}
+
+	public async interruptGeneration(): Promise<void> {
+		await fetch(`http://localhost:${this.getSdPort()}/sdapi/v1/interrupt`, {
+			method: 'POST'
+		});
 	}
 
 	private async modifySDUiPort(path: string, port: number): Promise<void> {

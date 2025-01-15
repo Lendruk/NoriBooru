@@ -4,6 +4,7 @@
 	import NumberInput from '$lib/components/NumberInput.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import SliderInput from '$lib/components/SliderInput.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import DiceEmoji from '$lib/icons/DiceEmoji.svelte';
 	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
@@ -36,14 +37,14 @@
 	let isUnloadingCheckpoint: boolean = false;
 
 	async function refreshCheckpoints() {
-		await HttpService.post(`/sd/refresh-checkpoints`);
-		checkpoints = await HttpService.get(`/sd/checkpoints`);
+		await HttpService.post(endpoints.refreshCheckpoints());
+		checkpoints = await HttpService.get(endpoints.sdCheckpoints());
 	}
 
 	async function unloadCheckpoints() {
 		isUnloadingCheckpoint = true;
 		try {
-			await HttpService.post(`/sd/unload-checkpoint`);
+			await HttpService.post(endpoints.unloadCheckpoint());
 		} catch {
 		} finally {
 			isUnloadingCheckpoint = false;

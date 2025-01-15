@@ -7,6 +7,7 @@
 	import TextArea from '$lib/components/TextArea.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
@@ -24,7 +25,7 @@
 
 	async function addTagToLora(tag: PopulatedTag) {
 		sdLora.tags = sdLora.tags.concat(tag);
-		await HttpService.put(`/sd/loras/${sdLora.id}`, {
+		await HttpService.put(endpoints.sdLora({ id: sdLora.id }), {
 			tags: sdLora.tags.map((t) => t.id)
 		});
 	}
@@ -33,7 +34,7 @@
 		const index = sdLora.tags.findIndex((t) => t.id === tag.id);
 		sdLora.tags.splice(index, 1);
 		sdLora.tags = sdLora.tags;
-		await HttpService.put(`/sd/loras/${sdLora.id}`, {
+		await HttpService.put(endpoints.sdLora({ id: sdLora.id }), {
 			tags: sdLora.tags.map((t) => t.id)
 		});
 	}
@@ -42,7 +43,7 @@
 		isLoading = true;
 
 		try {
-			await HttpService.put(`/sd/loras/${sdLora.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: sdLora.id }), {
 				name: loraName,
 				description: loraDescription,
 				origin: loraOrigin,

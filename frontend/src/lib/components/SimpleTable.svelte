@@ -69,7 +69,7 @@
 	}
 </script>
 
-<table class={`flex flex-col relative box-border ${cssClass}`}>
+<table class={`flex flex-1 flex-col relative box-border ${cssClass}`}>
 	<Tooltip
 		x={toolTipX}
 		y={toolTipY}

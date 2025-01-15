@@ -7,6 +7,7 @@
 	import NumberInput from '$lib/components/NumberInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import LinkIcon from '$lib/icons/LinkIcon.svelte';
 	import PauseIcon from '$lib/icons/PauseIcon.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
@@ -44,7 +45,7 @@
 	let inactivityTimeout = $state(INACTIVITY_TIMEOUT_DEFAULT); // ms
 
 	async function deleteWatcher(watcherId: string) {
-		await HttpService.delete(`/watchers/${watcherId}`);
+		await HttpService.delete(endpoints.watcher({ id: watcherId }));
 		watchers = watchers.filter((watcher) => watcher.id !== watcherId);
 
 		if (selectedWatcher?.id === watcherId) {
@@ -79,7 +80,7 @@
 	async function createWatcher() {
 		if (!isUrlValid) return;
 
-		const newWatcher = await HttpService.post<Watcher>(`/watchers`, {
+		const newWatcher = await HttpService.post<Watcher>(endpoints.watchers(), {
 			url: modalWatcherUrl,
 			requestInterval,
 			inactivityTimeout,
@@ -95,11 +96,14 @@
 	async function updateWatcher() {
 		if (!isUrlValid) return;
 
-		const updatedWatcher = await HttpService.put<Watcher>(`/watchers/${selectedWatcher?.id}`, {
-			requestInterval,
-			inactivityTimeout,
-			itemsPerRequest
-		});
+		const updatedWatcher = await HttpService.put<Watcher>(
+			endpoints.watcher({ id: selectedWatcher?.id }),
+			{
+				requestInterval,
+				inactivityTimeout,
+				itemsPerRequest
+			}
+		);
 
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === updatedWatcher.id) {
@@ -119,7 +123,7 @@
 	}
 
 	async function pauseWatcher(watcherId: string) {
-		await HttpService.patch(`/watchers/${watcherId}/pause`);
+		await HttpService.patch(endpoints.pauseWatcher({ id: watcherId }));
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === watcherId) {
 				watcher.status = 'paused';
@@ -130,7 +134,7 @@
 	}
 
 	async function resumeWatcher(watcherId: string) {
-		await HttpService.patch(`/watchers/${watcherId}/resume`);
+		await HttpService.patch(endpoints.resumeWatcher({ id: watcherId }));
 		watchers = watchers.map((watcher) => {
 			if (watcher.id === watcherId) {
 				watcher.status = 'running';
@@ -152,8 +156,8 @@
 	}
 
 	$effect(() => {
-		HttpService.get<{ watchers: Watcher[] }>(`/watchers`).then(async (res) => {
-			watchers = res.watchers;
+		HttpService.get<Watcher[]>(endpoints.watchers()).then(async (res) => {
+			watchers = res;
 
 			if (watchers.length > 0) {
 				selectedWatcher = watchers[0];
@@ -175,7 +179,9 @@
 	async function onSocketEvent(wsEvent: WebSocketEvent) {
 		if (wsEvent.event === 'watcher-update' && refreshGallery) {
 			const watcherUpdateEvent = wsEvent.data as WatcherUpdateSocketEvent;
-			const updatedWatcher = await HttpService.get<Watcher>(`/watchers/${watcherUpdateEvent.id}`);
+			const updatedWatcher = await HttpService.get<Watcher>(
+				endpoints.watcher({ id: watcherUpdateEvent.id })
+			);
 			console.log('event for watcher', watcherUpdateEvent.id);
 			watchers = watchers.map((watcher) => {
 				if (watcher.id === updatedWatcher.id) {

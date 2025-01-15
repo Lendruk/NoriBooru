@@ -3,6 +3,7 @@
 	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../../../store';
@@ -12,7 +13,7 @@
 
 	async function registerAPIKey() {
 		isLoading = true;
-		await HttpService.post(`/sd/civitai/register`, {
+		await HttpService.post(endpoints.registerCivitaiAPIKey(), {
 			key
 		});
 		isLoading = false;

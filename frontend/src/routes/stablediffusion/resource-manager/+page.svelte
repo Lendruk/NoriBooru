@@ -6,6 +6,7 @@
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
@@ -97,7 +98,9 @@
 
 		try {
 			await HttpService.delete(
-				`/sd/${deletionResourceType === 'LORA' ? 'loras' : 'checkpoints'}/${deletionResource?.id}`
+				deletionResourceType === 'LORA'
+					? endpoints.sdLoras({ id: deletionResource?.id })
+					: endpoints.sdCheckpoints({ id: deletionResource?.id })
 			);
 
 			if (deletionResourceType === 'LORA') {
@@ -127,9 +130,9 @@
 
 	async function fetchResources() {
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
-			HttpService.get<SDLora[]>(`/sd/loras`),
-			HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
-			HttpService.get<PopulatedTag[]>(`/tags`)
+			HttpService.get<SDLora[]>(endpoints.sdLoras()),
+			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
+			HttpService.get<PopulatedTag[]>(endpoints.tags())
 		]);
 
 		loras = sdLoras;
@@ -145,14 +148,18 @@
 	// Querying
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			`/sd/loras?tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+			endpoints.sdLoras({
+				params: `tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+			})
 		);
 		loras = filteredLoras;
 	}
 
 	async function searchCheckpoints() {
 		const filteredCheckpoints = await HttpService.get<SDCheckpoint[]>(
-			`/sd/checkpoints${queryCheckpointName ? `?name=${queryCheckpointName}` : ''}`
+			endpoints.sdCheckpoints({
+				params: queryCheckpointName ? `name=${queryCheckpointName}` : ''
+			})
 		);
 		checkpoints = filteredCheckpoints;
 	}

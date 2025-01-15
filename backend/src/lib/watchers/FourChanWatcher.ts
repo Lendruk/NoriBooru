@@ -3,7 +3,7 @@ import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vaul
 import { MediaService } from '../../services/MediaService';
 import { WebsocketService } from '../../services/WebsocketService';
 import { pause } from '../../utils/pause';
-import { VaultDb } from '../VaultInstance';
+import { VaultDb } from '../VaultAPI';
 import { ActiveWatcher } from './ActiveWatcher';
 
 export type FourChanWatcherData = {

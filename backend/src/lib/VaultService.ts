@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { VaultDb } from './VaultInstance';
+import { VaultDb } from './VaultAPI';
 
 @injectable()
 export abstract class VaultService {

@@ -5,6 +5,7 @@
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import { VaultService } from '$lib/services/VaultService';
 	import { vaultStore } from '../../store';
@@ -15,13 +16,13 @@
 	let civitaiApiKey = $state($vaultStore?.civitaiApiKey ?? '');
 
 	$effect(() => {
-		HttpService.get<{ civitaiApiKey: string }>(`/settings/api-keys`).then((res) => {
+		HttpService.get<{ civitaiApiKey: string }>(endpoints.getApiKeys()).then((res) => {
 			civitaiApiKey = res.civitaiApiKey;
 		});
 	});
 
 	async function setCivitaiApiKey() {
-		await HttpService.post(`/sd/civitai/register`, { key: civitaiApiKey });
+		await HttpService.post(endpoints.registerCivitaiAPIKey(), { key: civitaiApiKey });
 	}
 
 	async function renameVault() {
@@ -30,7 +31,7 @@
 			return;
 		}
 
-		await HttpService.put(`/vaults`, {
+		await HttpService.put(endpoints.renameVault(), {
 			name: vaultName
 		});
 		VaultService.setVault({ ...$vaultStore!, name: vaultName });
@@ -40,7 +41,7 @@
 	async function deleteVault() {
 		isPerformingDestructiveAction = true;
 		currentAction = 'Deleting vault...';
-		await HttpService.delete(`/vaults/${$vaultStore?.id}`);
+		await HttpService.delete(endpoints.vault({ id: $vaultStore?.id }));
 		VaultService.removeVault();
 		goto('/vaults');
 		isPerformingDestructiveAction = false;
@@ -54,7 +55,7 @@
 		}
 		isPerformingDestructiveAction = true;
 		currentAction = 'Uninstalling SDUI...';
-		await HttpService.post(`/sd/uninstall`);
+		await HttpService.post(endpoints.sdUninstall());
 		VaultService.setVault({ ...$vaultStore!, hasInstalledSD: false });
 		createToast('SDUI uninstalled successfully!');
 		isPerformingDestructiveAction = false;
@@ -63,7 +64,7 @@
 	async function unlinkVault() {
 		isPerformingDestructiveAction = true;
 		currentAction = 'Unlinking vault...';
-		await HttpService.post(`/vaults/unlink`);
+		await HttpService.post(endpoints.unlinkVault());
 		VaultService.removeVault();
 		goto('/vaults');
 		isPerformingDestructiveAction = false;

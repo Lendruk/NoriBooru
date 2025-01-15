@@ -1,9 +1,11 @@
 import { sql } from 'drizzle-orm';
 import fs from 'fs/promises';
+import { injectable } from 'inversify';
 import migrationFunctionMap from '../../migrations/vault';
-import type { VaultInstance } from './VaultInstance';
+import { VaultConfigService } from '../services/VaultConfigService';
+import { VaultAPI, VaultDb } from './VaultAPI';
 
-export type MigrationFunction = (vault: VaultInstance) => Promise<void> | void;
+export type MigrationFunction = (vault: VaultAPI) => Promise<void> | void;
 
 export type Migration = {
 	version: Version;
@@ -13,11 +15,12 @@ export type Migration = {
 
 export type Version = `${number}.${number}.${number}`;
 
+@injectable()
 export class VaultMigrator {
-	private static availableMigrations: Migration[] = [];
-	private static migrationDir = `${process.cwd()}/migrations/vault`;
+	private availableMigrations: Migration[] = [];
+	private migrationDir = `${process.cwd()}/migrations/vault`;
 
-	public static async init(): Promise<void> {
+	public async init(): Promise<void> {
 		const versions = await fs.readdir(this.migrationDir);
 		for (const version of versions) {
 			// We dont want the init.sql file
@@ -51,49 +54,48 @@ export class VaultMigrator {
 		}
 	}
 
-	public static async migrateVault(vault: VaultInstance): Promise<void> {
-		const { version } = vault.config.getConfig();
+	public async migrateVault(vault: VaultAPI): Promise<void> {
+		const { version, name } = vault.getConfig();
 		let nextMigration = this.getNextMigration(version);
+		const configService = vault.get(VaultConfigService);
 
 		while (nextMigration) {
 			console.log(
-				`Migrating vault ${vault.config.name} (version ${vault.config.version}) to version ${nextMigration?.version}`
+				`Migrating vault ${name} (version ${version}) to version ${nextMigration?.version}`
 			);
 			try {
 				await this.applyMigration(vault, nextMigration);
-				nextMigration = this.getNextMigration(vault.config.version);
+				nextMigration = this.getNextMigration(nextMigration.version);
 			} catch (error) {
 				console.log(error);
-				console.log(
-					`Failed to migrate vault ${vault.config.name} to version ${nextMigration?.version}`
-				);
-				await vault.config.saveConfig();
+				console.log(`Failed to migrate vault ${name} to version ${nextMigration?.version}`);
+				await configService.saveConfig();
 				break;
 			}
 		}
-		await vault.config.saveConfig();
+		await configService.saveConfig();
 	}
 
-	private static executeSQLMigration(db: VaultInstance['db'], sqlInput: string): void {
+	private executeSQLMigration(db: VaultDb, sqlInput: string): void {
 		const splitStatements = sqlInput.split('--- StatementBreak');
 		for (const statement of splitStatements) {
 			db.run(sql.raw(`${statement}`));
 		}
 	}
 
-	private static async applyMigration(vault: VaultInstance, migration: Migration): Promise<void> {
+	private async applyMigration(vault: VaultAPI, migration: Migration): Promise<void> {
 		if (migration.sql) {
-			this.executeSQLMigration(vault.db, migration.sql);
+			this.executeSQLMigration(vault.getDb(), migration.sql);
 		}
 
 		if (migration.migrationFunction) {
 			await migration.migrationFunction(vault);
 		}
 
-		vault.config.version = migration.version;
+		vault.getConfig().version = migration.version;
 	}
 
-	private static getNextMigration(currentVersion: Version): Migration | undefined {
+	private getNextMigration(currentVersion: Version): Migration | undefined {
 		const nextMigration = this.availableMigrations.find(
 			(migration) => migration.version > currentVersion
 		);

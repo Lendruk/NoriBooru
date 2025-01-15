@@ -4,6 +4,7 @@
 	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import PenIcon from '$lib/icons/PenIcon.svelte';
 	import XIcon from '$lib/icons/XIcon.svelte';
@@ -11,6 +12,7 @@
 	import { VaultService } from '$lib/services/VaultService';
 	import { WebsocketService } from '$lib/services/WebsocketService';
 	import type { Vault } from '$lib/types/Vault';
+	import type { World } from '$lib/types/Worldbuilding/World';
 	import { runningJobs } from '../../store';
 
 	let vaults: Vault[] = $state([]);
@@ -40,7 +42,7 @@
 
 	async function getVaults() {
 		const fetchedVaults = await HttpService.get<{ vaults: Vault[]; baseVaultDir: string }>(
-			'/vaults'
+			endpoints.vaults()
 		);
 		vaults = fetchedVaults.vaults;
 		newVaultPath = fetchedVaults.baseVaultDir;
@@ -56,7 +58,7 @@
 		if (path != '') {
 			vaultPathCheckTimeout = setTimeout(async () => {
 				try {
-					const result = await HttpService.post<{ message: string }>('/vaults/check-path', {
+					const result = await HttpService.post<{ message: string }>(endpoints.checkVaultPath(), {
 						path,
 						checkingForExistingVault
 					});
@@ -84,7 +86,7 @@
 		}
 
 		try {
-			const vault = await HttpService.post<Vault>('/vaults', {
+			const vault = await HttpService.post<Vault>(endpoints.vaults(), {
 				name: newVaultName,
 				path: newVaultPath
 			});
@@ -108,7 +110,7 @@
 		}
 
 		try {
-			const importedVault = await HttpService.post<Vault>(`/vaults/import`, {
+			const importedVault = await HttpService.post<Vault>(endpoints.importVault(), {
 				path: vaultImportPath
 			});
 			vaultImportOpen = false;
@@ -119,8 +121,14 @@
 		}
 	}
 
-	function publishVaultToLocalStorage(vault: Vault) {
+	async function publishVaultToLocalStorage(vault: Vault) {
 		VaultService.setVault(vault);
+
+		try {
+			const world = await HttpService.get<World | undefined>(endpoints.world());
+			VaultService.setVault({ ...vault, world });
+		} catch {}
+
 		goto('/');
 		WebsocketService.registerWebsocket();
 	}

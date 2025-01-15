@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
 	import ArrowRight from '$lib/icons/ArrowRight.svelte';
 	import TagIcon from '$lib/icons/TagIcon.svelte';
@@ -47,16 +48,12 @@
 	$effect(() => {
 		const params = new URLSearchParams($page.url.search);
 
-		if (!params.has('inbox')) {
-			params.set('inbox', 'false');
-		}
-
 		HttpService.get<{
 			mediaItem: MediaItemWithTags;
 			next?: string;
 			previous?: string;
 			tags: PopulatedTag[];
-		}>(`/media-items/${$page.params.id}?${params.toString()}`).then((res) => {
+		}>(endpoints.mediaItem({ id: $page.params.id, params })).then((res) => {
 			mediaItem = res.mediaItem;
 			tags = res.tags;
 			next = res.next;
@@ -66,26 +63,26 @@
 	});
 
 	async function addTagToMedia(tag: PopulatedTag) {
-		await HttpService.put(`/media-items/${JSON.stringify([mediaItem?.id])}/tags`, tag);
+		await HttpService.put(endpoints.mediaItemTags({ id: JSON.stringify([mediaItem?.id]) }), tag);
 		mediaItem!.tags = [...mediaItem!.tags, { ...tag }];
 		tagSearchText = '';
 		foundTags = [];
 	}
 
 	async function removeTagFromMedia(tag: PopulatedTag) {
-		await HttpService.delete(`/media-items/${mediaItem?.id}/tags`, tag);
+		await HttpService.delete(endpoints.mediaItemTags({ id: mediaItem?.id }), tag);
 		mediaItem!.tags = mediaItem!.tags.filter((t) => t.id !== tag.id);
 	}
 
 	async function attemptAutoTag() {
 		if (mediaItem) {
-			await HttpService.patch(`/media-items/${mediaItem.id}/auto-tag`);
+			await HttpService.patch(endpoints.autoTagMediaItem({ id: mediaItem.id }));
 			const updatedItem = await HttpService.get<{
 				mediaItem: MediaItemWithTags;
 				next?: string;
 				previous?: string;
 				tags: PopulatedTag[];
-			}>(`/media-items/${$page.params.id}`);
+			}>(endpoints.mediaItem({ id: $page.params.id }));
 
 			mediaItem = updatedItem.mediaItem;
 			tags = updatedItem.tags;
@@ -97,7 +94,7 @@
 
 	async function deleteMediaItem() {
 		if (mediaItem) {
-			await HttpService.delete(`/media-items/${JSON.stringify([mediaItem.id])}`);
+			await HttpService.delete(endpoints.mediaItem({ id: JSON.stringify([mediaItem.id]) }));
 			let idToFetch: string = '';
 			if (previous) {
 				idToFetch = previous;
@@ -141,14 +138,14 @@
 				{#if mediaItem?.type === 'image'}
 					<img
 						class="max-h-[80vh]"
-						src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+						src={HttpService.buildGetImageUrl(mediaItem.fileName, mediaItem.extension)}
 						alt="gallery-img"
 					/>
 				{/if}
 				{#if mediaItem?.type === 'video'}
 					<video
 						class="bg-cover w-full h-full"
-						src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+						src={HttpService.buildGetVideoUrl(mediaItem.fileName, mediaItem.extension)}
 						controls
 					>
 						<track kind="captions" />
@@ -186,7 +183,7 @@
 {/if}
 {#if isItemFullscreen && mediaItem}
 	<img
-		src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${mediaItem.fileName}.${mediaItem.extension}`}
+		src={HttpService.buildGetImageUrl(mediaItem.fileName, mediaItem.extension)}
 		alt="fullscreen"
 		class="absolute top-0 left-0 h-full w-full object-cover z-[100]"
 	/>

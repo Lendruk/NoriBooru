@@ -8,6 +8,7 @@
 	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
 	import VerticalDrawer from '$lib/components/VerticalDrawer.svelte';
 	import Video from '$lib/components/Video.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import TrashIcon from '$lib/icons/TrashIcon.svelte';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
@@ -23,12 +24,12 @@
 	let playlistItems: MediaItem[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>(`/tags`).then((tags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((tags) => {
 			availableTags = tags;
 		});
 
 		if ($page.params.id && $page.params.id !== 'new') {
-			HttpService.get<Playlist>(`/playlists/${$page.params.id}`).then((res) => {
+			HttpService.get<Playlist>(endpoints.playlist({ id: $page.params.id })).then((res) => {
 				playlistName = res.name;
 				randomizeOrder = res.randomizeOrder === 1;
 				playlistItems = res.items;
@@ -47,7 +48,9 @@
 
 	async function onTagSearchChange() {
 		if (tagSearchInputText.length > 0) {
-			const response = await HttpService.get<PopulatedTag[]>(`/tags?name=${tagSearchInputText}`);
+			const response = await HttpService.get<PopulatedTag[]>(
+				endpoints.tags({ params: `name=${tagSearchInputText}` })
+			);
 
 			foundTags = response;
 			foundTags = foundTags.filter((tag) => !filterTags.find((t) => t.id === tag.id));
@@ -78,12 +81,13 @@
 
 	async function searchMedia() {
 		const newItems = await HttpService.get<{ mediaItems: MediaItem[] }>(
-			'/media-items?' +
-				new URLSearchParams({
+			endpoints.mediaItems({
+				params: new URLSearchParams({
 					// negativeTags: JSON.stringify(appliedNegativeTags.map(tag => tag.id)),
 					positiveTags: JSON.stringify(filterTags.map((tag) => tag.id)),
 					archived: 'true'
 				})
+			})
 		);
 		sidebarMediaItems = newItems.mediaItems.filter(
 			(item) => !playlistItems.find((i) => i.id === item.id)
@@ -123,7 +127,7 @@
 	}
 
 	async function createPlaylist() {
-		const newPlaylist = await HttpService.post<Playlist>('/playlists', {
+		const newPlaylist = await HttpService.post<Playlist>(endpoints.playlists(), {
 			name: playlistName,
 			randomizeOrder,
 			timePerItem,
@@ -134,7 +138,7 @@
 	}
 
 	async function updatePlaylist() {
-		await HttpService.put(`/playlists/${$page.params.id}`, {
+		await HttpService.put(endpoints.playlist({ id: $page.params.id }), {
 			name: playlistName,
 			randomizeOrder,
 			timePerItem,
@@ -251,14 +255,14 @@
 						{#if mediaItem.type === 'image'}
 							<img
 								class="bg-cover"
-								src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}
+								src={HttpService.buildGetImageThumbnailUrl(mediaItem.fileName, mediaItem.extension)}
 								alt="gallery-img"
 							/>
 						{/if}
 						{#if mediaItem.type === 'video'}
 							<Video
 								cssClass="bg-cover w-full h-full"
-								src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension}`}
+								src={HttpService.buildGetVideoThumbnailUrl(mediaItem.fileName)}
 							/>
 						{/if}
 					</SidebarMediaItem>

@@ -94,9 +94,7 @@ export const playlists = sqliteTable('playlists', {
 	updatedAt: integer('updated_at')
 });
 
-export type Playlist = InferSelectModel<typeof playlists> & {
-	items: MediaItem[];
-};
+export type PlaylistSchema = InferSelectModel<typeof playlists>;
 
 export const playlists_mediaItems_table = sqliteTable(
 	'playlists_media_items',
@@ -112,7 +110,7 @@ export const playlists_mediaItems_table = sqliteTable(
 	(t) => ({ pk: primaryKey({ columns: [t.playlistId, t.mediaItemId] }) })
 );
 
-export type MediaItem = InferSelectModel<typeof mediaItems> & {
+export type MediaItemSchema = InferSelectModel<typeof mediaItems> & {
 	tags?: TagSchema[];
 };
 
@@ -137,6 +135,8 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	highResUpscaleBy: real('high_res_upscale_by'),
 	createdAt: integer('created_at').notNull()
 });
+
+export type SDPromptSchema = InferSelectModel<typeof sdPrompts>;
 
 export const lorasToMediaItems = sqliteTable(
 	'loras_to_mediaItems',

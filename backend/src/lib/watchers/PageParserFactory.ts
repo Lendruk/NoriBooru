@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { ActiveWatcherSchema } from '../../db/vault/schema';
 import { MediaService } from '../../services/MediaService';
 import { WebsocketService } from '../../services/WebsocketService';
-import type { VaultDb } from '../VaultInstance';
+import { VaultDb } from '../VaultAPI';
 import { ActiveWatcher } from './ActiveWatcher';
 import { FourChanWatcher } from './FourChanWatcher';
 import { RedditWatcher } from './RedditWatcher';
