@@ -41,7 +41,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@lendruk/personal-svelte-ui-lib": "file:../../Personal-ui-lib",
+		"@lendruk/personal-svelte-ui-lib": "^0.1.0",
 		"exifreader": "^4.23.1",
 		"pixi.js": "^8.5.1",
 		"puppeteer": "^21.5.2",
