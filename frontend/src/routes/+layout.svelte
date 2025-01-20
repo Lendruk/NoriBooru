@@ -80,13 +80,13 @@
 			navHref: '/watchers',
 			icon: CircleDown
 		},
-		{
-			name: 'World Building',
-			path: '',
-			navHref: '',
-			subRoutes: [],
-			icon: WorldIcon
-		},
+		// {
+		// 	name: 'World Building',
+		// 	path: '',
+		// 	navHref: '',
+		// 	subRoutes: [],
+		// 	icon: WorldIcon
+		// },
 		{
 			name: 'Settings',
 			path: '/settings',
@@ -165,21 +165,22 @@
 				}
 			];
 		} else {
-			worldBuildingRoutes = [
-				{
-					name: 'Create World',
-					path: '/world-building/world/new',
-					navHref: '/world-building/world/new',
-					icon: WorldIcon
-				}
-			];
+			// Commenting out the world building for now
+			// worldBuildingRoutes = [
+			// 	{
+			// 		name: 'Create World',
+			// 		path: '/world-building/world/new',
+			// 		navHref: '/world-building/world/new',
+			// 		icon: WorldIcon
+			// 	}
+			// ];
 		}
 
 		const sdIndex = routes.findIndex((route) => route.name === 'Stable Diffusion');
 		routes[sdIndex].subRoutes = stableDiffusionRoutes;
 
-		const wbIndex = routes.findIndex((route) => route.name === 'World Building');
-		routes[wbIndex].subRoutes = worldBuildingRoutes;
+		// const wbIndex = routes.findIndex((route) => route.name === 'World Building');
+		// routes[wbIndex].subRoutes = worldBuildingRoutes;
 		routes = routes;
 	}
 

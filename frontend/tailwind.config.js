@@ -2,7 +2,7 @@
 export default {
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
-		'./node_modules/@lendruk/personal-svelte-ui-lib/src/**/*.{html,js,svelte,ts}'
+		'./node_modules/@lendruk/personal-svelte-ui-lib/dist/**/*.{html,js,svelte,ts}'
 	],
 	theme: {
 		extend: {
