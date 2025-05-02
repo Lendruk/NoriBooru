@@ -92,7 +92,6 @@
 	let usedLoras: string[] = [];
 
 	async function setup(vault: Vault) {
-		if (!vault.hasInstalledSD) return;
 
 		$isSdStarting = true;
 		await HttpService.post(endpoints.sdStart());

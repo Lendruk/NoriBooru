@@ -11,7 +11,7 @@ import { Route, Router } from '../../../lib/Router';
 import { VaultDb } from '../../../lib/VaultAPI';
 import { JobService } from '../../../services/JobService';
 import { MediaService } from '../../../services/MediaService';
-import { SDService } from '../../../services/SDService';
+import { SDService2 } from '../../../services/SD/SDService2';
 import { VaultConfigService } from '../../../services/VaultConfigService';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
 import { VaultConfig } from '../../../types/VaultConfig';
@@ -24,7 +24,7 @@ export class CivitaiRouter extends Router {
 		@inject('config') private readonly config: VaultConfig,
 		@inject('db') private readonly db: VaultDb,
 		@inject(MediaService) private readonly mediaService: MediaService,
-		@inject(SDService) private readonly sdService: SDService
+		@inject(SDService2) private readonly sdService: SDService2
 	) {
 		super();
 	}
@@ -34,7 +34,7 @@ export class CivitaiRouter extends Router {
 		const { key } = request.body as { key: string };
 
 		if (key) {
-			await this.configService.setCivitaiApiKey(key);
+			await this.configService.setConfigValue('civitaiApiKey', key, true);
 		}
 
 		return reply.send({ message: 'API key registered successfully' });
@@ -126,14 +126,14 @@ export class CivitaiRouter extends Router {
 							.returning();
 						await this.mediaService.setMediaItemSDCheckpoint(mediaItem.id, newCheckpoint[0].id);
 					}
-
-					if (this.sdService.isSDUiRunning()) {
-						if (modelInfo.type === 'LORA') {
-							await this.sdService.refreshLoras();
-						} else if (modelInfo.type === 'Checkpoint') {
-							await this.sdService.refreshCheckpoints();
-						}
-					}
+					// TODO: Refresh models in SD
+					// if (this.sdService.isSDUiRunning()) {
+					// 	if (modelInfo.type === 'LORA') {
+					// 		await this.sdService.refreshLoras();
+					// 	} else if (modelInfo.type === 'Checkpoint') {
+					// 		await this.sdService.refreshCheckpoints();
+					// 	}
+					// }
 				}
 			} else {
 				throw new Error('Model version not found');

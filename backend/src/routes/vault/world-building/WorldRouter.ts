@@ -1,4 +1,4 @@
-import { FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { z } from 'zod';
 import { Route, Router } from '../../../lib/Router';
@@ -11,8 +11,12 @@ export class WorldRouter extends Router {
 	}
 
 	@Route.GET('/world-building/world')
-	public async getWorld() {
-		return await this.worldService.getWorld();
+	public async getWorld(request: FastifyRequest, reply: FastifyReply) {
+		try {
+			return await this.worldService.getWorld();
+		} catch {
+			return reply.status(404).send();
+		}
 	}
 
 	@Route.POST('/world-building/world')

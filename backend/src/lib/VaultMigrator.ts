@@ -55,11 +55,15 @@ export class VaultMigrator {
 	}
 
 	public async migrateVault(vault: VaultAPI): Promise<void> {
-		const { version, name } = vault.getConfig();
+		const config = vault.getConfigService().getConfig();
+		let { version } = config;
+		const { name } = config;
 		let nextMigration = this.getNextMigration(version);
 		const configService = vault.get(VaultConfigService);
 
 		while (nextMigration) {
+			const updatedConfig = vault.getConfigService().getConfig();
+			version = updatedConfig.version;
 			console.log(
 				`Migrating vault ${name} (version ${version}) to version ${nextMigration?.version}`
 			);
@@ -92,7 +96,7 @@ export class VaultMigrator {
 			await migration.migrationFunction(vault);
 		}
 
-		vault.getConfig().version = migration.version;
+		await vault.getConfigService().setConfigValue('version', migration.version);
 	}
 
 	private getNextMigration(currentVersion: Version): Migration | undefined {

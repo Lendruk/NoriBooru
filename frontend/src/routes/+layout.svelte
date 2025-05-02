@@ -8,7 +8,6 @@
 	import type { Vault } from '$lib/types/Vault';
 	import {
 		CircleDown,
-		DownloadIcon,
 		FlagIcon,
 		FolderClosedIcon,
 		ImagesIcon,
@@ -97,7 +96,6 @@
 
 	$: {
 		pathName = $page.url.pathname.slice() + $page.url.search;
-		if ($vaultStore?.hasInstalledSD) {
 			stableDiffusionRoutes = [
 				{
 					icon: FolderClosedIcon,
@@ -113,16 +111,6 @@
 					navHref: '/stablediffusion/generator'
 				}
 			];
-		} else {
-			stableDiffusionRoutes = [
-				{
-					icon: DownloadIcon,
-					name: 'Install',
-					path: '/stablediffusion/install',
-					navHref: '/stablediffusion/install'
-				}
-			];
-		}
 
 		let worldBuildingRoutes: any[] = [];
 		if ($vaultStore?.world) {

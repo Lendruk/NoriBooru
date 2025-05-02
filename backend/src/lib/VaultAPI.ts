@@ -28,8 +28,8 @@ import { PlaylistService } from '../services/PlaylistService';
 import { PromptService } from '../services/SD/PromptService';
 import { SDCheckpointService } from '../services/SD/SDCheckpointService';
 import { SDLoraService } from '../services/SD/SDLoraService';
+import { SDService2 } from '../services/SD/SDService2';
 import { WildcardService } from '../services/SD/WildcardService';
-import { SDService } from '../services/SDService';
 import { TagService } from '../services/TagService';
 import { VaultConfigService } from '../services/VaultConfigService';
 import { WebsocketService } from '../services/WebsocketService';
@@ -71,7 +71,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(JobService).toSelf().inSingletonScope();
 		this.bind(PageParserFactory).toSelf().inSingletonScope();
 		this.bind(PageWatcherService).toSelf().inSingletonScope();
-		this.bind(SDService).toSelf().inSingletonScope();
+		this.bind(SDService2).toSelf().inSingletonScope();
 		this.bind(PlaylistService).toSelf().inSingletonScope();
 		this.bind(SDCheckpointService).toSelf().inSingletonScope();
 		this.bind(SDLoraService).toSelf().inSingletonScope();
@@ -114,8 +114,8 @@ export class VaultAPI extends IoCAPI {
 		return this.get('db');
 	}
 
-	public getConfig(): VaultConfig {
-		return this.get('config');
+	public getConfigService(): VaultConfigService {
+		return this.get(VaultConfigService);
 	}
 
 	public getPort(): number | undefined {

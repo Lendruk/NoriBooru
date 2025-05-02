@@ -10,7 +10,6 @@
 		TagIcon,
 		TrashIcon
 	} from '@lendruk/personal-svelte-ui-lib';
-	import { vaultStore } from '../../store';
 	import GalleryItemButton from './GalleryItemButton.svelte';
 
 	export let href = '';
@@ -119,7 +118,7 @@
 				</div>
 			</div>
 			<div class="flex gap-4 flex-1 items-end justify-end justify-items-end m-2">
-				{#if $vaultStore?.hasInstalledSD && isAiGen}
+				{#if isAiGen}
 					<GalleryItemButton onClick={onGotoGeneratorClick} onMouseEnter={clearPreviewTimeout}>
 						<PenIcon />
 					</GalleryItemButton>

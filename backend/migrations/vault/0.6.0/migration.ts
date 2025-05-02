@@ -17,7 +17,7 @@ export default async (vault: VaultAPI) => {
 	});
 	for (const potentialGif of images) {
 		let filePath = path.join(
-			vault.getConfig().path,
+			vault.getConfigService().getConfig().path,
 			'media',
 			'images',
 			`${potentialGif.fileName}.png`
@@ -31,7 +31,7 @@ export default async (vault: VaultAPI) => {
 			// Delete the old thumbnail
 			await fs.unlink(
 				path.join(
-					vault.getConfig().path,
+					vault.getConfigService().getConfig().path,
 					'media',
 					'images',
 					'.thumb',

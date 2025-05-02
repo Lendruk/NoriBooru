@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { inject, injectable } from 'inversify';
 import { Job, JobAction, JobTag } from '../lib/Job';
-import { SDService } from './SDService';
+import { SDService2 } from './SD/SDService2';
 import { WebsocketService } from './WebsocketService';
 
 @injectable()
@@ -10,7 +10,7 @@ export class JobService {
 
 	public constructor(
 		@inject(WebsocketService) private websocketService: WebsocketService,
-		@inject(SDService) private sdService: SDService
+		@inject(SDService2) private sdService: SDService2
 	) {
 		this.websocketService.registerMiddleware((socket) => {
 			if (this.jobs.size > 0) {
@@ -22,7 +22,7 @@ export class JobService {
 			socket.send(
 				JSON.stringify({
 					event: 'SD',
-					data: { status: this.sdService.isSDUiRunning() ? 'RUNNING' : 'NOT_RUNNING' }
+					data: { status: this.sdService.isSDServerRunning() ? 'RUNNING' : 'NOT_RUNNING' }
 				})
 			);
 		});

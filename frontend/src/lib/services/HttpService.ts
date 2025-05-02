@@ -110,7 +110,7 @@ export class HttpService {
 		body?: Record<string, unknown> | FormData
 	): Promise<T> {
 		const { url, isGlobal } = endpoint;
-		return this.request({ url, method: 'POST', isGlobalRequest: isGlobal, body });
+		return this.request({ url, method: 'POST', isGlobalRequest: isGlobal, body: body ?? {} });
 	}
 
 	public static async postJob<T>(

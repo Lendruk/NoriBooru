@@ -84,7 +84,6 @@ export class VaultRouter extends Router {
 			path: vaultPath,
 			createdAt: Date.now(),
 			version: starterVersion,
-			hasInstalledSD: false,
 			civitaiApiKey: null
 		};
 		await fs.writeFile(`${vaultPath}/vault.config.json`, JSON.stringify(vaultConfig, null, 2));

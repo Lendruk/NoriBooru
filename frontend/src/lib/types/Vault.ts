@@ -5,7 +5,6 @@ export type Vault = {
 	name: string;
 	path: string;
 	port?: number;
-	hasInstalledSD: boolean;
 	civitaiApiKey: string | null;
 	world?: World;
 };

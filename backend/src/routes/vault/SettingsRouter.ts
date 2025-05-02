@@ -21,6 +21,6 @@ export class SettingsRouter extends Router {
 	@Route.PUT('/settings/rename')
 	public async renameVault(request: FastifyRequest) {
 		const { name } = request.body as { name: string };
-		await this.vaultConfigService.setName(name);
+		await this.vaultConfigService.setConfigValue('name', name, true);
 	}
 }

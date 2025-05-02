@@ -19,7 +19,7 @@
 
 	$effect(() => {
 		HttpService.get<{ civitaiApiKey: string }>(endpoints.getApiKeys()).then((res) => {
-			civitaiApiKey = res.civitaiApiKey;
+			civitaiApiKey = res?.civitaiApiKey;
 		});
 	});
 
@@ -50,18 +50,6 @@
 		createToast('Vault deleted successfully!');
 	}
 
-	async function uninstallSDUi() {
-		if (!$vaultStore?.hasInstalledSD) {
-			createToast('SDUI is not installed');
-			return;
-		}
-		isPerformingDestructiveAction = true;
-		currentAction = 'Uninstalling SDUI...';
-		await HttpService.post(endpoints.sdUninstall());
-		VaultService.setVault({ ...$vaultStore!, hasInstalledSD: false });
-		createToast('SDUI uninstalled successfully!');
-		isPerformingDestructiveAction = false;
-	}
 
 	async function unlinkVault() {
 		isPerformingDestructiveAction = true;
@@ -101,19 +89,6 @@
 	<div class="text-xl mb-2">Destructive Actions</div>
 
 	<div class="flex flex-col gap-2">
-		<div class="border-2 border-red-950 rounded-md p-4 flex items-center justify-between">
-			<div class="flex flex-col">
-				<div class="font-bold">Uninstall SDUI</div>
-				<div>
-					This will uninstall the Stable Diffusion UI from your device. It will remove all
-					checkpoints and loras. This action cannot be undone.
-				</div>
-			</div>
-			<Button
-				class={`${!$vaultStore?.hasInstalledSD ? 'cursor-not-allowed bg-surface-color text-red-800 ' : ''}`}
-				onClick={uninstallSDUi}>Uninstall SDUI</Button
-			>
-		</div>
 		<div class="border-2 border-red-950 rounded-md p-4 flex items-center justify-between">
 			<div class="flex flex-col">
 				<div class="font-bold">Unlink this Vault</div>
