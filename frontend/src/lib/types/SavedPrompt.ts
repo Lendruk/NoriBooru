@@ -1,7 +1,7 @@
 export type SavedPrompt = {
 	id?: string;
 	name: string;
-	previewImage: string;
+	previewMediaItem: number;
 	positivePrompt: string;
 	negativePrompt: string;
 	sampler: string;

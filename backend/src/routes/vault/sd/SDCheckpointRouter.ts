@@ -17,7 +17,7 @@ export class SDCheckpointRouter extends Router {
 	@Route.GET('/sd/checkpoints')
 	public async getSDCheckpoints(request: FastifyRequest) {
 		const { name } = request.query as { name: string };
-		return await this.sdCheckpointService.getSDCheckpoints(name);
+		return await this.sdCheckpointService.getCheckpoints(name);
 	}
 
 	@Route.PUT('/sd/checkpoints/:id')

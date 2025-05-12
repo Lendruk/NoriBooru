@@ -1,27 +1,54 @@
+import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
-import { sdLoras, SDLoraSchema, tagsToLoras } from '../../db/vault/schema';
+import { MediaItemSchema, sdLoras, SDLoraSchema, tagsToLoras } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 import { SDLora } from '../../types/sd/SDLora';
+import { MediaService } from '../MediaService';
 import { PopulatedTag, TagService } from '../TagService';
 
-export type UpdateLoraRequest = {
+export type UpdateLoraOptions = {
 	name?: string;
 	tags?: number[];
 	description?: string;
 	sdVersion?: string;
 	origin?: string;
-	previewImage?: string;
+	previewMediaItem?: number;
+	activationWords?: string[];
 };
+
+export type CreateLoraOptions = UpdateLoraOptions & {
+	path: string;
+};
+
 @injectable()
 export class SDLoraService extends VaultService {
 	public constructor(
 		@inject('db') protected readonly db: VaultDb,
-		@inject(TagService) private readonly tagService: TagService
+		@inject(TagService) private readonly tagService: TagService,
+		@inject(MediaService) private readonly mediaService: MediaService
 	) {
 		super(db);
+	}
+
+	public async createLora(options: CreateLoraOptions): Promise<SDLoraSchema> {
+		const { name, description, sdVersion, origin, previewMediaItem, path } = options;
+		const newLora = await this.db
+			.insert(sdLoras)
+			.values({
+				id: randomUUID(),
+				name: name ?? '',
+				previewMediaItem: previewMediaItem ?? null,
+				origin: origin ?? '',
+				description: description ?? 'unknown',
+				sdVersion: sdVersion ?? '',
+				path: path,
+				activationWords: JSON.stringify(options.activationWords ?? [])
+			})
+			.returning();
+		return newLora[0];
 	}
 
 	public async getLoras(queryTagArr: number[], nameQuery?: string): Promise<SDLora[]> {
@@ -38,8 +65,14 @@ export class SDLoraService extends VaultService {
 				this.matchesTagFilter(queryTagArr ?? [], tags) &&
 				this.matchesNameQuery(savedLora.name, nameQuery)
 			) {
+				let mediaItem: MediaItemSchema | undefined;
+				if (savedLora.previewMediaItem) {
+					mediaItem = await this.mediaService.getMediaItem(savedLora.previewMediaItem);
+				}
+
 				finalLoraArr.push({
 					...savedLora,
+					previewMediaItem: mediaItem,
 					activationWords: savedLora.activationWords ? JSON.parse(savedLora.activationWords) : [],
 					metadata: savedLora.metadata ? JSON.parse(savedLora.metadata) : {},
 					tags
@@ -61,11 +94,11 @@ export class SDLoraService extends VaultService {
 		return lora;
 	}
 
-	public async updateLora(id: string, options: UpdateLoraRequest): Promise<SDLoraSchema> {
+	public async updateLora(id: string, options: UpdateLoraOptions): Promise<SDLoraSchema> {
 		const updatePayload: Record<string, unknown> = {};
 
 		for (const key in options) {
-			if (['name', 'previewImage', 'origin', 'description', 'sdVersion'].includes(key)) {
+			if (['name', 'previewMediaItem', 'origin', 'description', 'sdVersion'].includes(key)) {
 				updatePayload[key] = options[key as keyof typeof options];
 			}
 		}

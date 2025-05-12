@@ -8,7 +8,7 @@ import { VaultService } from '../../lib/VaultService';
 type SDPrompt = {
 	id: string;
 	name: string | null;
-	previewImage: string | null;
+	previewMediaItem: number | null;
 	positivePrompt: string;
 	negativePrompt: string;
 	sampler: string;
@@ -112,7 +112,7 @@ export class PromptService extends VaultService {
 		return prompts.map((prompt) => ({
 			id: prompt.id,
 			name: prompt.name,
-			previewImage: prompt.previewImage,
+			previewMediaItem: prompt.previewMediaItem,
 			positivePrompt: prompt.positivePrompt,
 			negativePrompt: prompt.negativePrompt,
 			sampler: prompt.sampler,

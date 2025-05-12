@@ -5,13 +5,14 @@ import { inject, injectable } from 'inversify';
 import path from 'path';
 import { Readable } from 'stream';
 import { finished, pipeline } from 'stream/promises';
-import { sdCheckpoints, sdLoras } from '../../../db/vault/schema';
+import { SDCheckpointSchema, SDLoraSchema } from '../../../db/vault/schema';
 import { Job } from '../../../lib/Job';
 import { Route, Router } from '../../../lib/Router';
 import { VaultDb } from '../../../lib/VaultAPI';
 import { JobService } from '../../../services/JobService';
 import { MediaService } from '../../../services/MediaService';
-import { SDService2 } from '../../../services/SD/SDService2';
+import { SDCheckpointService } from '../../../services/SD/SDCheckpointService';
+import { SDLoraService } from '../../../services/SD/SDLoraService';
 import { VaultConfigService } from '../../../services/VaultConfigService';
 import { CivitaiResource } from '../../../types/sd/CivtaiResource';
 import { VaultConfig } from '../../../types/VaultConfig';
@@ -24,7 +25,8 @@ export class CivitaiRouter extends Router {
 		@inject('config') private readonly config: VaultConfig,
 		@inject('db') private readonly db: VaultDb,
 		@inject(MediaService) private readonly mediaService: MediaService,
-		@inject(SDService2) private readonly sdService: SDService2
+		@inject(SDLoraService) private readonly loraService: SDLoraService,
+		@inject(SDCheckpointService) private readonly sdCheckpointService: SDCheckpointService
 	) {
 		super();
 	}
@@ -70,8 +72,12 @@ export class CivitaiRouter extends Router {
 			if (modelVersion) {
 				const primaryFile = modelVersion.files.find((file) => file.primary);
 
+				if (!['Checkpoint', 'LORA'].includes(modelInfo.type)) {
+					throw new Error('Unsupported model type');
+				}
+
 				if (primaryFile) {
-					const filePath = `${this.config.path}/stable-diffusion-webui/models/${this.getFolderForModel(modelInfo.type)}/${primaryFile.name}`;
+					const filePath = `${this.config.path}/sd/${this.getFolderForModel(modelInfo.type)}/${primaryFile.name}`;
 					const stream = fs.createWriteStream(filePath);
 					const { body } = await fetch(primaryFile.downloadUrl, {
 						headers: {
@@ -79,61 +85,61 @@ export class CivitaiRouter extends Router {
 							'Content-Disposition': 'inline'
 						}
 					});
+
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					await finished(Readable.fromWeb(body! as any).pipe(stream));
 
+					console.log('File downloaded');
 					// Create a preview image
 					const imageRequest = await fetch(modelVersion.images[0].url);
 					const id = randomUUID();
 					const finalPath = path.join(this.config.path, 'media', 'images', `${id}.png`);
-					await pipeline(imageRequest.body!, createWriteStream(finalPath));
-					const mediaItem = await this.mediaService.createMediaItemFromFile({
-						fileExtension: 'png',
-						sdCheckPointId: modelId,
-						loras: [],
-						preCalculatedId: id
-					});
+					let newCheckpoint: SDCheckpointSchema | undefined;
+					let newLora: SDLoraSchema | undefined;
+					try {
+						if (modelInfo.type === 'LORA') {
+							console.log('Lora');
+							newLora = await this.loraService.createLora({
+								name: modelInfo.name,
+								description: modelInfo.description,
+								sdVersion: modelVersion.baseModel,
+								origin: url,
+								activationWords: modelVersion.trainedWords,
+								path: filePath
+							});
+						} else if (modelInfo.type === 'Checkpoint') {
+							console.log('Checkpoint');
 
-					if (modelInfo.type === 'LORA') {
-						const newLora = await this.db
-							.insert(sdLoras)
-							.values({
-								id: randomUUID(),
-								name: modelInfo.name,
-								path: filePath,
-								origin: url,
-								sdVersion: modelVersion.baseModel,
-								description: modelInfo.description,
-								previewImage: mediaItem.fileName,
-								activationWords: JSON.stringify(modelVersion.trainedWords),
-								metadata: ''
-							})
-							.returning();
-						await this.mediaService.addLoraToMediaItem(mediaItem.id, newLora[0].id);
-					} else if (modelInfo.type === 'Checkpoint') {
-						const newCheckpoint = await this.db
-							.insert(sdCheckpoints)
-							.values({
-								id: randomUUID(),
+							newCheckpoint = await this.sdCheckpointService.createCheckpoint({
 								name: modelInfo.name,
 								description: modelInfo.description,
-								path: filePath,
-								origin: url,
 								sdVersion: modelVersion.baseModel,
-								previewImage: mediaItem.fileName,
-								sha256: ''
-							})
-							.returning();
-						await this.mediaService.setMediaItemSDCheckpoint(mediaItem.id, newCheckpoint[0].id);
+								origin: url,
+								path: filePath
+							});
+						}
+
+						await pipeline(imageRequest.body!, createWriteStream(finalPath));
+						const mediaItem = await this.mediaService.createMediaItemFromFile({
+							fileExtension: 'png',
+							sdCheckPointId: undefined,
+							loras: [],
+							preCalculatedId: id
+						});
+
+						if (newLora) {
+							await this.mediaService.addLoraToMediaItem(mediaItem.id, newLora.id);
+							await this.loraService.updateLora(newLora.id, {
+								previewMediaItem: mediaItem.id
+							});
+						} else if (newCheckpoint) {
+							await this.mediaService.setMediaItemSDCheckpoint(mediaItem.id, newCheckpoint.id);
+						}
+						console.log('Preview image created');
+					} catch (error) {
+						console.log(error);
+						throw error;
 					}
-					// TODO: Refresh models in SD
-					// if (this.sdService.isSDUiRunning()) {
-					// 	if (modelInfo.type === 'LORA') {
-					// 		await this.sdService.refreshLoras();
-					// 	} else if (modelInfo.type === 'Checkpoint') {
-					// 		await this.sdService.refreshCheckpoints();
-					// 	}
-					// }
 				}
 			} else {
 				throw new Error('Model version not found');
@@ -154,9 +160,9 @@ export class CivitaiRouter extends Router {
 	private getFolderForModel = (modelType: string): string => {
 		switch (modelType) {
 			case 'LORA':
-				return 'Lora';
+				return 'loras';
 			case 'Checkpoint':
-				return 'Stable-diffusion';
+				return 'checkpoints';
 		}
 		throw new Error('Unsupported model type');
 	};

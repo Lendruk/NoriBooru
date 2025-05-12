@@ -494,6 +494,7 @@ export class MediaService extends VaultService {
 		loras?: string[];
 		source?: string;
 	}): Promise<MediaItemSchema> {
+		console.log('Creating media item from file');
 		const { fileExtension, originalFileName, preCalculatedId, sdCheckPointId, loras, source } =
 			options;
 		const fileType = this.getTypeFromExtension(fileExtension);
@@ -524,7 +525,6 @@ export class MediaService extends VaultService {
 				fileSize: stats.size / (1024 * 1024)
 			})
 			.returning();
-
 		if (exif) {
 			await this.processMediaItemExif(newMediaItem.id, exif);
 		}

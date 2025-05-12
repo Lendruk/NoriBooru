@@ -54,11 +54,11 @@
 	async function setPreviewImage(lora: SDLora) {
 		if (lastGen && loraInEdit) {
 			await HttpService.put(endpoints.sdLora({ id: lora.id }), {
-				previewImage: lastGen.fileName
+				previewImage: lastGen.id
 			});
-			loraInEdit.previewImage = lastGen.fileName!;
+			loraInEdit.previewMediaItem = lastGen
 			const index = loras.findIndex((l) => l.id === loraInEdit?.id);
-			loras[index].previewImage = loraInEdit!.previewImage;
+			loras[index].previewMediaItem = loraInEdit!.previewMediaItem;
 		}
 	}
 
@@ -152,7 +152,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each loras as lora}
 				<button
-					style={`background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${lora.previewImage}.png);`}
+					style={`background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${lora.previewMediaItem}.png);`}
 					on:click={() => onLoraClick(lora)}
 					class="w-[150px] h-[200px] bg-zinc-700 flex items-end justify-center relative bg-cover bg-no-repeat rounded-md overflow-hidden"
 				>
@@ -202,8 +202,8 @@
 					</LabeledComponent>
 				</div>
 				<div class="flex w-[150px] h-[250px] items-center relative justify-center bg-zinc-950">
-					{#if loraInEdit.previewImage}
-						<img src={HttpService.buildGetImageUrl(loraInEdit.previewImage, 'png')} />
+					{#if loraInEdit.previewMediaItem}
+						<img src={HttpService.buildGetImageUrl(loraInEdit.previewMediaItem.fileName!, 'png')} />
 					{:else}
 						<ImageIcon />
 					{/if}

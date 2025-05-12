@@ -2,12 +2,10 @@ import { FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../lib/Router';
 import { VaultConfigService } from '../../services/VaultConfigService';
-import { VaultConfig } from '../../types/VaultConfig';
 
 @injectable()
 export class SettingsRouter extends Router {
 	public constructor(
-		@inject('config') private readonly config: VaultConfig,
 		@inject(VaultConfigService) private readonly vaultConfigService: VaultConfigService
 	) {
 		super();
@@ -15,7 +13,9 @@ export class SettingsRouter extends Router {
 
 	@Route.GET('/settings/api-keys')
 	public async getApiKeys() {
-		return await this.config.civitaiApiKey;
+		return {
+			civitai: await this.vaultConfigService.getConfigValue('civitaiApiKey')
+		};
 	}
 
 	@Route.PUT('/settings/rename')

@@ -8,7 +8,7 @@
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { RawSDLora, SDLora } from '$lib/types/SD/SDLora';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
@@ -324,7 +324,7 @@
 		seed = lastGenSeed;
 	}
 
-	function onLoraClick(lora: SDLora) {
+	function onLoraClick(lora: RawSDLora) {
 		positivePrompt += `, <lora:${lora.name}:1>`;
 		usedLoras.push(lora.id);
 	}

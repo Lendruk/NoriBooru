@@ -2,9 +2,10 @@ import { randomUUID } from 'crypto';
 import { eq, like } from 'drizzle-orm';
 import fs from 'fs/promises';
 import { inject, injectable } from 'inversify';
-import { sdCheckpoints, SDCheckpointSchema } from '../../db/vault/schema';
+import { MediaItemSchema, sdCheckpoints, SDCheckpointSchema } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
+import { MediaService } from '../MediaService';
 import { VaultConfigService } from '../VaultConfigService';
 
 export type UpdateCheckpointRequest = {
@@ -13,28 +14,72 @@ export type UpdateCheckpointRequest = {
 	sdVersion?: string;
 	description?: string;
 	origin?: string;
-	previewImage?: string;
+	previewMediaItem?: string;
+};
+
+export type CreateCheckpointRequest = {
+	name: string;
+	description?: string;
+	path: string;
+	origin?: string;
+	sdVersion?: string;
+};
+
+export type PopulatedSDCheckpoint = Omit<SDCheckpointSchema, 'previewMediaItem'> & {
+	previewMediaItem?: MediaItemSchema;
 };
 
 @injectable()
 export class SDCheckpointService extends VaultService {
 	public constructor(
 		@inject('db') db: VaultDb,
-		@inject(VaultConfigService) private readonly config: VaultConfigService
+		@inject(VaultConfigService) private readonly config: VaultConfigService,
+		@inject(MediaService) private readonly mediaService: MediaService
 	) {
 		super(db);
 	}
 
-	public async getSDCheckpoints(nameQuery?: string): Promise<SDCheckpointSchema[]> {
+	public async createCheckpoint(options: CreateCheckpointRequest): Promise<SDCheckpointSchema> {
+		const { name, description, sdVersion, origin, path } = options;
+		const newCheckpoint = await this.db
+			.insert(sdCheckpoints)
+			.values({
+				id: randomUUID(),
+				name: name ?? '',
+				description: description ?? '',
+				origin: origin ?? '',
+				sdVersion: sdVersion ?? '',
+				path: path,
+				sha256: ''
+			})
+			.returning();
+		return newCheckpoint[0];
+	}
+
+	public async getCheckpoints(nameQuery?: string): Promise<PopulatedSDCheckpoint[]> {
+		await this.scanCheckpointDir();
+
+		let rawCheckpoints: SDCheckpointSchema[] = [];
 		if (nameQuery) {
-			return await this.db
+			rawCheckpoints = await this.db
 				.select()
 				.from(sdCheckpoints)
 				.where(like(sdCheckpoints.name, `%${nameQuery}%`));
+		} else {
+			rawCheckpoints = await this.db.query.sdCheckpoints.findMany();
 		}
-		await this.scanCheckpointDir();
 
-		return await this.db.query.sdCheckpoints.findMany();
+		const populatedCheckpoints: PopulatedSDCheckpoint[] = [];
+
+		for (const checkpoint of rawCheckpoints) {
+			let mediaItem: MediaItemSchema | undefined = undefined;
+			if (checkpoint.previewMediaItem) {
+				mediaItem = await this.mediaService.getMediaItem(checkpoint.previewMediaItem);
+			}
+			populatedCheckpoints.push({ ...checkpoint, previewMediaItem: mediaItem });
+		}
+
+		return populatedCheckpoints;
 	}
 
 	public async deleteCheckpoint(id: string): Promise<void> {
@@ -65,7 +110,7 @@ export class SDCheckpointService extends VaultService {
 	): Promise<SDCheckpointSchema> {
 		const updatePayload: Record<string, unknown> = {};
 		for (const key in options) {
-			if (['name', 'previewImage', 'origin', 'description', 'sdVersion'].includes(key)) {
+			if (['name', 'previewMediaItem', 'origin', 'description', 'sdVersion'].includes(key)) {
 				updatePayload[key] = options[key as keyof typeof options];
 			}
 
@@ -100,7 +145,7 @@ export class SDCheckpointService extends VaultService {
 							path: filePath,
 							origin: 'local',
 							sdVersion: 'unknown',
-							previewImage: null,
+							previewMediaItem: null,
 							sha256: ''
 						})
 						.returning();

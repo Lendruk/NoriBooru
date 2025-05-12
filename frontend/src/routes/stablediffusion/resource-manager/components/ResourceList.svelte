@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { HttpService } from '$lib/services/HttpService';
+	import type { MediaItem } from '$lib/types/MediaItem';
 	import { TrashIcon } from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 
-	export let resources: { name: string; id: string; previewImage?: string }[];
+	export let resources: { name: string; id: string; previewMediaItem?: Partial<MediaItem> }[];
 	export let selectedResourceId: string | undefined = undefined;
 
 	export let onResourceClick: (resource: any) => void | Promise<void>;
@@ -20,8 +21,8 @@
 		<div
 			on:click={() => onResourceClick(resource)}
 			class={`w-[150px] h-[200px] ${selectedResourceId === resource.id ? 'border-4 ' : ''} bg-zinc-950 bg-cover bg-no-repeat relative break-words rounded-sm border-red-950 hover:border-4  hover:transition-all`}
-			style={resource.previewImage
-				? `background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${resource.previewImage}.png)`
+			style={resource.previewMediaItem
+				? `background-image: url(${HttpService.buildGetImageUrl(resource.previewMediaItem.fileName!, 'png')})`
 				: ''}
 		>
 			{resource.name}

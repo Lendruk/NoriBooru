@@ -3,7 +3,7 @@
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { RawSDLora } from '$lib/types/SD/SDLora';
 	import {
 		ArrowLeft,
 		Button,
@@ -15,7 +15,7 @@
 		TextInput
 	} from '@lendruk/personal-svelte-ui-lib';
 
-	export let sdLora: SDLora;
+	export let sdLora: RawSDLora;
 	export let isOpen: boolean;
 	export let tags: PopulatedTag[];
 

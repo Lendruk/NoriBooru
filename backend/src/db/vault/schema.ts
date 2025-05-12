@@ -119,7 +119,7 @@ export type MediaItemSchema = InferSelectModel<typeof mediaItems> & {
 export const sdPrompts = sqliteTable('sd_prompts', {
 	id: text('id').primaryKey(),
 	name: text('name'),
-	previewImage: text('preview_image'),
+	previewMediaItem: integer('preview_media_item'),
 	positivePrompt: text('positive_prompt').notNull(),
 	negativePrompt: text('negative_prompt').notNull(),
 	sampler: text('sampler').notNull(),
@@ -172,7 +172,7 @@ export const sdCheckpoints = sqliteTable('sd_checkpoints', {
 	origin: text('origin').notNull(),
 	sdVersion: text('sd_version').notNull(),
 	sha256: text('sha256').notNull(),
-	previewImage: text('preview_image')
+	previewMediaItem: integer('preview_media_item')
 });
 export type SDCheckpointSchema = InferSelectModel<typeof sdCheckpoints>;
 
@@ -184,7 +184,7 @@ export const sdLoras = sqliteTable('sd_loras', {
 	metadata: text('metadata'),
 	origin: text('origin').notNull(),
 	sdVersion: text('sd_version').notNull(),
-	previewImage: text('preview_image'),
+	previewMediaItem: integer('preview_media_item'),
 	activationWords: text('activation_words').notNull()
 });
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;

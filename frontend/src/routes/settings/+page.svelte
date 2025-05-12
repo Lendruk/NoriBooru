@@ -18,8 +18,8 @@
 	let civitaiApiKey = $state($vaultStore?.civitaiApiKey ?? '');
 
 	$effect(() => {
-		HttpService.get<{ civitaiApiKey: string }>(endpoints.getApiKeys()).then((res) => {
-			civitaiApiKey = res?.civitaiApiKey;
+		HttpService.get<{ civitai: string }>(endpoints.getApiKeys()).then((res) => {
+			civitaiApiKey = res?.civitai;
 		});
 	});
 

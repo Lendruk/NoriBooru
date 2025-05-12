@@ -5,7 +5,7 @@
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { RawSDLora } from '$lib/types/SD/SDLora';
 	import {
 		Button,
 		createToast,
@@ -29,12 +29,12 @@
 	let deletionResourceType = '';
 	let isModalLoading = false;
 
-	let loras: SDLora[] = [];
+	let loras: RawSDLora[] = [];
 	let checkpoints: SDCheckpoint[] = [];
 	let tags: PopulatedTag[] = [];
 	let isEditWindowOpen = false;
 	let currentlySelectedResource:
-		| (SDLora & { type: string })
+		| (RawSDLora & { type: string })
 		| (SDCheckpoint & { type: string })
 		| undefined;
 
@@ -84,7 +84,7 @@
 		isEditWindowOpen = true;
 	}
 
-	function onLoraClick(sdLora: SDLora): void {
+	function onLoraClick(sdLora: RawSDLora): void {
 		currentlySelectedResource = { ...sdLora, type: 'lora' };
 		isEditWindowOpen = true;
 	}
@@ -132,7 +132,7 @@
 
 	async function fetchResources() {
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
-			HttpService.get<SDLora[]>(endpoints.sdLoras()),
+			HttpService.get<RawSDLora[]>(endpoints.sdLoras()),
 			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
 			HttpService.get<PopulatedTag[]>(endpoints.tags())
 		]);
@@ -149,7 +149,7 @@
 
 	// Querying
 	async function searchLoras() {
-		const filteredLoras = await HttpService.get<SDLora[]>(
+		const filteredLoras = await HttpService.get<RawSDLora[]>(
 			endpoints.sdLoras({
 				params: `tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
 			})
@@ -294,7 +294,7 @@
 					<LoraEdit
 						bind:isOpen={isEditWindowOpen}
 						bind:tags
-						bind:sdLora={currentlySelectedResource as SDLora}
+						bind:sdLora={currentlySelectedResource as RawSDLora}
 					/>
 				{/if}
 			</div>

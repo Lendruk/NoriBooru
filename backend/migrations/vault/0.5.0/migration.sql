@@ -66,7 +66,8 @@ CREATE TABLE IF NOT EXISTS `sd_checkpoints` (
 	`origin` text NOT NULL,
 	`sd_version` text NOT NULL,
 	`sha256` text NOT NULL,
-	`preview_image` text
+	`preview_media_item` integer,
+	FOREIGN KEY (`preview_media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE set null
 );
 --- StatementBreak
 CREATE TABLE IF NOT EXISTS `sd_loras` (
@@ -77,14 +78,14 @@ CREATE TABLE IF NOT EXISTS `sd_loras` (
 	`metadata` text,
 	`origin` text NOT NULL,
 	`sd_version` text NOT NULL,
-	`preview_image` text,
-	`activation_words` text NOT NULL
+	`activation_words` text NOT NULL,
+	`preview_media_item` integer,
+	FOREIGN KEY (`preview_media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE set null
 );
 --- StatementBreak
 CREATE TABLE IF NOT EXISTS `sd_prompts` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text,
-	`preview_image` text,
 	`positive_prompt` text NOT NULL,
 	`negative_prompt` text NOT NULL,
 	`sampler` text NOT NULL,
@@ -98,7 +99,9 @@ CREATE TABLE IF NOT EXISTS `sd_prompts` (
 	`high_res_steps` integer,
 	`high_res_denoising_strength` real,
 	`high_res_upscale_by` real,
-	`created_at` integer NOT NULL
+	`created_at` integer NOT NULL,
+	`preview_media_item` integer,
+	FOREIGN KEY (`preview_media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE set null
 );
 --- StatementBreak
 CREATE TABLE IF NOT EXISTS `sd_wildcards` (

@@ -1,3 +1,4 @@
+import { MediaItemSchema } from '../../db/vault/schema';
 import { PopulatedTag } from '../../services/TagService';
 
 export type SDLora = {
@@ -17,6 +18,6 @@ export type SDLora = {
 	description: string | null;
 	origin: string;
 	sdVersion: string;
-	previewImage: string | null;
+	previewMediaItem?: MediaItemSchema;
 	tags: PopulatedTag[];
 };

@@ -108,7 +108,6 @@ def text2img():
             img_io.seek(0)
             # Convert the image to base64
             img_base64 = base64.b64encode(img_io.read()).decode('utf-8')
-            # img_data_uri = f"data:image/png;base64,{img_base64}"
             result_images.append(img_base64)
 
     except Exception as e:
@@ -116,6 +115,5 @@ def text2img():
         return jsonify(error=str(e)), 500
 
     return jsonify(images=result_images)
-    # return send_file(img_io, mimetype='image/png')
 
 app.run(host='127.0.0.1', port=port)
