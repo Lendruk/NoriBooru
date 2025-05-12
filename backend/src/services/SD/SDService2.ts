@@ -9,6 +9,7 @@ import { MediaService } from '../MediaService';
 import { TagService } from '../TagService';
 import { VaultConfigService } from '../VaultConfigService';
 import { WebsocketService } from '../WebsocketService';
+import { SDCheckpointService } from './SDCheckpointService';
 
 type PromptResponse = {
 	fileName: string;
@@ -32,7 +33,7 @@ export type Text2ImgPromptBody = {
 	positive_prompt: string;
 	negative_prompt: string;
 	model: string;
-	step: number;
+	steps: number;
 	width: number;
 	height: number;
 	seed: number;
@@ -50,15 +51,23 @@ export class SDService2 {
 		@inject('db') private readonly db: VaultDb,
 		@inject(WebsocketService) private readonly websocketService: WebsocketService,
 		@inject(TagService) private readonly tagService: TagService,
-		@inject(MediaService) private readonly mediaService: MediaService
+		@inject(MediaService) private readonly mediaService: MediaService,
+		@inject(SDCheckpointService) private readonly sdCheckpointService: SDCheckpointService
 	) {}
 
 	public async startSDServer(): Promise<void> {
 		if (!this.sdProcess) {
 			const port = await this.findOpenPort();
 			const authToken = randomUUID();
-			const newProcess = spawn('python3', ['../sd-server/main.py', authToken, port.toString()]);
+			const cachePath = `${this.vaultConfig.getConfigValue('path')}/sd/diffusers_cache`;
+			const newProcess = spawn('python3', [
+				'../sd-server/main.py',
+				authToken,
+				port.toString(),
+				cachePath
+			]);
 			newProcess.on('error', (err) => console.log(err));
+			newProcess.on('message', (msg) => console.log(msg));
 			newProcess.stderr.on('data', (data) => {
 				console.log(data.toString());
 			});
@@ -91,7 +100,7 @@ export class SDService2 {
 	}
 
 	public async stopSDServer(): Promise<void> {
-		console.log(`Stopping SD ui for vault ${this.vaultConfig.name}`);
+		console.log(`Stopping SD ui for vault ${this.vaultConfig.getConfig().name}`);
 		if (this.sdProcess) {
 			if (this.sdProcess.process.pid) {
 				kill(this.sdProcess.process.pid);
@@ -108,12 +117,19 @@ export class SDService2 {
 		prompt: Text2ImgPromptBody;
 	}): Promise<PromptResponse[]> {
 		const { prompt, autoTag, checkpointId, loras } = options;
+
+		prompt.model = (await this.sdCheckpointService.getCheckpoint(checkpointId)).path;
+
+		if (prompt.seed === -1) {
+			prompt.seed = Math.floor(Math.random() * 1000000000);
+		}
+
 		const result = await fetch(`http://127.0.0.1:${this.getSdPort()}/sd/text2img`, {
 			method: 'POST',
 			body: JSON.stringify(prompt),
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${this.sdProcess?.authToken}`
+				Authorization: `${this.sdProcess?.authToken}`
 			}
 		});
 		const body = (await result.json()) as SDPromptResponse;

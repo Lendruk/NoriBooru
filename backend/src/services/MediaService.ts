@@ -591,10 +591,6 @@ export class MediaService extends VaultService {
 		const { base64EncodedImage, fileExtension, originalFileName, sdCheckPointId, loras, source } =
 			options;
 		const id = randomUUID();
-		const imageBuffer = Buffer.from(
-			base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''),
-			'base64'
-		);
 		const fileType = this.getTypeFromExtension(fileExtension);
 		const finalExtension = this.getFinalExtension(fileExtension);
 		const itemPath = path.join(
@@ -603,9 +599,13 @@ export class MediaService extends VaultService {
 			fileType === 'image' ? 'images' : 'videos',
 			`${id}.${finalExtension}`
 		);
-		const hash = createHash('sha256').update(Uint8Array.from(imageBuffer)).digest('hex').toString();
-		console.log(hash);
-		await fs.writeFile(itemPath, imageBuffer.toString());
+		// const hash = createHash('sha256').update(Uint8Array.from(imageBuffer)).digest('hex').toString();
+		// await fs.writeFile(itemPath, imageBuffer.toString());
+		await fs.writeFile(
+			itemPath,
+			base64EncodedImage.replace(/^data:image\/\w+;base64,/, ''),
+			'base64'
+		);
 
 		const newMediaItem = await this.createMediaItemFromFile({
 			fileExtension: finalExtension,

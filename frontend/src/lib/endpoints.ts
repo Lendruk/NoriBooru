@@ -45,6 +45,7 @@ type EndpointNames =
 	| 'renameVault'
 	| 'worldMaps'
 	| 'world'
+	| 'sdText2Img'
 	| 'mediaItems';
 
 type Endpoints = {
@@ -139,6 +140,10 @@ export const endpoints: Endpoints = {
 		url: `/sd/prompts/${options?.id ? `${options.id}` : ''}`,
 		isGlobal: false
 	}),
+	sdText2Img: () => ({
+		url: `/sd/text2img`,
+		isGlobal: false
+	}),
 	wildCard: (options) => ({
 		url: `/sd/wildcards/${options?.id ? `${options.id}` : ''}`,
 		isGlobal: false
@@ -160,7 +165,7 @@ export const endpoints: Endpoints = {
 		isGlobal: false
 	}),
 	stopSDUi: () => ({
-		url: `/sd op`,
+		url: `/sd/stop`,
 		isGlobal: false
 	}),
 	maskSDInactive: () => ({

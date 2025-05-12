@@ -1,9 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
-import { VaultConfig } from '../../../types/VaultConfig';
-
 import { SDService2, Text2ImgPromptBody } from '../../../services/SD/SDService2';
+import { VaultConfig } from '../../../types/VaultConfig';
 
 type PromptRequestBody = {
 	autoTag: boolean;
@@ -17,6 +16,7 @@ type PromptRequestBody = {
  */
 @injectable()
 export class SDRouter extends Router {
+	private readonly SD_RESOURCES_DIR_NAME = 'sd-resources';
 	public constructor(
 		@inject(SDService2) private readonly sdService: SDService2,
 		@inject('config') private readonly config: VaultConfig
@@ -24,17 +24,22 @@ export class SDRouter extends Router {
 		super();
 	}
 
-	@Route.GET('/sd/progress')
-	public async getSDProgress(_: FastifyRequest, reply: FastifyReply) {
-		const sdPort = this.sdService.getSdPort();
-		if (!sdPort) {
-			return reply.status(400).send('SD Ui is not running for the given vault');
-		}
+	// @Route.GET('/sd/progress')
+	// public async getSDProgress(_: FastifyRequest, reply: FastifyReply) {
+	// 	const sdPort = this.sdService.getSdPort();
+	// 	if (!sdPort) {
+	// 		return reply.status(400).send('SD Ui is not running for the given vault');
+	// 	}
 
-		const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/progress`);
-		const body = await result.json();
+	// 	const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/progress`);
+	// 	const body = await result.json();
 
-		return reply.send(body);
+	// 	return reply.send(body);
+	// }
+
+	@Route.POST('/sd/scan-resources')
+	public async scanResources(_: FastifyRequest, reply: FastifyReply) {
+		return reply.send({ message: 'Resources scanned successfully!' });
 	}
 
 	@Route.GET('/sd/samplers')
@@ -127,7 +132,7 @@ export class SDRouter extends Router {
 	// 	reply.send({ message: 'Checkpoint unloaded successfully' });
 	// }
 
-	@Route.POST('/sd/prompt')
+	@Route.POST('/sd/text2img')
 	public async promptSd(request: FastifyRequest) {
 		const { autoTag, checkpointId, loras, prompt } = request.body as PromptRequestBody;
 		const items = await this.sdService.prompt({ autoTag, checkpointId, loras, prompt });

@@ -1,21 +1,30 @@
 import os
-# Setting the cache directory for Hugging Face before importing diffusers
-os.environ["HF_HOME"] = "./sd-server/.cache"
-from flask import Flask, request, jsonify, send_file
-from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
-import torch
 import sys
-from io import BytesIO
-import base64
-from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from_original_stable_diffusion_ckpt
 
-app = Flask('sd-client')
 auth_key = sys.argv[1]
 port = 5000
+
 if len(sys.argv) > 2:
     port = int(sys.argv[2])
     print(f"Using port {port} from command line argument")
 
+
+base_storage_path = sys.argv[3] if len(sys.argv) > 3 else '../sd-server/.cache'
+checkpoint_path = base_storage_path + '/checkpoints/'
+lora_path = base_storage_path + '/loras/'
+huggingface_path = base_storage_path + '/huggingface/'
+
+# Setting the cache directory for Hugging Face before importing diffusers
+os.environ["HF_HOME"] = huggingface_path
+from flask import Flask, request, jsonify, send_file
+from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
+import torch
+from io import BytesIO
+import base64
+from typing import cast
+from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from_original_stable_diffusion_ckpt
+
+app = Flask('sd-client')
 loaded_models_dict = {}
 
 @app.route('/sd/text2img', methods=['POST'])
@@ -35,39 +44,45 @@ def text2img():
     height = data['height']
     seed = data['seed']
 
+    print(f"Received model: {sd_model}")
+
     if not all([sd_model, steps, width, height, seed]):
         return jsonify(error='Bad Request'), 400
 
     try:
         # Load the model
-
         if sd_model in loaded_models_dict:
             print(f"Model {sd_model} already loaded, using cached version.")
             pipe = loaded_models_dict[sd_model]
         elif sd_model.lower().endswith('.safetensors'):
             # Extract the model name from the path
             model_name = os.path.basename(sd_model).replace('.safetensors', '')
-            if not os.path.exists('./sd-server/.cache/local_checkpoints/' + model_name):
+            if not os.path.exists(checkpoint_path + model_name):
                 print("Converting safetensors to original checkpoint format...")
                 result = download_from_original_stable_diffusion_ckpt(
                     checkpoint_path_or_dict=sd_model,
                     safety_checker=None,
-                    local_files_only=True,
+                    local_files_only=False,
                     load_safety_checker=False,
                     from_safetensors=True,
-                    original_config_file='./sd-server/sd_xl_base.yaml'
+                    original_config_file='../sd-server/sd_xl_base.yaml'
                     # original_config_file='./v1-inference.yaml'
                 )
-                result.save_pretrained('./sd-server/.cache/local_checkpoints/' + model_name)
+                result.save_pretrained(checkpoint_path + model_name)
             print(f"Loading model from {sd_model}")
-            model_path = './sd-server/.cache/local_checkpoints/' + model_name
-            pipe = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
+            model_path = checkpoint_path + model_name
+            pipe: StableDiffusionXLPipeline  = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
             loaded_models_dict[sd_model] = pipe
+        else:
+            print('Invalid model path, must be .ckpt or .safetensors')
+            return jsonify(error='Invalid model path, must be .ckpt or .safetensors'), 400
 
 
         print("Setting up scheduler...")
         pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
+        
         pipe = pipe.to('cuda')
+        pipe = cast(StableDiffusionXLPipeline, pipe)
 
         print("Generating image...")
         # Create the generator
@@ -85,11 +100,15 @@ def text2img():
 
         # Populate the result_images list with the generated images as base64 strings
         for image in generation_result.images:
+            if image.mode not in ('RGB', 'RGBA'):
+                image = image.convert('RGBA')
+
             img_io = BytesIO()
             image.save(img_io, 'PNG')
             img_io.seek(0)
             # Convert the image to base64
-            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            img_base64 = base64.b64encode(img_io.read()).decode('utf-8')
+            # img_data_uri = f"data:image/png;base64,{img_base64}"
             result_images.append(img_base64)
 
     except Exception as e:

@@ -1,3 +1,13 @@
+export type Text2ImgPromptBody = {
+	positive_prompt: string;
+	negative_prompt: string;
+	model: string;
+	steps: number;
+	width: number;
+	height: number;
+	seed: number;
+};
+
 export type SDPromptRequest = {
 	prompt: string;
 	negative_prompt: string;

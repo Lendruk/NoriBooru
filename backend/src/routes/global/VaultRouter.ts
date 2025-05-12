@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import fs from 'fs/promises';
@@ -45,50 +44,17 @@ export class VaultRouter extends Router {
 	@Route.POST('/vaults')
 	public async createVault(request: FastifyRequest, reply: FastifyReply) {
 		const body = request.body as { path?: string; name: string };
-		const starterVersion = '0.0.0';
-		const vaultPath = body.path as string;
-
-		if (vaultPath) {
-			try {
-				const stats = await fs.stat(vaultPath);
-				if (!stats.isDirectory()) {
-					return reply.status(400).send({ message: 'Path is not a directory' });
-				}
-
-				const dirContent = await fs.readdir(vaultPath);
-				if (dirContent.length > 0) {
-					return reply.status(400).send({ message: 'Directory must be empty' });
-				}
-			} catch (err) {
-				await fs.mkdir(vaultPath);
+		let newVaultConfig: VaultConfig;
+		try {
+			newVaultConfig = await this.vaultController.createVault(body.name, body.path);
+		} catch (error) {
+			if (error instanceof Error) {
+				return reply.status(400).send({ message: error.message });
 			}
+			return reply.status(500).send({ message: 'Internal server error' });
 		}
-
-		const newVault = await masterDb
-			.insert(vaults)
-			.values({
-				id: randomUUID(),
-				path: body.path ?? (await getServerConfig()).baseVaultDir
-			})
-			.returning();
-
-		await fs.mkdir(`${vaultPath}/media`);
-		await fs.mkdir(`${vaultPath}/media/images`);
-		await fs.mkdir(`${vaultPath}/media/images/.thumb`);
-		await fs.mkdir(`${vaultPath}/media/videos`);
-		await fs.mkdir(`${vaultPath}/media/videos/.thumb`);
-
-		const vaultConfig: VaultConfig = {
-			id: newVault[0].id,
-			name: body.name,
-			path: vaultPath,
-			createdAt: Date.now(),
-			version: starterVersion,
-			civitaiApiKey: null
-		};
-		await fs.writeFile(`${vaultPath}/vault.config.json`, JSON.stringify(vaultConfig, null, 2));
-		await this.vaultController.registerVault(newVault[0]);
-		return reply.send(vaultConfig);
+		await this.vaultController.registerVault(newVaultConfig);
+		return reply.send(newVaultConfig);
 	}
 
 	@Route.DELETE('/vaults/:id')

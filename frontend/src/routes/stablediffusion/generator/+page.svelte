@@ -30,7 +30,6 @@
 	import { onMount } from 'svelte';
 	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
-	import ProgressTracker from './components/ProgressTracker.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
 	import SimplePrompt from './components/prompting/SimplePrompt.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
@@ -121,9 +120,10 @@
 		loras = fetchedLoras;
 		wildcards = fetchedWildcards;
 
-		checkpointId = checkpoints[0]?.id;
-		sampler = samplers[0].name;
-		highResUpscaler = upscalers[0].name;
+		// checkpointId = checkpoints[0]?.id;
+		// sampler = samplers[0].name;
+		sampler = 'TBD'
+		// highResUpscaler = upscalers[0].name;
 		if (checkpoints.length > 1) {
 			refinerCheckpoint = checkpoints[1].name;
 		}
@@ -176,35 +176,34 @@
 		prompt
 			.withPositivePrompt(processPrompt(wildcards, positivePrompt))
 			.withNegativePrompt(processPrompt(wildcards, negativePrompt))
-			.withSampler(sampler)
 			.withSteps(steps)
 			.withSize(width, height)
 			.withSeed(seed)
 			.withCheckpoint(checkpoint.name)
-			.withBatching(numberOfGenerations, imagesPerGeneration)
-			.withCfgScale(cfgScale);
+			// .withBatching(numberOfGenerations, imagesPerGeneration)
+			// .withCfgScale(cfgScale);
 
-		if (isRefinerEnabled) {
-			prompt.withRefiner({
-				refinerCheckpoint,
-				switchAt: refinerSwitchAt
-			});
-		}
+		// if (isRefinerEnabled) {
+		// 	prompt.withRefiner({
+		// 		refinerCheckpoint,
+		// 		switchAt: refinerSwitchAt
+		// 	});
+	// }
 
-		if (isHighResEnabled) {
-			prompt.withHighResOptions({
-				denoisingStrength: highResDenoisingStrength,
-				steps: highResSteps,
-				upscaleBy,
-				upscaler: highResUpscaler
-			});
-		}
+		// if (isHighResEnabled) {
+		// 	prompt.withHighResOptions({
+		// 		denoisingStrength: highResDenoisingStrength,
+		// 		steps: highResSteps,
+		// 		upscaleBy,
+		// 		upscaler: highResUpscaler
+		// 	});
+		// }
 
 		isGeneratingImage = true;
 		try {
 			const result = await HttpService.post<{
 				items: { fileName: string; id: number; metadata: MediaItemMetadata; isArchived: boolean }[];
-			}>(endpoints.sdPrompts(), {
+			}>(endpoints.sdText2Img(), {
 				prompt: prompt.build(),
 				autoTag,
 				checkpointId,
@@ -521,7 +520,7 @@
 						<PreviewImages images={generatedImages} onSetSeed={setSeedFromLastGen} />
 					{/if}
 				</div>
-				<ProgressTracker bind:isGeneratingImage />
+				<!-- <ProgressTracker bind:isGeneratingImage /> -->
 			</div>
 		</div>
 	</div>

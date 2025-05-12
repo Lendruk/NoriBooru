@@ -10,6 +10,10 @@ export class VaultConfigService {
 		return this.config;
 	}
 
+	public getConfigValue<K extends keyof VaultConfig>(key: K): VaultConfig[K] {
+		return this.config[key];
+	}
+
 	public async setConfigValue<K extends keyof VaultConfig>(
 		key: K,
 		value: VaultConfig[K],
