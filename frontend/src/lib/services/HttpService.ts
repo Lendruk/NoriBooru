@@ -68,10 +68,12 @@ export class HttpService {
 
 		let port = options.isGlobalRequest ? this.GLOBAL_PORT : this.getVaultPort();
 
-		if (!(body instanceof FormData)) {
-			headers['Content-Type'] = 'application/json';
-		} else {
-			headers['Content-Type'] = 'multipart/form-data';
+		if (method !== 'DELETE') {
+			if (!(body instanceof FormData)) {
+				headers['Content-Type'] = 'application/json';
+			} else {
+				headers['Content-Type'] = 'multipart/form-data';
+			}
 		}
 
 		if (!port) {
@@ -81,7 +83,6 @@ export class HttpService {
 		const response = await fetch(this.buildUrl(url, port), {
 			method,
 			headers: {
-				'Content-Type': 'application/json',
 				vault: this.getVaultId() || '',
 				...headers
 			},

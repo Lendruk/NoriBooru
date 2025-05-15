@@ -20,7 +20,10 @@ export abstract class IoCAPI extends Container {
 		});
 
 		app.register(ws);
-		app.register(cors);
+		app.register(cors, {
+			origin: '*',
+			methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
+		});
 		app.register(multipart, {
 			limits: {
 				files: 100000,
