@@ -9,6 +9,7 @@ import { MediaService } from '../MediaService';
 import { TagService } from '../TagService';
 import { VaultConfigService } from '../VaultConfigService';
 import { WebsocketService } from '../WebsocketService';
+import { PromptBody } from './PromptService';
 import { SDCheckpointService } from './SDCheckpointService';
 
 type PromptResponse = {
@@ -30,9 +31,20 @@ type ProcessEntry = {
 };
 
 export type Text2ImgPromptBody = {
+	positive_prompt: PromptBody;
+	negative_prompt: PromptBody;
+	steps: number;
+	width: number;
+	height: number;
+	seed: number;
+};
+
+type SDServerLoraPayload = { path: string; strength: number };
+type SDServerText2ImgPromptBody = {
 	positive_prompt: string;
 	negative_prompt: string;
 	model: string;
+	loras: SDServerLoraPayload[];
 	steps: number;
 	width: number;
 	height: number;
@@ -118,15 +130,11 @@ export class SDService2 {
 	}): Promise<PromptResponse[]> {
 		const { prompt, autoTag, checkpointId, loras } = options;
 
-		prompt.model = (await this.sdCheckpointService.getCheckpoint(checkpointId)).path;
-
-		if (prompt.seed === -1) {
-			prompt.seed = Math.floor(Math.random() * 1000000000);
-		}
-
+		const mappedPrompt = await this.mapSDPromptToSDServerRequest(prompt, checkpointId);
+		console.log(mappedPrompt);
 		const result = await fetch(`http://127.0.0.1:${this.getSdPort()}/sd/text2img`, {
 			method: 'POST',
-			body: JSON.stringify(prompt),
+			body: JSON.stringify(mappedPrompt),
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `${this.sdProcess?.authToken}`
@@ -151,7 +159,7 @@ export class SDService2 {
 		if (autoTag) {
 			await this.mediaService.tagMediaItemFromPrompt(
 				items.map((item) => item.id),
-				prompt.positive_prompt.concat(' ', prompt.negative_prompt)
+				mappedPrompt.positive_prompt.concat(' ', mappedPrompt.negative_prompt)
 			);
 		}
 
@@ -211,5 +219,53 @@ export class SDService2 {
 		}
 
 		throw new Error('No available port');
+	}
+
+	private async mapSDPromptToSDServerRequest(
+		prompt: Text2ImgPromptBody,
+		checkpointId: string
+	): Promise<SDServerText2ImgPromptBody> {
+		const checkpointPath = (await this.sdCheckpointService.getCheckpoint(checkpointId)).path;
+		const seed = prompt.seed === -1 ? Math.floor(Math.random() * 1000000000) : prompt.seed;
+
+		const [positivePrompt, positiveLoras] = this.mapPromptBodyToSimplePrompt(
+			prompt.positive_prompt
+		);
+		const [negativePrompt, negativeLoras] = this.mapPromptBodyToSimplePrompt(
+			prompt.negative_prompt
+		);
+		console.log(positivePrompt);
+		console.log(positiveLoras);
+		return {
+			positive_prompt: positivePrompt,
+			negative_prompt: negativePrompt,
+			loras: positiveLoras.concat(negativeLoras),
+			height: prompt.height,
+			width: prompt.width,
+			steps: prompt.steps,
+			seed: seed,
+			model: checkpointPath
+		};
+	}
+
+	public mapPromptBodyToSimplePrompt(promptBody: PromptBody): [string, SDServerLoraPayload[]] {
+		const loras: SDServerLoraPayload[] = [];
+		let prompt = '';
+		for (const item of promptBody) {
+			if ('text' in item) {
+				prompt += `${prompt.length > 0 ? ', ' : ''}${item.text}`;
+			} else if ('name' in item) {
+				prompt += `${prompt.length > 0 ? ', ' : ''}${item.name}`;
+			} else if ('lora' in item) {
+				if (item.activatedWords) {
+					for (const activationWord of item.activatedWords) {
+						prompt += `, ${activationWord}`;
+					}
+				}
+				loras.push({ path: item.lora.path, strength: item.strength });
+			}
+		}
+
+		return [prompt, loras];
 	}
 }

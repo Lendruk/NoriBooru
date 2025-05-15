@@ -26,7 +26,7 @@
 
 	let showLoraEditModal = false;
 	let loraInEdit: SDLora | undefined;
-	let activationWords: [string, number][] = [];
+	let activationWords: string[] = [];
 
 	let nameInputTimeout: NodeJS.Timeout | undefined;
 
@@ -34,13 +34,14 @@
 		showLoraEditModal = true;
 		loraInEdit = lora;
 
-		const key = Object.keys(loraInEdit.metadata.ss_tag_frequency)[0];
-		const frequencyDict = loraInEdit.metadata.ss_tag_frequency[key];
-		for (const tag in frequencyDict) {
-			activationWords.push([tag, frequencyDict[tag]]);
-		}
+		// const key = Object.keys(loraInEdit.metadata.ss_tag_frequency)[0];
+		// const frequencyDict = loraInEdit.metadata.ss_tag_frequency[key];
+		// for (const tag in frequencyDict) {
+		// 	activationWords.push([tag, frequencyDict[tag]]);
+		// }
+		activationWords = loraInEdit.activationWords;
 
-		activationWords.sort((a, b) => b[1] - a[1]);
+		// activationWords.sort((a, b) => b[1] - a[1]);
 	}
 
 	onMount(() => {
@@ -152,7 +153,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each loras as lora}
 				<button
-					style={`background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${lora.previewMediaItem}.png);`}
+					style={`background-image: url(${HttpService.buildGetImageThumbnailUrl(lora?.previewMediaItem?.fileName ?? '', 'png')});`}
 					on:click={() => onLoraClick(lora)}
 					class="w-[150px] h-[200px] bg-zinc-700 flex items-end justify-center relative bg-cover bg-no-repeat rounded-md overflow-hidden"
 				>
@@ -217,9 +218,9 @@
 			<LabeledComponent>
 				<div slot="label">Activation Words</div>
 				<div class="overflow-scroll max-h-[300px]" slot="content">
-					{#each activationWords as activationPair}
+					{#each activationWords as word}
 						<div>
-							{activationPair[0]} : {activationPair[1]}
+							{word}
 						</div>
 					{/each}
 				</div>

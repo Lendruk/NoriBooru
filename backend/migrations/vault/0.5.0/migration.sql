@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS `sd_loras` (
 	`sd_version` text NOT NULL,
 	`activation_words` text NOT NULL,
 	`preview_media_item` integer,
+	`type` text,
 	FOREIGN KEY (`preview_media_item`) REFERENCES `media_items`(`id`) ON UPDATE no action ON DELETE set null
 );
 --- StatementBreak

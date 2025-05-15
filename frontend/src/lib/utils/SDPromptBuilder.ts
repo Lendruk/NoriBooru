@@ -1,13 +1,12 @@
-import type { Text2ImgPromptBody } from '$lib/types/SD/SDPromptRequest';
+import type { PromptBody, Text2ImgPromptBody } from '$lib/types/SD/SDPromptRequest';
 
 export class SDPromptBuilder {
 	private promptRequest: Text2ImgPromptBody;
 
 	public constructor() {
 		this.promptRequest = {
-			positive_prompt: '',
-			negative_prompt: '',
-			model: '',
+			positive_prompt: [],
+			negative_prompt: [],
 			steps: 20,
 			width: 512,
 			height: 512,
@@ -15,17 +14,12 @@ export class SDPromptBuilder {
 		};
 	}
 
-	public withCheckpoint(checkpoint: string): this {
-		this.promptRequest.model = checkpoint;
-		return this;
-	}
-
-	public withPositivePrompt(prompt: string): this {
+	public withPositivePrompt(prompt: PromptBody): this {
 		this.promptRequest.positive_prompt = prompt;
 		return this;
 	}
 
-	public withNegativePrompt(prompt: string): this {
+	public withNegativePrompt(prompt: PromptBody): this {
 		this.promptRequest.negative_prompt = prompt;
 		return this;
 	}

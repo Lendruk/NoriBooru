@@ -4,13 +4,20 @@ import { inject, injectable } from 'inversify';
 import { sdPrompts, SDPromptSchema } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
+import { SDLora } from '../../types/sd/SDLora';
+import { PopulatedTag } from '../TagService';
+
+export type PromptLora = { lora: SDLora; strength: number; activatedWords?: string[] };
+export type PromptItem = { text: string } | PopulatedTag | PromptLora;
+
+export type PromptBody = PromptItem[];
 
 type SDPrompt = {
 	id: string;
 	name: string | null;
 	previewMediaItem: number | null;
-	positivePrompt: string;
-	negativePrompt: string;
+	positivePrompt: PromptBody;
+	negativePrompt: PromptBody;
 	sampler: string;
 	steps: number;
 	width: number;
@@ -27,8 +34,8 @@ type SDPrompt = {
 
 export type CreatePromptOptions = {
 	name: string;
-	positivePrompt: string;
-	negativePrompt: string;
+	positivePrompt: PromptBody;
+	negativePrompt: PromptBody;
 	sampler: string;
 	steps: number;
 	width: number;
@@ -62,8 +69,8 @@ export class PromptService extends VaultService {
 					height: options.height,
 					width: options.width,
 					id: randomUUID(),
-					negativePrompt: options.negativePrompt,
-					positivePrompt: options.positivePrompt,
+					negativePrompt: JSON.stringify(options.negativePrompt),
+					positivePrompt: JSON.stringify(options.positivePrompt),
 					isHighResEnabled: options.highRes ? 1 : 0,
 					sampler: options.sampler,
 					steps: options.steps,
@@ -90,8 +97,8 @@ export class PromptService extends VaultService {
 					height: options.height,
 					width: options.width,
 					id: randomUUID(),
-					negativePrompt: options.negativePrompt,
-					positivePrompt: options.positivePrompt,
+					negativePrompt: JSON.stringify(options.negativePrompt),
+					positivePrompt: JSON.stringify(options.positivePrompt),
 					isHighResEnabled: options.highRes ? 1 : 0,
 					sampler: options.sampler,
 					steps: options.steps,
@@ -113,8 +120,8 @@ export class PromptService extends VaultService {
 			id: prompt.id,
 			name: prompt.name,
 			previewMediaItem: prompt.previewMediaItem,
-			positivePrompt: prompt.positivePrompt,
-			negativePrompt: prompt.negativePrompt,
+			positivePrompt: JSON.parse(prompt.positivePrompt),
+			negativePrompt: JSON.parse(prompt.negativePrompt),
 			sampler: prompt.sampler,
 			steps: prompt.steps,
 			width: prompt.width,

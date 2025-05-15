@@ -8,13 +8,13 @@
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { RawSDLora, SDLora } from '$lib/types/SD/SDLora';
+	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { PromptBody } from '$lib/types/SD/SDPromptRequest';
 	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
 	import type { Vault } from '$lib/types/Vault';
-	import { processPrompt } from '$lib/utils/promptUtils';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import {
 		Button,
@@ -31,7 +31,6 @@
 	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
-	import SimplePrompt from './components/prompting/SimplePrompt.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
 	import GeneralSettings from './views/GeneralSettings.svelte';
@@ -39,54 +38,54 @@
 	import LoraSelector from './views/LoraSelector.svelte';
 	import WildcardManager from './views/WildcardManager.svelte';
 
-	let checkpoints: SDCheckpoint[] = [];
-	let samplers: SDSampler[] = [];
-	let schedulers: SDScheduler[] = [];
-	let upscalers: SDUpscaler[] = [];
-	let loras: SDLora[] = [];
-	let wildcards: SDWildcard[] = [];
-	let allTags: PopulatedTag[] = [];
+	let checkpoints = $state<SDCheckpoint[]>([]);
+	let samplers = $state<SDSampler[]>([]);
+	let schedulers = $state<SDScheduler[]>([]);
+	let upscalers = $state<SDUpscaler[]>([]);
+	let loras = $state<SDLora[]>([]);
+	let wildcards = $state<SDWildcard[]>([]);
+	let allTags = $state<PopulatedTag[]>([]);
 
-	let generatedImages:
-		| { fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[]
-		| undefined = undefined;
+	let generatedImages
+		= $state<| { fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[]
+		| undefined >(undefined);
 
-	let selectedTab: 'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS' = 'GENERAL';
-	let promptMode: 'SIMPLE' | 'BLOCK' = 'SIMPLE';
-	let isSearchingPrompts = false;
-	let isSavingPrompt = false;
-	let areSaveOptionsExpanded = false;
-	let autoTag = false;
+	let selectedTab = $state<'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS'>('GENERAL');
+	let promptMode = $state<'SIMPLE' | 'BLOCK'>('BLOCK');
+	let isSearchingPrompts = $state(false);
+	let isSavingPrompt = $state(false);
+	let areSaveOptionsExpanded = $state(false);
+	let autoTag = $state(false);
 
 	// Loading flags
-	let isGeneratingImage = false;
+	let isGeneratingImage = $state(false);
 
 	// General settings
-	let promptId: string = '';
-	let promptName: string = '';
-	let positivePrompt: string = '';
-	let negativePrompt: string = '';
-	let checkpointId: string;
-	let width = 512;
-	let height = 512;
-	let sampler = '';
-	let steps = 20;
-	let seed = -1;
-	let cfgScale = 7;
-	let numberOfGenerations = 1;
-	let imagesPerGeneration = 1;
+	let promptId: string = $state<string>('');
+	let promptName: string = $state<string>('');
+	let positivePrompt = $state<PromptBody>([]);
+	let negativePrompt = $state<PromptBody>([]);
+	let checkpointId = $state<string>('');
+	let width = $state<number>(512);
+	let height = $state<number>(512);
+	let sampler =  $state<string>('');
+	let steps = $state<number>(20);
+	let seed = $state<number>(-1);
+	let cfgScale = $state<number>(7);
+	let numberOfGenerations = $state<number>(1);
+	let imagesPerGeneration = $state<number>(1);
 
 	// High res
-	let isHighResEnabled = false;
-	let upscaleBy = 2;
-	let highResUpscaler = '';
-	let highResSteps = 0;
-	let highResDenoisingStrength = 0.7;
+	let isHighResEnabled = $state(false);
+	let upscaleBy = $state(2);
+	let highResUpscaler = $state<string>('');
+	let highResSteps = $state(0);
+	let highResDenoisingStrength = $state(0.7);
 
 	// Refiner
-	let isRefinerEnabled = false;
-	let refinerCheckpoint = '';
-	let refinerSwitchAt = 0.8;
+	let isRefinerEnabled = $state(false);
+	let refinerCheckpoint = $state<string>('');
+	let refinerSwitchAt = $state(0.8);
 
 	let usedLoras: string[] = [];
 
@@ -120,7 +119,10 @@
 		loras = fetchedLoras;
 		wildcards = fetchedWildcards;
 
-		// checkpointId = checkpoints[0]?.id;
+		if (checkpoints.length > 0) {
+			checkpointId = checkpoints[0].id;
+		}
+
 		// sampler = samplers[0].name;
 		sampler = 'TBD'
 		// highResUpscaler = upscalers[0].name;
@@ -133,8 +135,8 @@
 			const parsedMetadata = JSON.parse(decodeURIComponent(rawMetadata)) as MediaItemMetadata;
 			width = parsedMetadata.width;
 			height = parsedMetadata.height;
-			positivePrompt = parsedMetadata.positivePrompt;
-			negativePrompt = parsedMetadata.negativePrompt;
+			positivePrompt = [{text: parsedMetadata.positivePrompt }]
+			negativePrompt = [{text: parsedMetadata.negativePrompt }]
 			seed = parsedMetadata.seed;
 			sampler = parsedMetadata.sampler;
 			console.log(sampler);
@@ -157,14 +159,6 @@
 				highResDenoisingStrength = parsedMetadata.denoisingStrength;
 				isHighResEnabled = true;
 			}
-
-			// 		if (settingsObject.Refiner) {
-			// 			isRefinerEnabled = true;
-			// 			refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
-			// 			refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
-			// 		}
-			// 	}
-			// }
 		}
 
 		$isSdStarting = false;
@@ -174,21 +168,15 @@
 		const prompt = new SDPromptBuilder();
 		const checkpoint = checkpoints.find((ch) => ch.id === checkpointId)!;
 		prompt
-			.withPositivePrompt(processPrompt(wildcards, positivePrompt))
-			.withNegativePrompt(processPrompt(wildcards, negativePrompt))
+		.withPositivePrompt(positivePrompt)
+		.withNegativePrompt(negativePrompt)
+			// .withPositivePrompt(processPrompt(wildcards, positivePrompt))
+			// .withNegativePrompt(processPrompt(wildcards, negativePrompt))
 			.withSteps(steps)
 			.withSize(width, height)
 			.withSeed(seed)
-			.withCheckpoint(checkpoint.name)
 			// .withBatching(numberOfGenerations, imagesPerGeneration)
 			// .withCfgScale(cfgScale);
-
-		// if (isRefinerEnabled) {
-		// 	prompt.withRefiner({
-		// 		refinerCheckpoint,
-		// 		switchAt: refinerSwitchAt
-		// 	});
-	// }
 
 		// if (isHighResEnabled) {
 		// 	prompt.withHighResOptions({
@@ -298,8 +286,8 @@
 	function clearPrompt() {
 		promptId = '';
 		promptName = '';
-		positivePrompt = '';
-		negativePrompt = '';
+		positivePrompt = []
+		negativePrompt = []
 		checkpointId;
 		width = 512;
 		height = 512;
@@ -324,8 +312,8 @@
 		seed = lastGenSeed;
 	}
 
-	function onLoraClick(lora: RawSDLora) {
-		positivePrompt += `, <lora:${lora.name}:1>`;
+	function onLoraClick(lora: SDLora) {
+		positivePrompt.push({ lora, strength: 0.5, activatedWords: []})
 		usedLoras.push(lora.id);
 	}
 
@@ -356,12 +344,12 @@
 				<div>Prompt Mode:</div>
 				<div class="flex flex-1">
 					<button
-						on:click={() => (promptMode = 'SIMPLE')}
+						onclick={() => (promptMode = 'SIMPLE')}
 						class={`${promptMode === 'SIMPLE' ? 'bg-red-950' : 'bg-zinc-950 hover:bg-red-900 hover:transition'} h-[40px] rounded-l-md w-[50%]`}
 						>Simple</button
 					>
 					<button
-						on:click={() => (promptMode = 'BLOCK')}
+						onclick={() => (promptMode = 'BLOCK')}
 						class={`${promptMode === 'BLOCK' ? 'bg-red-950' : 'bg-zinc-950 hover:bg-red-900 hover:transition'} h-[40px] rounded-r-md w-[50%]`}
 						>Block</button
 					>
@@ -439,37 +427,37 @@
 	</div>
 	<div class="flex flex-col flex-1">
 		{#if promptMode === 'SIMPLE'}
-			<SimplePrompt bind:negativePrompt bind:positivePrompt />
+			<!-- <SimplePrompt bind:negativePrompt bind:positivePrompt /> -->
 		{:else}
-			<BlockPrompt />
+			<BlockPrompt bind:positivePrompt bind:negativePrompt loras={loras} tags={allTags}  />
 		{/if}
 		<div class="flex gap-4 pt-4">
 			<div class="flex flex-[0.6] flex-col gap-2">
 				<div class="flex gap-1">
 					<button
-						on:click={() => (selectedTab = 'GENERAL')}
+						onclick={() => (selectedTab = 'GENERAL')}
 						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'GENERAL' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
 					>
 						General
 					</button>
 					<button
-						on:click={() => (selectedTab = 'HIGHRES')}
+						onclick={() => (selectedTab = 'HIGHRES')}
 						class={`tab-option min-w-[15%] flex justify-center flex gap-2 ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
 					>
 						<input
-							on:click={(e) => e.stopPropagation()}
+							onclick={(e) => e.stopPropagation()}
 							bind:checked={isHighResEnabled}
 							type="checkbox"
 						/> <span>High Res</span>
 					</button>
 					<button
-						on:click={() => (selectedTab = 'LORAS')}
+						onclick={() => (selectedTab = 'LORAS')}
 						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
 					>
 						Loras
 					</button>
 					<button
-						on:click={() => (selectedTab = 'WILDCARDS')}
+						onclick={() => (selectedTab = 'WILDCARDS')}
 						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'WILDCARDS' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
 					>
 						Wildcards

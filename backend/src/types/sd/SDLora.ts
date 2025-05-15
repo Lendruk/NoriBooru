@@ -20,4 +20,5 @@ export type SDLora = {
 	sdVersion: string;
 	previewMediaItem?: MediaItemSchema;
 	tags: PopulatedTag[];
+	type?: 'SLIDER' | 'MODIFIER' | 'NORMAL';
 };

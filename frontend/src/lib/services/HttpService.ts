@@ -16,7 +16,7 @@ export type ApiEndpoint = {
 
 export class HttpService {
 	public static GLOBAL_PORT = 8080;
-	public static BASE_URL = `http://localhost`;
+	public static BASE_URL = `http://127.0.0.1`;
 
 	public static getVaultId(): string | undefined {
 		const curVault = get(vaultStore);

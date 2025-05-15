@@ -21,4 +21,5 @@ export type RawSDLora = {
 
 export type SDLora = RawSDLora & {
 	previewMediaItem?: Partial<MediaItem>;
+	type: 'SLIDER' | 'MODIFIER' | 'NORMAL';
 };

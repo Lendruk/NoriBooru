@@ -116,41 +116,6 @@ export type MediaItemSchema = InferSelectModel<typeof mediaItems> & {
 
 // Stable Diffusion schemas
 
-export const sdPrompts = sqliteTable('sd_prompts', {
-	id: text('id').primaryKey(),
-	name: text('name'),
-	previewMediaItem: integer('preview_media_item'),
-	positivePrompt: text('positive_prompt').notNull(),
-	negativePrompt: text('negative_prompt').notNull(),
-	sampler: text('sampler').notNull(),
-	steps: integer('steps').notNull(),
-	width: integer('width').notNull(),
-	height: integer('height').notNull(),
-	checkpoint: text('checkpoint').notNull(),
-	cfgScale: integer('cfg_scale').notNull(),
-	isHighResEnabled: integer('is_high_res_enabled').notNull(),
-	highResUpscaler: text('high_res_upscaler'),
-	highResSteps: integer('high_res_steps'),
-	highResDenoisingStrength: real('high_res_denoising_strength'),
-	highResUpscaleBy: real('high_res_upscale_by'),
-	createdAt: integer('created_at').notNull()
-});
-
-export type SDPromptSchema = InferSelectModel<typeof sdPrompts>;
-
-export const lorasToMediaItems = sqliteTable(
-	'loras_to_mediaItems',
-	{
-		mediaItemId: integer('media_item_id')
-			.notNull()
-			.references(() => mediaItems.id, { onDelete: 'cascade' }),
-		loraId: text('lora_id')
-			.notNull()
-			.references(() => sdLoras.id, { onDelete: 'cascade' })
-	},
-	(t) => ({ pk: primaryKey({ columns: [t.mediaItemId, t.loraId] }) })
-);
-
 export const tagsToLoras = sqliteTable(
 	'tags_to_loras',
 	{
@@ -185,9 +150,23 @@ export const sdLoras = sqliteTable('sd_loras', {
 	origin: text('origin').notNull(),
 	sdVersion: text('sd_version').notNull(),
 	previewMediaItem: integer('preview_media_item'),
+	type: text('type'),
 	activationWords: text('activation_words').notNull()
 });
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
+
+export const lorasToMediaItems = sqliteTable(
+	'loras_to_mediaItems',
+	{
+		mediaItemId: integer('media_item_id')
+			.notNull()
+			.references(() => mediaItems.id, { onDelete: 'cascade' }),
+		loraId: text('lora_id')
+			.notNull()
+			.references(() => sdLoras.id, { onDelete: 'cascade' })
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.mediaItemId, t.loraId] }) })
+);
 
 export const sdWildcards = sqliteTable('sd_wildcards', {
 	id: text('id').primaryKey(),
@@ -195,6 +174,30 @@ export const sdWildcards = sqliteTable('sd_wildcards', {
 	values: text('text').notNull()
 });
 export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;
+
+export const sdPrompts = sqliteTable('sd_prompts', {
+	id: text('id').primaryKey(),
+	name: text('name'),
+	previewMediaItem: integer('preview_media_item'),
+	positivePrompt: text('positive_prompt').notNull(),
+	negativePrompt: text('negative_prompt').notNull(),
+	sampler: text('sampler').notNull(),
+	steps: integer('steps').notNull(),
+	width: integer('width').notNull(),
+	height: integer('height').notNull(),
+	checkpoint: text('checkpoint').notNull(),
+	cfgScale: integer('cfg_scale').notNull(),
+	isHighResEnabled: integer('is_high_res_enabled').notNull(),
+	highResUpscaler: text('high_res_upscaler'),
+	highResSteps: integer('high_res_steps'),
+	highResDenoisingStrength: real('high_res_denoising_strength'),
+	highResUpscaleBy: real('high_res_upscale_by'),
+	createdAt: integer('created_at').notNull()
+});
+
+export type SDPromptSchema = InferSelectModel<typeof sdPrompts>;
+
+// Watchers
 
 export const activeWatchers = sqliteTable('active_watchers', {
 	id: text('id').primaryKey(),

@@ -1,7 +1,14 @@
+import type { PopulatedTag } from '../PopulatedTag';
+import type { SDLora } from './SDLora';
+
+export type PromptLora = { lora: SDLora; strength: number; activatedWords?: string[] };
+export type PromptItem = { text: string } | PopulatedTag | PromptLora;
+
+export type PromptBody = PromptItem[];
+
 export type Text2ImgPromptBody = {
-	positive_prompt: string;
-	negative_prompt: string;
-	model: string;
+	positive_prompt: PromptBody;
+	negative_prompt: PromptBody;
 	steps: number;
 	width: number;
 	height: number;

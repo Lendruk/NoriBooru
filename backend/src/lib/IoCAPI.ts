@@ -64,9 +64,6 @@ export abstract class IoCAPI extends Container {
 			}
 		}
 
-		// console.log(
-		// 	`Starting API for vault ${this.get<VaultConfig>('config').id} on port: ${this.port}`
-		// );
 		app.listen({ port: this.port, host: '0.0.0.0' }, (err) => {
 			if (err) throw err;
 		});

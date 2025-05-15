@@ -1,9 +1,11 @@
+import type { PromptBody } from './SD/SDPromptRequest';
+
 export type SavedPrompt = {
 	id?: string;
 	name: string;
 	previewMediaItem: number;
-	positivePrompt: string;
-	negativePrompt: string;
+	positivePrompt: PromptBody;
+	negativePrompt: PromptBody;
 	sampler: string;
 	steps: number;
 	width: number;

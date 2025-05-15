@@ -16,7 +16,7 @@ huggingface_path = base_storage_path + '/huggingface/'
 
 # Setting the cache directory for Hugging Face before importing diffusers
 os.environ["HF_HOME"] = huggingface_path
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
 import torch
 from io import BytesIO
@@ -43,7 +43,7 @@ def text2img():
     width = data['width']
     height = data['height']
     seed = data['seed']
-
+    loras = data['loras']
     print(f"Received model: {sd_model}")
 
     if not all([sd_model, steps, width, height, seed]):
@@ -65,6 +65,7 @@ def text2img():
                     local_files_only=False,
                     load_safety_checker=False,
                     from_safetensors=True,
+                    # use_peft_backend=True,
                     original_config_file='../sd-server/sd_xl_base.yaml'
                     # original_config_file='./v1-inference.yaml'
                 )
@@ -79,11 +80,20 @@ def text2img():
 
 
         print("Setting up scheduler...")
-        pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
-        
-        pipe = pipe.to('cuda')
         pipe = cast(StableDiffusionXLPipeline, pipe)
+        pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
+        pipe = pipe.to('cuda')
 
+
+        # Setup loras
+        for idx, lora in enumerate(loras):
+            lora_path = os.path.expanduser(lora['path'])
+            strength = lora['strength']
+            adapter_name = f"lora_{idx}"
+            print(f"Loading lora {lora_path} with strength {strength}")
+            pipe.load_lora_weights(lora_path, adapter_name=adapter_name)
+            pipe.set_adapters([adapter_name], adapter_weights=[strength])
+        
         print("Generating image...")
         # Create the generator
         generator = torch.Generator(device='cuda').manual_seed(seed)
@@ -109,6 +119,8 @@ def text2img():
             # Convert the image to base64
             img_base64 = base64.b64encode(img_io.read()).decode('utf-8')
             result_images.append(img_base64)
+
+        pipe.unload_lora_weights()
 
     except Exception as e:
         print(f"Error: {e.with_traceback()}")
