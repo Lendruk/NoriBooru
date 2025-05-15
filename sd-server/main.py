@@ -75,6 +75,7 @@ def text2img():
     height = data['height']
     seed = data['seed']
     loras = data['loras']
+    cfg_scale = data.get('cfg_scale', 7.5)
     scheduler = data.get('scheduler', 'euler_ancestral')
     print(f"Received model: {sd_model}")
 
@@ -150,6 +151,7 @@ def text2img():
                     height=height,
                     num_inference_steps=steps,
                     generator=generator,
+                    guidance_scale=cfg_scale
                     )
         # print generation result object
         print(f"Generation result: {generation_result}")

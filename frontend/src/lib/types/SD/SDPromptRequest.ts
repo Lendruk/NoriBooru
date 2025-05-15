@@ -14,6 +14,7 @@ export type Text2ImgPromptBody = {
 	height: number;
 	seed: number;
 	scheduler: string;
+	cfgScale: number;
 };
 
 export type SDPromptRequest = {

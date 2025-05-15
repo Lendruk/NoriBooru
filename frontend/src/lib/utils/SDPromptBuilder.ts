@@ -11,8 +11,14 @@ export class SDPromptBuilder {
 			width: 512,
 			height: 512,
 			seed: -1,
-			scheduler: ''
+			scheduler: '',
+			cfgScale: 7.5
 		};
+	}
+
+	public withCfgScale(cfgScale: number): this {
+		this.promptRequest.cfgScale = cfgScale;
+		return this;
 	}
 
 	public withPositivePrompt(prompt: PromptBody): this {
