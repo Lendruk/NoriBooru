@@ -1,7 +1,5 @@
 export type SDScheduler = {
+	id: string;
 	name: string;
-	label: string;
-	alias: string[];
-	default_rho: number;
-	need_inner_model: boolean;
+	description: string;
 };

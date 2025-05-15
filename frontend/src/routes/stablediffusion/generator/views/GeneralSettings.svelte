@@ -2,7 +2,7 @@
 	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { SDSampler } from '$lib/types/SD/SDSampler';
+	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import {
 		Button,
 		DiceEmoji,
@@ -22,9 +22,9 @@
 	export let height: number;
 	export let seed: number;
 
-	export let samplers: SDSampler[];
+	export let schedulers: SDScheduler[];
 	export let checkpoints: SDCheckpoint[];
-	export let selectedSampler: string;
+	export let selectedScheduler: string;
 	export let selectedCheckpoint: string;
 	export let samplingSteps: number;
 	export let cfgScale: number;
@@ -96,9 +96,9 @@
 			<LabeledComponent class="flex-1">
 				<div slot="label">Sampling method</div>
 				<div class="w-full" slot="content">
-					<Select class="h-[40px] w-full" bind:value={selectedSampler}>
-						{#each samplers as sampler}
-							<option value={sampler.name}>{sampler.name}</option>
+					<Select class="h-[40px] w-full" bind:value={selectedScheduler}>
+						{#each schedulers as scheduler}
+							<option value={scheduler.id}>{scheduler.name}</option>
 						{/each}
 					</Select>
 				</div>

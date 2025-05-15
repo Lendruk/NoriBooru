@@ -10,12 +10,18 @@ export class SDPromptBuilder {
 			steps: 20,
 			width: 512,
 			height: 512,
-			seed: -1
+			seed: -1,
+			scheduler: ''
 		};
 	}
 
 	public withPositivePrompt(prompt: PromptBody): this {
 		this.promptRequest.positive_prompt = prompt;
+		return this;
+	}
+
+	public withScheduler(scheduler: string): this {
+		this.promptRequest.scheduler = scheduler;
 		return this;
 	}
 

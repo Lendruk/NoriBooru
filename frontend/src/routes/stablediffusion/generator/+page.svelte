@@ -10,7 +10,6 @@
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import type { PromptBody } from '$lib/types/SD/SDPromptRequest';
-	import type { SDSampler } from '$lib/types/SD/SDSampler';
 	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
@@ -39,7 +38,6 @@
 	import WildcardManager from './views/WildcardManager.svelte';
 
 	let checkpoints = $state<SDCheckpoint[]>([]);
-	let samplers = $state<SDSampler[]>([]);
 	let schedulers = $state<SDScheduler[]>([]);
 	let upscalers = $state<SDUpscaler[]>([]);
 	let loras = $state<SDLora[]>([]);
@@ -68,7 +66,7 @@
 	let checkpointId = $state<string>('');
 	let width = $state<number>(512);
 	let height = $state<number>(512);
-	let sampler =  $state<string>('');
+	let scheduler =  $state<string>('');
 	let steps = $state<number>(20);
 	let seed = $state<number>(-1);
 	let cfgScale = $state<number>(7);
@@ -94,7 +92,6 @@
 		$isSdStarting = true;
 		await HttpService.post(endpoints.sdStart());
 		const [
-			fetchedSamplers,
 			fetchedCheckpoints,
 			fetchedSchedulers,
 			fetchedUpscalers,
@@ -102,7 +99,6 @@
 			fetchedTags,
 			fetchedWildcards
 		] = await Promise.all([
-			HttpService.get<SDSampler[]>(endpoints.sdSamplers()),
 			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
 			HttpService.get<SDScheduler[]>(endpoints.sdSchedulers()),
 			HttpService.get<SDUpscaler[]>(endpoints.sdUpscalers()),
@@ -112,7 +108,6 @@
 		]);
 
 		allTags = fetchedTags;
-		samplers = fetchedSamplers;
 		checkpoints = fetchedCheckpoints;
 		schedulers = fetchedSchedulers;
 		upscalers = fetchedUpscalers;
@@ -123,8 +118,7 @@
 			checkpointId = checkpoints[0].id;
 		}
 
-		// sampler = samplers[0].name;
-		sampler = 'TBD'
+		scheduler = schedulers[0].id;
 		// highResUpscaler = upscalers[0].name;
 		if (checkpoints.length > 1) {
 			refinerCheckpoint = checkpoints[1].name;
@@ -138,8 +132,7 @@
 			positivePrompt = [{text: parsedMetadata.positivePrompt }]
 			negativePrompt = [{text: parsedMetadata.negativePrompt }]
 			seed = parsedMetadata.seed;
-			sampler = parsedMetadata.sampler;
-			console.log(sampler);
+			scheduler = parsedMetadata.sampler;
 			cfgScale = parsedMetadata.cfgScale;
 			steps = parsedMetadata.steps;
 
@@ -170,6 +163,7 @@
 		prompt
 		.withPositivePrompt(positivePrompt)
 		.withNegativePrompt(negativePrompt)
+		.withScheduler(scheduler)
 			// .withPositivePrompt(processPrompt(wildcards, positivePrompt))
 			// .withNegativePrompt(processPrompt(wildcards, negativePrompt))
 			.withSteps(steps)
@@ -221,7 +215,7 @@
 			negativePrompt,
 			width,
 			height,
-			sampler,
+			scheduler,
 			steps,
 			highRes: isHighResEnabled
 				? {
@@ -245,7 +239,7 @@
 			negativePrompt,
 			width,
 			height,
-			sampler,
+			sampler: scheduler,
 			steps,
 			highRes: isHighResEnabled
 				? {
@@ -263,7 +257,7 @@
 		width = prompt.width;
 		height = prompt.height;
 		cfgScale = prompt.cfgScale;
-		sampler = prompt.sampler;
+		scheduler = prompt.sampler;
 		checkpointId = prompt.checkpoint;
 		promptName = prompt.name;
 		positivePrompt = prompt.positivePrompt;
@@ -291,7 +285,7 @@
 		checkpointId;
 		width = 512;
 		height = 512;
-		sampler = '';
+		scheduler = '';
 		steps = 20;
 		seed = -1;
 		cfgScale = 7;
@@ -467,9 +461,9 @@
 					{#if selectedTab === 'GENERAL'}
 						<GeneralSettings
 							bind:samplingSteps={steps}
-							bind:samplers
+							bind:schedulers
 							bind:checkpoints
-							bind:selectedSampler={sampler}
+							bind:selectedScheduler={scheduler}
 							bind:selectedCheckpoint={checkpointId}
 							bind:width
 							bind:height

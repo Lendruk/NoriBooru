@@ -46,7 +46,8 @@ type EndpointNames =
 	| 'worldMaps'
 	| 'world'
 	| 'sdText2Img'
-	| 'mediaItems';
+	| 'mediaItems'
+	| 'getVersion';
 
 type Endpoints = {
 	[key in EndpointNames]: (options?: {
@@ -230,6 +231,10 @@ export const endpoints: Endpoints = {
 	}),
 	renameVault: () => ({
 		url: `/settings/rename`,
+		isGlobal: false
+	}),
+	getVersion: () => ({
+		url: `/settings/version`,
 		isGlobal: false
 	}),
 	worldMaps: () => ({

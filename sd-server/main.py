@@ -17,7 +17,7 @@ huggingface_path = base_storage_path + '/huggingface/'
 # Setting the cache directory for Hugging Face before importing diffusers
 os.environ["HF_HOME"] = huggingface_path
 from flask import Flask, request, jsonify
-from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
+from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline, EulerDiscreteScheduler, HeunDiscreteScheduler, UniPCMultistepScheduler, DPMSolverMultistepScheduler, DDIMScheduler
 import torch
 from io import BytesIO
 import base64
@@ -26,6 +26,37 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from
 
 app = Flask('sd-client')
 loaded_models_dict = {}
+
+available_schedulers = {
+    'ddim': { 
+        'name': 'DDIM',
+        'description': 'Deterministic and relatively fast\nGood balance between speed and quality'
+    },
+    'dpm_solver_multistep': {
+        'name': 'DPM Solver Multistep',
+        'description': 'Very fast and high-quality\nOne of the most commonly used schedulers for SDXL'
+    },
+    'euler_discrete': {
+        'name': 'Euler Discrete',
+        'description': 'Often preferred for artistic generations'
+    },
+    'euler_ancestral': {
+        'name': 'Euler Ancestral',
+        'description': 'Can yield more diverse outputs'
+    },
+    'heun_discrete_scheduler': {
+        'name': 'Heun Discrete',
+        'description': 'Similar to Euler with minor differences in trajectory computation'
+    },
+    'uni_pc_multistep': {
+        'name': 'UniPC Multistep',
+        'description': 'Good for high-quality generations'
+    }
+}
+
+@app.route('/sd/schedulers', methods=['GET'])
+def get_schedulers():
+    return jsonify(available_schedulers)
 
 @app.route('/sd/text2img', methods=['POST'])
 def text2img():
@@ -44,6 +75,7 @@ def text2img():
     height = data['height']
     seed = data['seed']
     loras = data['loras']
+    scheduler = data.get('scheduler', 'euler_ancestral')
     print(f"Received model: {sd_model}")
 
     if not all([sd_model, steps, width, height, seed]):
@@ -81,9 +113,23 @@ def text2img():
 
         print("Setting up scheduler...")
         pipe = cast(StableDiffusionXLPipeline, pipe)
-        pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
-        pipe = pipe.to('cuda')
 
+        # Setup scheduler
+
+        if scheduler == 'euler_ancestral': 
+            pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
+        elif scheduler == 'euler_discrete':
+            pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config)
+        elif scheduler == 'ddim':
+            pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
+        elif scheduler == 'dpm_solver_multistep':
+            pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+        elif scheduler == 'heun_discrete_scheduler':
+            pipe.scheduler = HeunDiscreteScheduler.from_config(pipe.scheduler.config)
+        elif scheduler == 'uni_pc_multistep':
+            pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+
+        pipe = pipe.to('cuda')
 
         # Setup loras
         for idx, lora in enumerate(loras):

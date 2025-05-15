@@ -63,12 +63,19 @@ export class SDRouter extends Router {
 			return reply.status(400).send('SD Ui is not running for the given vault');
 		}
 
-		// TODO: Convert this
+		const result = await fetch(`http://localhost:${sdPort}/sd/schedulers`);
+		const body = (await result.json()) as Record<string, { name: string; description: string }>;
 
-		// const result = await fetch(`http://localhost:${sdPort}/sdapi/v1/schedulers`);
-		// const body = await result.json();
+		const schedulers = [];
+		for (const key in body) {
+			schedulers.push({
+				id: key,
+				name: body[key].name,
+				description: body[key].description
+			});
+		}
 
-		return reply.send([]);
+		return reply.send(schedulers);
 	}
 
 	@Route.GET('/sd/highres/upscalers')

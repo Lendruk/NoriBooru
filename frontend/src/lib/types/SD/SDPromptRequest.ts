@@ -13,6 +13,7 @@ export type Text2ImgPromptBody = {
 	width: number;
 	height: number;
 	seed: number;
+	scheduler: string;
 };
 
 export type SDPromptRequest = {

@@ -37,6 +37,7 @@ export type Text2ImgPromptBody = {
 	width: number;
 	height: number;
 	seed: number;
+	scheduler: string;
 };
 
 type SDServerLoraPayload = { path: string; strength: number };
@@ -49,6 +50,7 @@ type SDServerText2ImgPromptBody = {
 	width: number;
 	height: number;
 	seed: number;
+	scheduler: string;
 };
 
 @injectable()
@@ -234,8 +236,6 @@ export class SDService2 {
 		const [negativePrompt, negativeLoras] = this.mapPromptBodyToSimplePrompt(
 			prompt.negative_prompt
 		);
-		console.log(positivePrompt);
-		console.log(positiveLoras);
 		return {
 			positive_prompt: positivePrompt,
 			negative_prompt: negativePrompt,
@@ -244,6 +244,7 @@ export class SDService2 {
 			width: prompt.width,
 			steps: prompt.steps,
 			seed: seed,
+			scheduler: prompt.scheduler,
 			model: checkpointPath
 		};
 	}

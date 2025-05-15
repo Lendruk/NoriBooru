@@ -181,7 +181,7 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	previewMediaItem: integer('preview_media_item'),
 	positivePrompt: text('positive_prompt').notNull(),
 	negativePrompt: text('negative_prompt').notNull(),
-	sampler: text('sampler').notNull(),
+	scheduler: text('scheduler').notNull(),
 	steps: integer('steps').notNull(),
 	width: integer('width').notNull(),
 	height: integer('height').notNull(),

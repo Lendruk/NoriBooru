@@ -18,6 +18,13 @@ export class SettingsRouter extends Router {
 		};
 	}
 
+	@Route.GET('/settings/version')
+	public async getVersion() {
+		return {
+			version: this.vaultConfigService.getConfigValue('version')
+		};
+	}
+
 	@Route.PUT('/settings/rename')
 	public async renameVault(request: FastifyRequest) {
 		const { name } = request.body as { name: string };

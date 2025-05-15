@@ -18,7 +18,7 @@ type SDPrompt = {
 	previewMediaItem: number | null;
 	positivePrompt: PromptBody;
 	negativePrompt: PromptBody;
-	sampler: string;
+	scheduler: string;
 	steps: number;
 	width: number;
 	height: number;
@@ -36,7 +36,7 @@ export type CreatePromptOptions = {
 	name: string;
 	positivePrompt: PromptBody;
 	negativePrompt: PromptBody;
-	sampler: string;
+	scheduler: string;
 	steps: number;
 	width: number;
 	height: number;
@@ -72,7 +72,7 @@ export class PromptService extends VaultService {
 					negativePrompt: JSON.stringify(options.negativePrompt),
 					positivePrompt: JSON.stringify(options.positivePrompt),
 					isHighResEnabled: options.highRes ? 1 : 0,
-					sampler: options.sampler,
+					scheduler: options.scheduler,
 					steps: options.steps,
 					highResDenoisingStrength: options.highRes?.denoisingStrength,
 					highResSteps: options.highRes?.steps,
@@ -100,7 +100,7 @@ export class PromptService extends VaultService {
 					negativePrompt: JSON.stringify(options.negativePrompt),
 					positivePrompt: JSON.stringify(options.positivePrompt),
 					isHighResEnabled: options.highRes ? 1 : 0,
-					sampler: options.sampler,
+					scheduler: options.scheduler,
 					steps: options.steps,
 					highResDenoisingStrength: options.highRes?.denoisingStrength,
 					highResSteps: options.highRes?.steps,
@@ -122,7 +122,7 @@ export class PromptService extends VaultService {
 			previewMediaItem: prompt.previewMediaItem,
 			positivePrompt: JSON.parse(prompt.positivePrompt),
 			negativePrompt: JSON.parse(prompt.negativePrompt),
-			sampler: prompt.sampler,
+			scheduler: prompt.scheduler,
 			steps: prompt.steps,
 			width: prompt.width,
 			height: prompt.height,
