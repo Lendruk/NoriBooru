@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
-import { SDService2, Text2ImgPromptBody } from '../../../services/SD/SDService2';
+import { SDService, Text2ImgPromptBody } from '../../../services/SD/SDService';
 import { VaultConfig } from '../../../types/VaultConfig';
 
 type PromptRequestBody = {
@@ -18,7 +18,7 @@ type PromptRequestBody = {
 export class SDRouter extends Router {
 	private readonly SD_RESOURCES_DIR_NAME = 'sd-resources';
 	public constructor(
-		@inject(SDService2) private readonly sdService: SDService2,
+		@inject(SDService) private readonly sdService: SDService,
 		@inject('config') private readonly config: VaultConfig
 	) {
 		super();

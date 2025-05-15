@@ -28,7 +28,7 @@ import { PlaylistService } from '../services/PlaylistService';
 import { PromptService } from '../services/SD/PromptService';
 import { SDCheckpointService } from '../services/SD/SDCheckpointService';
 import { SDLoraService } from '../services/SD/SDLoraService';
-import { SDService2 } from '../services/SD/SDService2';
+import { SDService } from '../services/SD/SDService';
 import { WildcardService } from '../services/SD/WildcardService';
 import { TagService } from '../services/TagService';
 import { VaultConfigService } from '../services/VaultConfigService';
@@ -71,7 +71,7 @@ export class VaultAPI extends IoCAPI {
 		this.bind(JobService).toSelf().inSingletonScope();
 		this.bind(PageParserFactory).toSelf().inSingletonScope();
 		this.bind(PageWatcherService).toSelf().inSingletonScope();
-		this.bind(SDService2).toSelf().inSingletonScope();
+		this.bind(SDService).toSelf().inSingletonScope();
 		this.bind(PlaylistService).toSelf().inSingletonScope();
 		this.bind(SDCheckpointService).toSelf().inSingletonScope();
 		this.bind(SDLoraService).toSelf().inSingletonScope();

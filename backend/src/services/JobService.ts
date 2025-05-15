@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { inject, injectable } from 'inversify';
 import { Job, JobAction, JobTag } from '../lib/Job';
-import { SDService2 } from './SD/SDService2';
+import { SDService } from './SD/SDService';
 import { WebsocketService } from './WebsocketService';
 
 @injectable()
@@ -10,7 +10,7 @@ export class JobService {
 
 	public constructor(
 		@inject(WebsocketService) private websocketService: WebsocketService,
-		@inject(SDService2) private sdService: SDService2
+		@inject(SDService) private sdService: SDService
 	) {
 		this.websocketService.registerMiddleware((socket) => {
 			if (this.jobs.size > 0) {

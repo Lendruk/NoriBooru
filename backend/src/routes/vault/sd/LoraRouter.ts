@@ -2,13 +2,13 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { inject, injectable } from 'inversify';
 import { Route, Router } from '../../../lib/Router';
 import { SDLoraService, UpdateLoraOptions } from '../../../services/SD/SDLoraService';
-import { SDService2 } from '../../../services/SD/SDService2';
+import { SDService } from '../../../services/SD/SDService';
 
 @injectable()
 export class LoraRouter extends Router {
 	public constructor(
 		@inject(SDLoraService) private readonly loraService: SDLoraService,
-		@inject(SDService2) private readonly sdService: SDService2
+		@inject(SDService) private readonly sdService: SDService
 	) {
 		super();
 	}

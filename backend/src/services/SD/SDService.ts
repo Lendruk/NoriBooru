@@ -54,7 +54,7 @@ type SDServerText2ImgPromptBody = {
 };
 
 @injectable()
-export class SDService2 {
+export class SDService {
 	private static readonly PROCESS_INACTIVE_TTL = 60 * 1000 * 10; // 10 Minutes
 
 	private sdProcess?: ProcessEntry;
@@ -192,7 +192,7 @@ export class SDService2 {
 			this.sdProcess.isActive = false;
 			this.inactiveProcessTimer = setTimeout(() => {
 				this.stopSDServer();
-			}, SDService2.PROCESS_INACTIVE_TTL);
+			}, SDService.PROCESS_INACTIVE_TTL);
 		}
 	}
 
