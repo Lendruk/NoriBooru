@@ -3,8 +3,7 @@
 Self-hosted media database and management system.
 Uses the concept of vaults as a media database. A server can keep track of multiple vaults at the same time.
 
-Currently NoriBooru is **NOT PRODUCTION READY**. All future versions released before `1.0.0` will be experimental versions and subject to breaking changes.
-
+Currently NoriBooru is **NOT PRODUCTION READY**. The current build is far from optimized and very buggy
 ## Current Features
 
 - Tagged Image / Video storage and gallery / inbox
