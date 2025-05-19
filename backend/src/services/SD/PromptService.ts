@@ -6,9 +6,17 @@ import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
 import { SDLora } from '../../types/sd/SDLora';
 import { PopulatedTag } from '../TagService';
+import { SDWildcard } from './WildcardService';
 
 export type PromptLora = { lora: SDLora; strength: number; activatedWords?: string[] };
-export type PromptItem = { text: string } | PopulatedTag | PromptLora;
+
+export type PromptText = { text: string };
+
+export type PromptTag = { tag: PopulatedTag };
+
+export type PromptWildcard = { wildcard: SDWildcard };
+
+export type PromptItem = PromptText | PromptTag | PromptLora | PromptWildcard;
 
 export type PromptBody = PromptItem[];
 

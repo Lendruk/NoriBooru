@@ -151,6 +151,7 @@ export const sdLoras = sqliteTable('sd_loras', {
 	sdVersion: text('sd_version').notNull(),
 	previewMediaItem: integer('preview_media_item'),
 	type: text('type'),
+	// Not normalized
 	activationWords: text('activation_words').notNull()
 });
 export type SDLoraSchema = InferSelectModel<typeof sdLoras>;
@@ -171,6 +172,7 @@ export const lorasToMediaItems = sqliteTable(
 export const sdWildcards = sqliteTable('sd_wildcards', {
 	id: text('id').primaryKey(),
 	listName: text('list_name').notNull(),
+	// Not normalized
 	values: text('text').notNull()
 });
 export type SDWildcardSchema = InferSelectModel<typeof sdWildcards>;
@@ -179,7 +181,9 @@ export const sdPrompts = sqliteTable('sd_prompts', {
 	id: text('id').primaryKey(),
 	name: text('name'),
 	previewMediaItem: integer('preview_media_item'),
+	// Not normalized
 	positivePrompt: text('positive_prompt').notNull(),
+	// Not normalized
 	negativePrompt: text('negative_prompt').notNull(),
 	scheduler: text('scheduler').notNull(),
 	steps: integer('steps').notNull(),

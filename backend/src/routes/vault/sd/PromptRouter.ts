@@ -31,5 +31,6 @@ export class PromptRouter extends Router {
 	public async deletePrompt(request: FastifyRequest) {
 		const { id } = request.params as { id: string };
 		await this.promptService.deletePrompt(id);
+		return {};
 	}
 }

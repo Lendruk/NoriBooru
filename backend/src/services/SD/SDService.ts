@@ -258,8 +258,8 @@ export class SDService {
 		for (const item of promptBody) {
 			if ('text' in item) {
 				prompt += `${prompt.length > 0 ? ', ' : ''}${item.text}`;
-			} else if ('name' in item) {
-				prompt += `${prompt.length > 0 ? ', ' : ''}${item.name}`;
+			} else if ('tag' in item) {
+				prompt += `${prompt.length > 0 ? ', ' : ''}${item.tag.name}`;
 			} else if ('lora' in item) {
 				if (item.activatedWords) {
 					for (const activationWord of item.activatedWords) {
@@ -267,6 +267,10 @@ export class SDService {
 					}
 				}
 				loras.push({ path: item.lora.path, strength: item.strength });
+			} else if ('wildcard' in item) {
+				const { values } = item.wildcard;
+				const randomValue = values[Math.floor(Math.random() * values.length)];
+				prompt += randomValue;
 			}
 		}
 
