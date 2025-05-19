@@ -2,13 +2,14 @@
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
 	import type { PromptBody } from '$lib/types/SD/SDPromptRequest';
+	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
 	import { dndzone } from 'svelte-dnd-action';
 	import BlockPromptLoraItem from './prompt-items/BlockPromptLoraItem.svelte';
 	import BlockPromptTagItem from './prompt-items/BlockPromptTagItem.svelte';
 	import BlockPromptTextItem from './prompt-items/BlockPromptTextItem.svelte';
+	import BlockPromptWildcardItem from './prompt-items/BlockPromptWildcardItem.svelte';
 
 	type ActionListItem = {
-		id: number;
 		text: string;
 		action: () => void;
 	};
@@ -16,8 +17,14 @@
 	let {
 		tags,
 		loras,
+		wildcards,
 		currentPrompt = $bindable()
-	}: { tags: PopulatedTag[]; loras: SDLora[]; currentPrompt: PromptBody } = $props();
+	}: {
+		tags: PopulatedTag[];
+		loras: SDLora[];
+		currentPrompt: PromptBody;
+		wildcards: SDWildcard[];
+	} = $props();
 	let promptInputValue = $state<string>('');
 
 	// Action list items
@@ -33,31 +40,38 @@
 			currentPrompt.push({ text: promptInputValue, id: curLength });
 			promptInputValue = '';
 			showingActionList = false;
+			highLightedActionListEntry = 0;
 		}
 	}
 
 	function addTagElementToPrompt(tag: PopulatedTag) {
 		console.log('Adding tag element to prompt');
-		if (tag) {
-			let curLength = currentPrompt.length;
-			currentPrompt.push({ ...tag, id: curLength });
-			promptInputValue = '';
-			showingActionList = false;
-		}
+		let curLength = currentPrompt.length;
+		currentPrompt.push({ tag, id: curLength });
+		promptInputValue = '';
+		showingActionList = false;
+		highLightedActionListEntry = 0;
 	}
 
 	function addLoraElementToPrompt(lora: SDLora) {
 		console.log('Adding lora element to prompt');
-		if (lora) {
-			currentPrompt.push({ lora, strength: 0.5, id: currentPrompt.length });
-			promptInputValue = '';
-			showingActionList = false;
-		}
+		currentPrompt.push({ lora, strength: 0.5, id: currentPrompt.length });
+		promptInputValue = '';
+		showingActionList = false;
+		highLightedActionListEntry = 0;
+	}
+
+	function addWildcardElementToPrompt(wildcard: SDWildcard) {
+		currentPrompt.push({
+			wildcard,
+			id: currentPrompt.length
+		});
 	}
 
 	$effect(() => {
 		if (!showingActionList) {
 			actionListItems = [];
+			highLightedActionListEntry = 0;
 		}
 	});
 
@@ -73,31 +87,37 @@
 			lora.name.toLowerCase().includes(promptInputValue.toLowerCase())
 		);
 
+		// Search wildcards
+		const matchingWildcards = wildcards.filter((wildcard) =>
+			wildcard.name.toLowerCase().includes(promptInputValue.toLowerCase())
+		);
+
 		let count = 0;
 		for (const matchingTag of matchingTags) {
 			actionListItems.push({
 				text: `Add tag ${matchingTag.name}`,
-				action: () => addTagElementToPrompt(matchingTag),
-				id: count
+				action: () => addTagElementToPrompt(matchingTag)
 			});
-			count++;
 		}
 
 		for (const matchingLora of matchingLoras) {
 			actionListItems.push({
 				text: `Add lora ${matchingLora.name}`,
-				action: () => addLoraElementToPrompt(matchingLora),
-				id: count
+				action: () => addLoraElementToPrompt(matchingLora)
 			});
-			count++;
+		}
+
+		for (const matchingWildcard of matchingWildcards) {
+			actionListItems.push({
+				text: `Add wildcard ${matchingWildcard.name}`,
+				action: () => addWildcardElementToPrompt(matchingWildcard)
+			});
 		}
 
 		actionListItems.push({
 			text: `Add text element`,
-			action: addTextElementToPrompt,
-			id: count
+			action: addTextElementToPrompt
 		});
-		count++;
 	}
 </script>
 
@@ -120,9 +140,9 @@
 							currentPrompt.splice(index, 1);
 						}}
 					/>
-				{:else if 'name' in promptItem}
+				{:else if 'tag' in promptItem}
 					<BlockPromptTagItem
-						tag={promptItem}
+						tag={promptItem.tag}
 						onDelete={() => {
 							currentPrompt.splice(index, 1);
 						}}
@@ -130,6 +150,13 @@
 				{:else if 'lora' in promptItem}
 					<BlockPromptLoraItem
 						promptLora={promptItem}
+						onDelete={() => {
+							currentPrompt.splice(index, 1);
+						}}
+					/>
+				{:else if 'wildcard' in promptItem}
+					<BlockPromptWildcardItem
+						promptWildcard={promptItem}
 						onDelete={() => {
 							currentPrompt.splice(index, 1);
 						}}

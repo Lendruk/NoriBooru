@@ -30,6 +30,7 @@
 	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
 	import PreviewImages from './components/PreviewImages.svelte';
 	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
+	import SimplePrompt from './components/prompting/SimplePrompt.svelte';
 	import PromptSaveModal from './components/PromptSaveModal.svelte';
 	import PromptSearch from './components/PromptSearch.svelte';
 	import GeneralSettings from './views/GeneralSettings.svelte';
@@ -44,9 +45,9 @@
 	let wildcards = $state<SDWildcard[]>([]);
 	let allTags = $state<PopulatedTag[]>([]);
 
-	let generatedImages
-		= $state<| { fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[]
-		| undefined >(undefined);
+	let generatedImages = $state<
+		{ fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[] | undefined
+	>(undefined);
 
 	let selectedTab = $state<'GENERAL' | 'HIGHRES' | 'LORAS' | 'WILDCARDS'>('GENERAL');
 	let promptMode = $state<'SIMPLE' | 'BLOCK'>('BLOCK');
@@ -66,7 +67,7 @@
 	let checkpointId = $state<string>('');
 	let width = $state<number>(512);
 	let height = $state<number>(512);
-	let scheduler =  $state<string>('');
+	let scheduler = $state<string>('');
 	let steps = $state<number>(20);
 	let seed = $state<number>(-1);
 	let cfgScale = $state<number>(7);
@@ -88,7 +89,6 @@
 	let usedLoras: string[] = [];
 
 	async function setup(vault: Vault) {
-
 		$isSdStarting = true;
 		await HttpService.post(endpoints.sdStart());
 		const [
@@ -129,8 +129,8 @@
 			const parsedMetadata = JSON.parse(decodeURIComponent(rawMetadata)) as MediaItemMetadata;
 			width = parsedMetadata.width;
 			height = parsedMetadata.height;
-			positivePrompt = [{text: parsedMetadata.positivePrompt }]
-			negativePrompt = [{text: parsedMetadata.negativePrompt }]
+			positivePrompt = [{ text: parsedMetadata.positivePrompt, id: 0 }];
+			negativePrompt = [{ text: parsedMetadata.negativePrompt, id: 0 }];
 			seed = parsedMetadata.seed;
 			scheduler = parsedMetadata.sampler;
 			cfgScale = parsedMetadata.cfgScale;
@@ -161,16 +161,14 @@
 		const prompt = new SDPromptBuilder();
 		const checkpoint = checkpoints.find((ch) => ch.id === checkpointId)!;
 		prompt
-		.withPositivePrompt(positivePrompt)
-		.withNegativePrompt(negativePrompt)
-		.withScheduler(scheduler)
-			// .withPositivePrompt(processPrompt(wildcards, positivePrompt))
-			// .withNegativePrompt(processPrompt(wildcards, negativePrompt))
+			.withPositivePrompt(positivePrompt)
+			.withNegativePrompt(negativePrompt)
+			.withScheduler(scheduler)
 			.withSteps(steps)
 			.withSize(width, height)
 			.withSeed(seed)
 			.withCfgScale(cfgScale);
-			// .withBatching(numberOfGenerations, imagesPerGeneration)
+		// .withBatching(numberOfGenerations, imagesPerGeneration)
 
 		// if (isHighResEnabled) {
 		// 	prompt.withHighResOptions({
@@ -280,8 +278,8 @@
 	function clearPrompt() {
 		promptId = '';
 		promptName = '';
-		positivePrompt = []
-		negativePrompt = []
+		positivePrompt = [];
+		negativePrompt = [];
 		checkpointId;
 		width = 512;
 		height = 512;
@@ -307,7 +305,7 @@
 	}
 
 	function onLoraClick(lora: SDLora) {
-		positivePrompt.push({ lora, strength: 0.5, activatedWords: []})
+		positivePrompt.push({ lora, strength: 0.5, activatedWords: [], id: positivePrompt.length });
 		usedLoras.push(lora.id);
 	}
 
@@ -333,8 +331,8 @@
 
 <div class=" bg-zinc-900 rounded-md p-4 flex flex-1 flex-col relative">
 	<div class="flex justify-between">
-		<div class="flex flex-1 gap-4 items-center">
-			<div class="flex flex-[0.25] gap-2 items-center">
+		<div class="flex flex-1 gap-4 items-center max-w-[40%]">
+			<div class="flex flex-1 gap-2 items-center">
 				<div>Prompt Mode:</div>
 				<div class="flex flex-1">
 					<button
@@ -421,9 +419,9 @@
 	</div>
 	<div class="flex flex-col flex-1">
 		{#if promptMode === 'SIMPLE'}
-			<!-- <SimplePrompt bind:negativePrompt bind:positivePrompt /> -->
+			<SimplePrompt bind:negativePrompt bind:positivePrompt />
 		{:else}
-			<BlockPrompt bind:positivePrompt bind:negativePrompt loras={loras} tags={allTags}  />
+			<BlockPrompt bind:positivePrompt bind:negativePrompt {loras} tags={allTags} {wildcards} />
 		{/if}
 		<div class="flex gap-4 pt-4">
 			<div class="flex flex-[0.6] flex-col gap-2">
@@ -434,7 +432,7 @@
 					>
 						General
 					</button>
-					<button
+					<!-- <button
 						onclick={() => (selectedTab = 'HIGHRES')}
 						class={`tab-option min-w-[15%] flex justify-center flex gap-2 ${selectedTab === 'HIGHRES' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
 					>
@@ -443,7 +441,7 @@
 							bind:checked={isHighResEnabled}
 							type="checkbox"
 						/> <span>High Res</span>
-					</button>
+					</button> -->
 					<button
 						onclick={() => (selectedTab = 'LORAS')}
 						class={`tab-option min-w-[15%] flex justify-center ${selectedTab === 'LORAS' ? 'active-tab-option bg-red-950 font-bold' : 'bg-zinc-950 hover:bg-red-900'}`}
