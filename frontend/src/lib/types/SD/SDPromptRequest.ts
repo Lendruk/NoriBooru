@@ -23,4 +23,5 @@ export type Text2ImgPromptBody = {
 	seed: number;
 	scheduler: string;
 	cfgScale: number;
+	iterations: number;
 };

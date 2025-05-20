@@ -167,8 +167,8 @@
 			.withSteps(steps)
 			.withSize(width, height)
 			.withSeed(seed)
-			.withCfgScale(cfgScale);
-		// .withBatching(numberOfGenerations, imagesPerGeneration)
+			.withCfgScale(cfgScale)
+			.withBatching(numberOfGenerations);
 
 		// if (isHighResEnabled) {
 		// 	prompt.withHighResOptions({

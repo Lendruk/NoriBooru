@@ -77,6 +77,7 @@ def text2img():
     loras = data['loras']
     cfg_scale = data.get('cfg_scale', 7.5)
     scheduler = data.get('scheduler', 'euler_ancestral')
+    iterations = data.get('iterations', 1)
     print(f"Received model: {sd_model}")
 
     if not all([sd_model, steps, width, height, seed]):
@@ -151,7 +152,8 @@ def text2img():
                     height=height,
                     num_inference_steps=steps,
                     generator=generator,
-                    guidance_scale=cfg_scale
+                    guidance_scale=cfg_scale,
+                    num_images_per_prompt=iterations
                     )
         # print generation result object
         print(f"Generation result: {generation_result}")

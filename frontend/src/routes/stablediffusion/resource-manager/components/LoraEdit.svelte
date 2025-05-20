@@ -103,9 +103,9 @@
 	<LabeledComponent>
 		<div slot="label">SD Version</div>
 		<Select class="w-full h-[40px]" slot="content" bind:value={sdVersion}>
-			<option>SD 1.5</option>
 			<option>SDXL</option>
 			<option>Pony</option>
+			<option>Illustrious</option>
 		</Select>
 	</LabeledComponent>
 	<LabeledComponent>

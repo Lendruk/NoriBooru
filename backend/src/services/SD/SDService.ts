@@ -39,6 +39,7 @@ export type Text2ImgPromptBody = {
 	seed: number;
 	scheduler: string;
 	cfgScale: number;
+	iterations: number;
 };
 
 type SDServerLoraPayload = { path: string; strength: number };
@@ -53,6 +54,7 @@ type SDServerText2ImgPromptBody = {
 	seed: number;
 	scheduler: string;
 	cfgScale: number;
+	iterations: number;
 };
 
 @injectable()
@@ -248,6 +250,7 @@ export class SDService {
 			seed: seed,
 			scheduler: prompt.scheduler,
 			model: checkpointPath,
+			iterations: prompt.iterations,
 			cfgScale: prompt.cfgScale
 		};
 	}

@@ -16,6 +16,11 @@ export class SDPromptBuilder {
 		};
 	}
 
+	public withBatching(iterations: nunber): this {
+		this.promptRequest.iterations = iterations;
+		return this;
+	}
+
 	public withCfgScale(cfgScale: number): this {
 		this.promptRequest.cfgScale = cfgScale;
 		return this;
