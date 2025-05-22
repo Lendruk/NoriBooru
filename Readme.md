@@ -8,7 +8,6 @@ Currently NoriBooru is **NOT PRODUCTION READY**. The current build is far from o
 
 - Tagged Image / Video storage and gallery / inbox
 - Media Item playlists
-- Optional Stable diffusion integration via the [Automatic1111](https://github.com/AUTOMATIC1111/stable-diffusion-webui) backend (currently only supports text2img)
 - Stable diffusion resource management interface (checkpoints / loras only for now)
 - Allow direct importing of Civitai models with their metadata
 
