@@ -152,11 +152,13 @@
 	async function populateScreen() {
 		await search({ appendResults: true, watcherId });
 		currentPage = currentPage + 1;
-		while (galleryDiv.scrollHeight <= window.innerHeight) {
-			const res = await search({ appendResults: true, watcherId });
-			currentPage = currentPage + 1;
-			if (res.length === 0) {
-				break;
+		if (galleryDiv) {
+			while (galleryDiv.scrollHeight <= window.innerHeight) {
+				const res = await search({ appendResults: true, watcherId });
+				currentPage = currentPage + 1;
+				if (res.length === 0) {
+					break;
+				}
 			}
 		}
 	}
