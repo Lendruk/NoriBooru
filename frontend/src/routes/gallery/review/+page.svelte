@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Button from '$lib/components/Button.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagEditModal from '$lib/components/TagEditModal.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import DoorOpen from '$lib/icons/DoorOpen.svelte';
-	import InfoIcon from '$lib/icons/InfoIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemWithTags } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		ArchiveIcon,
+		ArrowLeft,
+		ArrowRight,
+		Button,
+		DoorOpen,
+		InfoIcon,
+		Modal,
+		TagIcon,
+		Tooltip,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	type ReviewAction = 'Archive' | 'Delete';
 
 	let currentMediaIndex = $state(0);
@@ -30,14 +33,14 @@
 
 	const inboxUrl = '/gallery/inbox';
 	$effect(() => {
-		HttpService.get<number[]>('/mediaItems/review').then(async (items) => {
+		HttpService.get<number[]>(endpoints.getMediaItemsForReview()).then(async (items) => {
 			mediaIds = items.reverse();
 			const firstItem = await fetchMediaItem(mediaIds[0]);
 			currentMediaItem = firstItem;
 			fetchedMediaItems.set(firstItem.id, firstItem);
 		});
 
-		HttpService.get<PopulatedTag[]>('/tags').then((fetchedTags) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((fetchedTags) => {
 			tags = fetchedTags;
 		});
 	});
@@ -49,7 +52,7 @@
 
 	async function fetchMediaItem(id: number): Promise<MediaItemWithTags> {
 		const { mediaItem } = await HttpService.get<{ mediaItem: MediaItemWithTags }>(
-			`/mediaItems/${id}`
+			endpoints.mediaItem({ id })
 		);
 		return mediaItem;
 	}
@@ -144,19 +147,23 @@
 		let promises: Promise<unknown>[] = [];
 		if (itemsToArchive.length > 0) {
 			promises.push(
-				HttpService.patch(`/mediaItems/${JSON.stringify(itemsToArchive)}`, { isArchived: true })
+				HttpService.patch(endpoints.mediaItem({ id: JSON.stringify(itemsToArchive) }), {
+					isArchived: true
+				})
 			);
 		}
 
 		if (itemsToDelete.length > 0) {
-			promises.push(HttpService.delete(`/mediaItems/${JSON.stringify(itemsToDelete)}`));
+			promises.push(HttpService.delete(endpoints.mediaItem({ id: JSON.stringify(itemsToDelete) })));
 		}
 
 		if (tagsToApply.size > 0) {
 			for (const pair of tagsToApply) {
 				const id = pair[0];
 				const tags = pair[1];
-				promises.push(HttpService.put(`/mediaItems/${JSON.stringify([id])}/tags`, { tags }));
+				promises.push(
+					HttpService.put(endpoints.mediaItemTags({ id: JSON.stringify([id]) }), { tags })
+				);
 			}
 		}
 
@@ -221,14 +228,14 @@
 			{#if currentMediaItem.type === 'image'}
 				<img
 					class="max-w-full max-h-[85vh]"
-					src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetImageUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					alt="gallery-img"
 				/>
 			{/if}
 			{#if currentMediaItem.type === 'video'}
 				<video
 					class="bg-cover w-full h-full"
-					src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetVideoUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					controls
 				>
 					<track kind="captions" />

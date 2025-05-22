@@ -1,16 +1,19 @@
 <script lang="ts">
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import ImageIcon from '$lib/icons/ImageIcon.svelte';
-	import RefreshIcon from '$lib/icons/RefreshIcon.svelte';
-	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
-	import UploadIcon from '$lib/icons/UploadIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDLora } from '$lib/types/SD/SDLora';
+	import {
+		ImageIcon,
+		LabeledComponent,
+		Modal,
+		RefreshIcon,
+		SettingsIcon,
+		TextInput,
+		UploadIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onDestroy, onMount } from 'svelte';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 
@@ -23,7 +26,7 @@
 
 	let showLoraEditModal = false;
 	let loraInEdit: SDLora | undefined;
-	let activationWords: [string, number][] = [];
+	let activationWords: string[] = [];
 
 	let nameInputTimeout: NodeJS.Timeout | undefined;
 
@@ -31,13 +34,14 @@
 		showLoraEditModal = true;
 		loraInEdit = lora;
 
-		const key = Object.keys(loraInEdit.metadata.ss_tag_frequency)[0];
-		const frequencyDict = loraInEdit.metadata.ss_tag_frequency[key];
-		for (const tag in frequencyDict) {
-			activationWords.push([tag, frequencyDict[tag]]);
-		}
+		// const key = Object.keys(loraInEdit.metadata.ss_tag_frequency)[0];
+		// const frequencyDict = loraInEdit.metadata.ss_tag_frequency[key];
+		// for (const tag in frequencyDict) {
+		// 	activationWords.push([tag, frequencyDict[tag]]);
+		// }
+		activationWords = loraInEdit.activationWords;
 
-		activationWords.sort((a, b) => b[1] - a[1]);
+		// activationWords.sort((a, b) => b[1] - a[1]);
 	}
 
 	onMount(() => {
@@ -50,19 +54,19 @@
 
 	async function setPreviewImage(lora: SDLora) {
 		if (lastGen && loraInEdit) {
-			await HttpService.put(`/sd/loras/${lora.id}`, {
-				previewImage: lastGen.fileName
+			await HttpService.put(endpoints.sdLora({ id: lora.id }), {
+				previewImage: lastGen.id
 			});
-			loraInEdit.previewImage = lastGen.fileName!;
+			loraInEdit.previewMediaItem = lastGen
 			const index = loras.findIndex((l) => l.id === loraInEdit?.id);
-			loras[index].previewImage = loraInEdit!.previewImage;
+			loras[index].previewMediaItem = loraInEdit!.previewMediaItem;
 		}
 	}
 
 	async function addTagToLora(tag: PopulatedTag) {
 		if (loraInEdit) {
 			loraInEdit.tags = loraInEdit.tags.concat(tag);
-			await HttpService.put(`/sd/loras/${loraInEdit.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: loraInEdit.id }), {
 				tags: loraInEdit.tags.map((t) => t.id)
 			});
 		}
@@ -73,7 +77,7 @@
 			const index = loraInEdit.tags.findIndex((t) => t.id === tag.id);
 			loraInEdit.tags.splice(index, 1);
 			loraInEdit.tags = loraInEdit.tags;
-			await HttpService.put(`/sd/loras/${loraInEdit.id}`, {
+			await HttpService.put(endpoints.sdLora({ id: loraInEdit.id }), {
 				tags: loraInEdit.tags.map((t) => t.id)
 			});
 		}
@@ -81,7 +85,9 @@
 
 	async function searchLoras() {
 		const filteredLoras = await HttpService.get<SDLora[]>(
-			`/sd/loras?tags=${filterTags.map((tag) => tag.id).join(',')}${filterName ? `&name=${filterName}` : ''}`
+			endpoints.sdLoras({
+				params: `tags=${filterTags.map((tag) => tag.id).join(',')}${filterName ? `&name=${filterName}` : ''}`
+			})
 		);
 		loras = filteredLoras;
 	}
@@ -100,8 +106,8 @@
 	}
 
 	async function refreshLoras() {
-		await HttpService.post(`/sd/refresh-loras`);
-		const updatedLoras = await HttpService.get<SDLora[]>(`/sd/loras`);
+		await HttpService.post(endpoints.refreshSDLoras());
+		const updatedLoras = await HttpService.get<SDLora[]>(endpoints.sdLoras());
 		loras = updatedLoras;
 	}
 
@@ -147,7 +153,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each loras as lora}
 				<button
-					style={`background-image: url(${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${lora.previewImage}.png);`}
+					style={`background-image: url(${HttpService.buildGetImageThumbnailUrl(lora?.previewMediaItem?.fileName ?? '', 'png')});`}
 					on:click={() => onLoraClick(lora)}
 					class="w-[150px] h-[200px] bg-zinc-700 flex items-end justify-center relative bg-cover bg-no-repeat rounded-md overflow-hidden"
 				>
@@ -197,10 +203,8 @@
 					</LabeledComponent>
 				</div>
 				<div class="flex w-[150px] h-[250px] items-center relative justify-center bg-zinc-950">
-					{#if loraInEdit.previewImage}
-						<img
-							src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${loraInEdit.previewImage}.png`}
-						/>
+					{#if loraInEdit.previewMediaItem}
+						<img src={HttpService.buildGetImageUrl(loraInEdit.previewMediaItem.fileName!, 'png')} />
 					{:else}
 						<ImageIcon />
 					{/if}
@@ -214,9 +218,9 @@
 			<LabeledComponent>
 				<div slot="label">Activation Words</div>
 				<div class="overflow-scroll max-h-[300px]" slot="content">
-					{#each activationWords as activationPair}
+					{#each activationWords as word}
 						<div>
-							{activationPair[0]} : {activationPair[1]}
+							{word}
 						</div>
 					{/each}
 				</div>

@@ -1,16 +1,19 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import LoadingBackground from '$lib/components/LoadingBackground.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { JobWebsocketEventData } from '$lib/services/WebsocketService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
 	import type { SDCheckpoint } from '$lib/types/SD/SDCheckpoint';
-	import type { SDLora } from '$lib/types/SD/SDLora';
+	import type { RawSDLora } from '$lib/types/SD/SDLora';
+	import {
+		Button,
+		createToast,
+		LabeledComponent,
+		LoadingBackground,
+		Modal,
+		TextInput
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
 	import { vaultStore } from '../../../store';
 	import CheckpointEdit from './components/CheckpointEdit.svelte';
@@ -26,12 +29,12 @@
 	let deletionResourceType = '';
 	let isModalLoading = false;
 
-	let loras: SDLora[] = [];
+	let loras: RawSDLora[] = [];
 	let checkpoints: SDCheckpoint[] = [];
 	let tags: PopulatedTag[] = [];
 	let isEditWindowOpen = false;
 	let currentlySelectedResource:
-		| (SDLora & { type: string })
+		| (RawSDLora & { type: string })
 		| (SDCheckpoint & { type: string })
 		| undefined;
 
@@ -81,7 +84,7 @@
 		isEditWindowOpen = true;
 	}
 
-	function onLoraClick(sdLora: SDLora): void {
+	function onLoraClick(sdLora: RawSDLora): void {
 		currentlySelectedResource = { ...sdLora, type: 'lora' };
 		isEditWindowOpen = true;
 	}
@@ -97,7 +100,9 @@
 
 		try {
 			await HttpService.delete(
-				`/sd/${deletionResourceType === 'LORA' ? 'loras' : 'checkpoints'}/${deletionResource?.id}`
+				deletionResourceType === 'LORA'
+					? endpoints.sdLoras({ id: deletionResource?.id })
+					: endpoints.sdCheckpoints({ id: deletionResource?.id })
 			);
 
 			if (deletionResourceType === 'LORA') {
@@ -127,9 +132,9 @@
 
 	async function fetchResources() {
 		const [sdLoras, sdCheckpoints, fetchedTags] = await Promise.all([
-			HttpService.get<SDLora[]>(`/sd/loras`),
-			HttpService.get<SDCheckpoint[]>(`/sd/checkpoints`),
-			HttpService.get<PopulatedTag[]>(`/tags`)
+			HttpService.get<RawSDLora[]>(endpoints.sdLoras()),
+			HttpService.get<SDCheckpoint[]>(endpoints.sdCheckpoints()),
+			HttpService.get<PopulatedTag[]>(endpoints.tags())
 		]);
 
 		loras = sdLoras;
@@ -144,15 +149,19 @@
 
 	// Querying
 	async function searchLoras() {
-		const filteredLoras = await HttpService.get<SDLora[]>(
-			`/sd/loras?tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+		const filteredLoras = await HttpService.get<RawSDLora[]>(
+			endpoints.sdLoras({
+				params: `tags=${loraFilterTags.map((tag) => tag.id).join(',')}${queryLoraName ? `&name=${queryLoraName}` : ''}`
+			})
 		);
 		loras = filteredLoras;
 	}
 
 	async function searchCheckpoints() {
 		const filteredCheckpoints = await HttpService.get<SDCheckpoint[]>(
-			`/sd/checkpoints${queryCheckpointName ? `?name=${queryCheckpointName}` : ''}`
+			endpoints.sdCheckpoints({
+				params: queryCheckpointName ? `name=${queryCheckpointName}` : ''
+			})
 		);
 		checkpoints = filteredCheckpoints;
 	}
@@ -285,7 +294,7 @@
 					<LoraEdit
 						bind:isOpen={isEditWindowOpen}
 						bind:tags
-						bind:sdLora={currentlySelectedResource as SDLora}
+						bind:sdLora={currentlySelectedResource as RawSDLora}
 					/>
 				{/if}
 			</div>

@@ -1,10 +1,13 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SavedPrompt } from '$lib/types/SavedPrompt';
+	import {
+		Button,
+		createToast,
+		LabeledComponent,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 
 	export let isOpen: boolean;
 	export let onSelectPrompt: (prompt: SavedPrompt) => void | Promise<void>;
@@ -15,7 +18,7 @@
 	let currentOpenPromptName: string | undefined;
 
 	async function getSavedPrompts() {
-		const response = await HttpService.get<SavedPrompt[]>('/sd/prompts');
+		const response = await HttpService.get<SavedPrompt[]>(endpoints.sdPrompts());
 		prompts = response;
 
 		currentOpenPrompt = prompts[0];
@@ -27,7 +30,7 @@
 	async function updatePrompt() {
 		if (!currentOpenPrompt) return;
 
-		await HttpService.put(`/sd/prompts/${currentOpenPrompt.id}`, {
+		await HttpService.put(endpoints.sdPrompt({ id: currentOpenPrompt.id }), {
 			...currentOpenPrompt,
 			name: currentOpenPromptName
 		});
@@ -37,7 +40,7 @@
 	}
 
 	async function deleteSavedPrompt(id: string) {
-		await HttpService.delete(`/sd/prompts/${id}`);
+		await HttpService.delete(endpoints.sdPrompt({ id }));
 
 		if (id === currentOpenPrompt?.id) {
 			currentOpenPrompt = undefined;

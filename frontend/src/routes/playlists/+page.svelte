@@ -1,23 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import SimpleTable from '$lib/components/SimpleTable.svelte';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import EditIcon from '$lib/icons/editIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SimplePlaylist } from '$lib/types/SimplePlaylist';
+	import { EditIcon, PlayIcon, SimpleTable, TrashIcon } from '@lendruk/personal-svelte-ui-lib';
 
 	let playlists: SimplePlaylist[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<SimplePlaylist[]>(`/playlists`).then((res) => {
+		HttpService.get<SimplePlaylist[]>(endpoints.playlists()).then((res) => {
 			playlists = res;
 		});
 	});
 
 	async function deletePlaylist(playlistId?: number) {
 		if (playlistId !== undefined) {
-			await HttpService.delete(`/playlists/${playlistId}`);
+			await HttpService.delete(endpoints.playlist({ id: playlistId }));
 			playlists = playlists.filter((playlist) => playlist.id !== playlistId);
 		}
 	}

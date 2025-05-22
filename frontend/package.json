@@ -1,6 +1,6 @@
 {
 	"name": "@nori-booru/front-end",
-	"version": "0.6.0",
+	"version": "1.0.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -18,31 +18,34 @@
 		"bump:major": "npm version major --git-tag-version false"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^3.0.4",
-		"@sveltejs/kit": "^2.5.22",
-		"@sveltejs/vite-plugin-svelte": "^3.1.1",
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/kit": "^2.21.1",
+		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@typescript-eslint/eslint-plugin": "^7.11.0",
 		"@typescript-eslint/parser": "^7.11.0",
-		"autoprefixer": "^10.4.19",
+		"autoprefixer": "^10.4.21",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.39.0",
-		"postcss": "^8.4.38",
-		"prettier": "^3.2.5",
+		"postcss": "^8.5.3",
+		"prettier": "^3.5.3",
 		"prettier-plugin-svelte": "^3.0.0",
-		"svelte": "5.0.0-next.216",
-		"svelte-check": "^3.8.0",
-		"tslib": "^2.4.1",
-		"typescript": "^5.4.5",
-		"vite": "^5.2.12"
+		"svelte": "5.28.3",
+		"svelte-check": "^4.1.5",
+		"svelte-dnd-action": "^0.9.61",
+		"tslib": "^2.8.1",
+		"typescript": "^5.8.3",
+		"vite": "^6.2.5"
 	},
 	"peerDependencies": {
 		"tailwindcss": "^3.3.5"
 	},
 	"type": "module",
 	"dependencies": {
+		"@lendruk/personal-svelte-ui-lib": "^0.1.0",
 		"exifreader": "^4.23.1",
-		"puppeteer": "^21.5.2",
+		"pixi.js": "^8.5.1",
+		"puppeteer": "^24.8.2",
 		"rxjs": "^7.8.1"
 	}
 }

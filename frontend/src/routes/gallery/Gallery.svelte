@@ -19,27 +19,30 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Link from '$lib/components/Link.svelte';
 	import MassTagEditModal from '$lib/components/MassTagEditModal.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import Select from '$lib/components/Select.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
-	import TextInput from '$lib/components/TextInput.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Video from '$lib/components/Video.svelte';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import CheckIcon from '$lib/icons/CheckIcon.svelte';
-	import FilterIcon from '$lib/icons/FilterIcon.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import XIcon from '$lib/icons/XIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem, MediaItemMetadata } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import {
+		ArchiveIcon,
+		Button,
+		CheckIcon,
+		FilterIcon,
+		InboxIcon,
+		LabeledComponent,
+		Link,
+		Modal,
+		Select,
+		TagIcon,
+		TextInput,
+		TrashIcon,
+		Video,
+		XIcon,
+		createToast
+	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
 	import GalleryItem from './GalleryItem.svelte';
 
@@ -129,11 +132,11 @@
 				await populateScreen();
 			});
 		}
-		tags = await HttpService.get<PopulatedTag[]>('/tags');
+		tags = await HttpService.get<PopulatedTag[]>(endpoints.tags());
 	});
 
 	async function createPlaylist() {
-		const newPlaylist = await HttpService.post<Playlist>('/playlists', {
+		const newPlaylist = await HttpService.post<Playlist>(endpoints.playlists(), {
 			name: playlistCreationName,
 			randomizeOrder: false,
 			timePerItem: 0,
@@ -149,11 +152,13 @@
 	async function populateScreen() {
 		await search({ appendResults: true, watcherId });
 		currentPage = currentPage + 1;
-		while (galleryDiv.scrollHeight <= window.innerHeight) {
-			const res = await search({ appendResults: true, watcherId });
-			currentPage = currentPage + 1;
-			if (res.length === 0) {
-				break;
+		if (galleryDiv) {
+			while (galleryDiv.scrollHeight <= window.innerHeight) {
+				const res = await search({ appendResults: true, watcherId });
+				currentPage = currentPage + 1;
+				if (res.length === 0) {
+					break;
+				}
 			}
 		}
 	}
@@ -173,14 +178,16 @@
 	}
 
 	async function removeTagFromMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.delete(`/mediaItems/${mediaItemId}/tags`, { ...tag });
+		await HttpService.delete(endpoints.mediaItemTags({ id: mediaItemId }), { ...tag });
 		const tagIndex = mediaItemInTagEdit!.tags.findIndex((mediaTag) => mediaTag.id === tag.id);
 		mediaItemInTagEdit!.tags.splice(tagIndex, 1);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
 
 	async function addTagToMediaItem(tag: PopulatedTag, mediaItemId: number) {
-		await HttpService.put(`/mediaItems/${JSON.stringify([mediaItemId])}/tags`, { ...tag });
+		await HttpService.put(endpoints.mediaItemTags({ id: JSON.stringify([mediaItemId]) }), {
+			...tag
+		});
 		mediaItemInTagEdit!.tags.push(tag);
 		mediaItemInTagEdit!.tags = mediaItemInTagEdit!.tags;
 	}
@@ -206,11 +213,11 @@
 		if (isInbox !== undefined) {
 			params.set('archived', isInbox ? 'false' : 'true');
 		}
-		const res = await HttpService.get<{ mediaItems: MediaItem[] }>('/mediaItems?' + params);
-		let fetchedMediaItems = res.mediaItems;
+		const res = await HttpService.get<MediaItem[]>(endpoints.mediaItems({ params }));
+		let fetchedMediaItems = res;
 		if (appendResults) {
-			if (res.mediaItems.length > 0) {
-				mediaItems = mediaItems.concat(res.mediaItems);
+			if (res.length > 0) {
+				mediaItems = mediaItems.concat(res);
 			} else {
 				hasMoreItems = false;
 			}
@@ -247,7 +254,7 @@
 	}
 
 	async function deleteItems(mediaItemIds: number[]) {
-		await HttpService.delete(`/mediaItems/${JSON.stringify(mediaItemIds)}`);
+		await HttpService.delete(endpoints.mediaItem({ id: JSON.stringify(mediaItemIds) }));
 		mediaItems = mediaItems.filter((item) => !mediaItemIds.includes(item.id));
 	}
 
@@ -261,7 +268,9 @@
 	}
 
 	async function toggleArchivedStatus(mediaItemIds: number[], isArchived: boolean) {
-		await HttpService.patch(`/mediaItems/${JSON.stringify(mediaItemIds)}`, { isArchived });
+		await HttpService.patch(endpoints.mediaItem({ id: JSON.stringify(mediaItemIds) }), {
+			isArchived
+		});
 		mediaItems = mediaItems.map((item) =>
 			mediaItemIds.includes(item.id) ? { ...item, isArchived } : item
 		);
@@ -278,7 +287,9 @@
 	}
 
 	async function fetchMediaItemTags(mediaItemId: number) {
-		const tags = await HttpService.get<PopulatedTag[]>(`/mediaItems/${mediaItemId}/tags`);
+		const tags = await HttpService.get<PopulatedTag[]>(
+			endpoints.mediaItemTags({ id: mediaItemId })
+		);
 		mediaItemInTagEdit = { id: mediaItemId, tags };
 	}
 
@@ -338,13 +349,13 @@
 	}
 
 	async function onAddToPlaylistClick(mediaItem: MediaItem) {
-		playlists = await HttpService.get<Playlist[]>('/playlists');
+		playlists = await HttpService.get<Playlist[]>(endpoints.playlists());
 		mediaItemToAddToPlaylist = mediaItem;
 		isPlaylistModalOpen = true;
 	}
 
 	async function addMediaItemToPlaylist(playlistId: number, mediaItemId: number) {
-		await HttpService.patch(`/playlists/${playlistId}/add-item`, { item: mediaItemId });
+		await HttpService.patch(endpoints.addPlaylistItem({ id: playlistId }), { item: mediaItemId });
 		playlists = playlists.map((playlist) => {
 			if (playlist.id === playlistId) {
 				playlist.items.push(mediaItemId);
@@ -428,7 +439,7 @@
 	{/if}
 	<div class="flex flex-1 relative">
 		{#if isFilterSelectionVisible}
-			<div class="bg-zinc-900 rounded-lg p-2 ml-2 flex flex-col w-[40%]">
+			<div class="bg-zinc-900 rounded-lg p-2 mr-2 flex flex-col w-[40%]">
 				<div class="text-3xl mb-4 sticky">Filters</div>
 				<div class="flex flex-col mb-2">
 					<div class="mb-2 flex justify-between">
@@ -530,6 +541,7 @@
 		>
 			{#each mediaItems as mediaItem}
 				<GalleryItem
+					{mediaItem}
 					isAiGen={!!mediaItem.metadata?.model}
 					isArchived={mediaItem.isArchived}
 					onMoveToArchive={() => toggleArchivedStatus([mediaItem.id], !mediaItem.isArchived)}
@@ -546,14 +558,14 @@
 					{#if mediaItem.type === 'image'}
 						<img
 							class="h-full"
-							src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.${mediaItem.extension === 'gif' ? 'webp' : 'jpg'}`}
+							src={HttpService.buildGetImageThumbnailUrl(mediaItem.fileName, mediaItem.extension)}
 							alt="gallery-img"
 						/>
 					{/if}
 					{#if mediaItem.type === 'video'}
 						<Video
 							cssClass="bg-cover w-full h-full"
-							src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/thumb/${mediaItem.fileName}.mp4`}
+							src={HttpService.buildGetVideoThumbnailUrl(mediaItem.fileName)}
 						/>
 					{/if}
 				</GalleryItem>

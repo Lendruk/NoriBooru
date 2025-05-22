@@ -1,13 +1,11 @@
 <script lang="ts">
-	import PauseIcon from '$lib/icons/PauseIcon.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { Playlist } from '$lib/types/Playlist';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import { goto } from '$app/navigation';
+	import { ArrowLeft, ArrowRight, PauseIcon, PlayIcon } from '@lendruk/personal-svelte-ui-lib';
 
 	let currentMediaIndex = $state(0);
 	let isPaused = $state(false);
@@ -18,7 +16,7 @@
 
 	$effect(() => {
 		if ($page.params.id) {
-			HttpService.get<Playlist>(`/playlists/${$page.params.id}`).then((res) => {
+			HttpService.get<Playlist>(endpoints.playlist({ id: $page.params.id })).then((res) => {
 				timePerItem = res.timePerItem ?? 0;
 				items = res.items ?? [];
 
@@ -90,14 +88,14 @@
 			{#if currentMediaItem.type === 'image'}
 				<img
 					class="max-w-full max-h-full"
-					src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetImageUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					alt="gallery-img"
 				/>
 			{/if}
 			{#if currentMediaItem.type === 'video'}
 				<video
 					class="bg-cover w-full h-full"
-					src={`${HttpService.BASE_URL}/videos/${HttpService.getVaultId()}/${currentMediaItem.fileName}.${currentMediaItem.extension}`}
+					src={HttpService.buildGetVideoUrl(currentMediaItem.fileName, currentMediaItem.extension)}
 					controls
 				>
 					<track kind="captions" />

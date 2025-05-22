@@ -1,12 +1,15 @@
 <script lang="ts">
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import CheckIcon from '$lib/icons/CheckIcon.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import PenIcon from '$lib/icons/PenIcon.svelte';
-	import PlayIcon from '$lib/icons/PlayIcon.svelte';
-	import TagIcon from '$lib/icons/TagIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
-	import { vaultStore } from '../../store';
+	import { setItemPreview } from '$lib/components/ItemPreview.svelte';
+	import type { MediaItem } from '$lib/types/MediaItem';
+	import {
+		ArchiveIcon,
+		CheckIcon,
+		InboxIcon,
+		PenIcon,
+		PlayIcon,
+		TagIcon,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from './GalleryItemButton.svelte';
 
 	export let href = '';
@@ -18,6 +21,7 @@
 	export let onGotoGeneratorClick: () => void;
 	export let isArchived = false;
 	export let style = '';
+	export let mediaItem: MediaItem;
 
 	export let isSelected = false;
 	export let isAiGen = false;
@@ -29,6 +33,9 @@
 	let confirmingDelete = false;
 	let showOptions = false;
 
+	let element: HTMLElement;
+	let previewTimeout: NodeJS.Timeout | undefined;
+
 	const reset = () => {
 		confirmingDelete = false;
 	};
@@ -39,12 +46,34 @@
 			e.preventDefault();
 		}
 	}
+
+	function onMouseEnter() {
+		showOptions = true;
+	}
+
+	function clearPreviewTimeout() {
+		if (previewTimeout) {
+			clearTimeout(previewTimeout);
+		}
+	}
+
+	function registerPreviewTimeout() {
+		if (previewTimeout) {
+			clearTimeout(previewTimeout);
+		}
+
+		previewTimeout = setTimeout(() => {
+			setItemPreview(element, mediaItem.id);
+		}, 1500);
+	}
 </script>
 
 <a
-	on:mouseenter={() => (showOptions = true)}
+	bind:this={element}
+	on:mouseenter={onMouseEnter}
 	on:mouseleave={() => {
 		showOptions = false;
+		clearPreviewTimeout();
 		reset();
 	}}
 	{style}
@@ -57,6 +86,7 @@
 	<!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
 	<div
 		class={`${!showOptions ? 'hidden' : 'flex'} flex-1 w-full h-full absolute top-0`}
+		on:mouseenter={() => registerPreviewTimeout()}
 		on:click={onItemClick}
 	>
 		<div class="flex flex-1 flex-col">
@@ -77,31 +107,31 @@
 				</div>
 				<div class="flex flex-1 justify-end">
 					{#if isArchived}
-						<GalleryItemButton onClick={onMoveToInbox}>
+						<GalleryItemButton onClick={onMoveToInbox} onMouseEnter={clearPreviewTimeout}>
 							<ArchiveIcon />
 						</GalleryItemButton>
 					{:else}
-						<GalleryItemButton onClick={onMoveToArchive}>
+						<GalleryItemButton onClick={onMoveToArchive} onMouseEnter={clearPreviewTimeout}>
 							<InboxIcon />
 						</GalleryItemButton>
 					{/if}
 				</div>
 			</div>
 			<div class="flex gap-4 flex-1 items-end justify-end justify-items-end m-2">
-				{#if $vaultStore?.hasInstalledSD && isAiGen}
-					<GalleryItemButton onClick={onGotoGeneratorClick}>
+				{#if isAiGen}
+					<GalleryItemButton onClick={onGotoGeneratorClick} onMouseEnter={clearPreviewTimeout}>
 						<PenIcon />
 					</GalleryItemButton>
 				{/if}
-				<GalleryItemButton onClick={onAddToPlaylistClick}>
+				<GalleryItemButton onClick={onAddToPlaylistClick} onMouseEnter={clearPreviewTimeout}>
 					<PlayIcon />
 				</GalleryItemButton>
-				<GalleryItemButton onClick={onTagButtonClick}>
+				<GalleryItemButton onClick={onTagButtonClick} onMouseEnter={clearPreviewTimeout}>
 					<TagIcon />
 				</GalleryItemButton>
 
 				<!-- {#if confirmingDelete} -->
-				<GalleryItemButton onClick={onConfirmDelete}>
+				<GalleryItemButton onClick={onConfirmDelete} onMouseEnter={clearPreviewTimeout}>
 					<TrashIcon />
 				</GalleryItemButton>
 				<!-- {/if} -->

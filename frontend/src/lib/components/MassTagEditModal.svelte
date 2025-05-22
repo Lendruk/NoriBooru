@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItem } from '$lib/types/MediaItem';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
-	import Modal from './Modal.svelte';
+	import { Button, Modal } from '@lendruk/personal-svelte-ui-lib';
 	import TagSearchInput from './TagSearchInput.svelte';
 
 	export let itemsInEdit: Map<number, MediaItem>;
@@ -13,9 +13,12 @@
 	let appliedTags: PopulatedTag[] = [];
 
 	async function modifyMediaItemTags() {
-		await HttpService.put(`/mediaItems/${JSON.stringify(Array.from(itemsInEdit.keys()))}/tags`, {
-			tags: appliedTags
-		});
+		await HttpService.put(
+			endpoints.mediaItemTags({ id: JSON.stringify(Array.from(itemsInEdit.keys())) }),
+			{
+				tags: appliedTags
+			}
+		);
 		showModal = false;
 		appliedTags = [];
 	}

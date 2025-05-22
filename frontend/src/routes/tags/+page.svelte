@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagSearchInput from '$lib/components/TagSearchInput.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { PopulatedTag } from '$lib/types/PopulatedTag';
+	import { Button, Modal } from '@lendruk/personal-svelte-ui-lib';
 	let tagName = $state('');
 	let tagColor = $state('#ffffff');
 	let tagParentId = $state<number | undefined>(undefined);
@@ -20,13 +20,13 @@
 	let tags: PopulatedTag[] = $state([]);
 
 	$effect(() => {
-		HttpService.get<PopulatedTag[]>('/tags').then((res) => {
+		HttpService.get<PopulatedTag[]>(endpoints.tags()).then((res) => {
 			tags = res;
 		});
 	});
 
 	async function createTag() {
-		const newTag = await HttpService.post<PopulatedTag>('/tags', {
+		const newTag = await HttpService.post<PopulatedTag>(endpoints.tags(), {
 			name: tagName,
 			color: tagColor,
 			parentId: tagParentId
@@ -39,7 +39,7 @@
 	}
 
 	async function updateTag() {
-		const updatedTag = await HttpService.put<PopulatedTag>(`/tags/${tagInEditId}`, {
+		const updatedTag = await HttpService.put<PopulatedTag>(endpoints.tag({ id: tagInEditId }), {
 			name: tagInEditName,
 			parentId: tagInEditParent,
 			color: tagInEditColor
@@ -53,7 +53,7 @@
 	}
 
 	async function deleteTag(id: number) {
-		await HttpService.delete(`/tags/${id}`);
+		await HttpService.delete(endpoints.tag({ id }));
 		tags = tags.filter((tag) => tag.id !== id);
 	}
 </script>

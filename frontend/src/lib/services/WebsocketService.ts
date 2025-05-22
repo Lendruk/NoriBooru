@@ -32,14 +32,18 @@ type CurrentJobsEventData = {
 export class WebsocketService {
 	private static isProcessingMessage = false;
 	private static messageQueue: MessageEvent[] = [];
-	public static BASE_WEBSOCKET_URL = `ws://localhost:8080`;
+	public static BASE_WEBSOCKET_URL = `ws://localhost`;
 	public static socket: WebSocket | undefined;
 
-	public static registerWebsocket(): void {
+	public static async registerWebsocket(): Promise<void> {
 		const vaultId = HttpService.getVaultId();
-
+		let port = HttpService.getVaultPort();
 		if (vaultId) {
-			WebsocketService.socket = new WebSocket(`${WebsocketService.BASE_WEBSOCKET_URL}`);
+			if (!port) {
+				port = await HttpService.refreshPort();
+			}
+
+			WebsocketService.socket = new WebSocket(`${WebsocketService.BASE_WEBSOCKET_URL}:${port}/ws`);
 			WebsocketService.socket.addEventListener('open', () => {
 				console.log('socket connected');
 				WebsocketService.socket!.send(

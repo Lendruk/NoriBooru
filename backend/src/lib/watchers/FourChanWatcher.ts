@@ -1,8 +1,9 @@
 import { parse } from 'node-html-parser';
 import { activeWatchers_to_mediaItems, ActiveWatcherSchema } from '../../db/vault/schema';
-import { mediaService } from '../../services/MediaService';
+import { MediaService } from '../../services/MediaService';
+import { WebsocketService } from '../../services/WebsocketService';
 import { pause } from '../../utils/pause';
-import { VaultInstance } from '../VaultInstance';
+import { VaultDb } from '../VaultAPI';
 import { ActiveWatcher } from './ActiveWatcher';
 
 export type FourChanWatcherData = {
@@ -11,8 +12,13 @@ export type FourChanWatcherData = {
 
 export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
 	private static readonly BASE_ITEM_URL = 'https://i.4cdn.org/';
-	public constructor(rawWatcher: ActiveWatcherSchema, vault: VaultInstance) {
-		super(rawWatcher, vault);
+	public constructor(
+		rawWatcher: ActiveWatcherSchema,
+		db: VaultDb,
+		websocketService: WebsocketService,
+		private mediaService: MediaService
+	) {
+		super(rawWatcher, db, websocketService);
 
 		this.instanceData = this.data
 			? JSON.parse(this.data)
@@ -20,6 +26,10 @@ export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
 	}
 
 	public async queryPage(): Promise<void> {
+		if (this.status !== 'running') {
+			return;
+		}
+
 		const response = await fetch(this.url);
 		const body = await response.text();
 		const parsedHtml = parse(body);
@@ -56,13 +66,12 @@ export class FourChanWatcher extends ActiveWatcher<FourChanWatcherData> {
 					const itemUrl = `${FourChanWatcher.BASE_ITEM_URL}${board}/${fileName}`;
 					const itemBuffer = Buffer.from(await (await fetch(itemUrl)).arrayBuffer());
 
-					const { id: mediaItemId } = await mediaService.createItemFromBase64({
+					const { id: mediaItemId } = await this.mediaService.createItemFromBase64({
 						base64EncodedImage: itemBuffer.toString('base64'),
 						fileExtension: fileName.split('.').pop()!,
-						vault: this.vault,
 						source: itemUrl
 					});
-					await this.vault.db.insert(activeWatchers_to_mediaItems).values({
+					await this.db.insert(activeWatchers_to_mediaItems).values({
 						activeWatcherId: this.id,
 						mediaItemId
 					});

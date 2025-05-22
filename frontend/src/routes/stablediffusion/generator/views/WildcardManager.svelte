@@ -1,13 +1,16 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import SimpleTable from '$lib/components/SimpleTable.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import EditIcon from '$lib/icons/editIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
+	import {
+		Button,
+		createToast,
+		EditIcon,
+		LabeledComponent,
+		Modal,
+		SimpleTable,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 
 	export let wildcards: SDWildcard[];
 	let isWildcardModalOpen = false;
@@ -49,7 +52,7 @@
 	}
 
 	async function createWildcard() {
-		const newWildcard = await HttpService.post<SDWildcard>(`/sd/wildcards`, {
+		const newWildcard = await HttpService.post<SDWildcard>(endpoints.wildCards(), {
 			name: modalWildcardName,
 			values: modalWildcardValues
 		});
@@ -63,10 +66,13 @@
 	}
 
 	async function updateWildcard() {
-		const updatedWildcard = await HttpService.put<SDWildcard>(`/sd/wildcards/${modalWildcardId}`, {
-			name: modalWildcardName,
-			values: modalWildcardValues
-		});
+		const updatedWildcard = await HttpService.put<SDWildcard>(
+			endpoints.wildCard({ id: modalWildcardId }),
+			{
+				name: modalWildcardName,
+				values: modalWildcardValues
+			}
+		);
 		const index = wildcards.findIndex((wildcard) => wildcard.id === modalWildcardId);
 		wildcards[index].name = updatedWildcard.name;
 		wildcards[index].values = updatedWildcard.values;
@@ -81,7 +87,7 @@
 	}
 
 	async function deleteWildcard(id: string) {
-		await HttpService.delete(`/sd/wildcards/${id}`);
+		await HttpService.delete(endpoints.wildCard({ id }));
 		const index = wildcards.findIndex((wildcard) => wildcard.id === id);
 		if (index !== -1) {
 			wildcards.splice(index, 1);

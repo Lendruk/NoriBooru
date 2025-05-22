@@ -1,8 +1,8 @@
+import type { MediaItem } from '../MediaItem';
 import type { PopulatedTag } from '../PopulatedTag';
 
-export type SDLora = {
+export type RawSDLora = {
 	name: string;
-	previewImage?: string;
 	id: string;
 	path: string;
 	description: string;
@@ -17,4 +17,9 @@ export type SDLora = {
 		ss_num_train_images: string;
 		ss_tag_frequency: Record<string, Record<string, number>>;
 	};
+};
+
+export type SDLora = RawSDLora & {
+	previewMediaItem?: Partial<MediaItem>;
+	type: 'SLIDER' | 'MODIFIER' | 'NORMAL';
 };

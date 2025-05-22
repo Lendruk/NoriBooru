@@ -1,5 +1,5 @@
 <script lang="ts">
-	import JobViewerIcon from '$lib/icons/JobViewerIcon.svelte';
+	import { JobViewerIcon } from '@lendruk/personal-svelte-ui-lib';
 	import { runningJobs } from '../../../store';
 
 	let amtOfRunningJobs = $derived($runningJobs.length);

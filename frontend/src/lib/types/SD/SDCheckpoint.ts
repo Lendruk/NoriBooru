@@ -1,7 +1,9 @@
+import type { MediaItem } from '../MediaItem';
+
 export type SDCheckpoint = {
 	id: string;
 	name: string;
-	previewImage?: string;
+	previewMediaItem?: Partial<MediaItem>;
 	description: string;
 	path: string;
 	origin: string;

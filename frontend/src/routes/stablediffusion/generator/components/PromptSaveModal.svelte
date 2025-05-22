@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import LabeledComponent from '$lib/components/LabeledComponent.svelte';
+	import { Button, LabeledComponent } from '@lendruk/personal-svelte-ui-lib';
 
 	export let isOpen: boolean;
 	export let onSubmit: (name: string) => void | Promise<void>;

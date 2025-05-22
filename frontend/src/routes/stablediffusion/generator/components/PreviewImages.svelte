@@ -1,15 +1,18 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import { createToast } from '$lib/components/toast/ToastContainer.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
-	import ArchiveIcon from '$lib/icons/ArchiveIcon.svelte';
-	import ArrowLeft from '$lib/icons/ArrowLeft.svelte';
-	import ArrowRight from '$lib/icons/ArrowRight.svelte';
-	import InboxIcon from '$lib/icons/InboxIcon.svelte';
-	import SeedIcon from '$lib/icons/SeedIcon.svelte';
-	import TrashIcon from '$lib/icons/TrashIcon.svelte';
+	import { endpoints } from '$lib/endpoints';
 	import { HttpService } from '$lib/services/HttpService';
 	import type { MediaItemMetadata } from '$lib/types/MediaItem';
+	import {
+		ArchiveIcon,
+		ArrowLeft,
+		ArrowRight,
+		Button,
+		createToast,
+		InboxIcon,
+		SeedIcon,
+		Tooltip,
+		TrashIcon
+	} from '@lendruk/personal-svelte-ui-lib';
 	import GalleryItemButton from '../../../gallery/GalleryItemButton.svelte';
 	// export let imageName: string;
 	// export let imageId: number;
@@ -27,7 +30,7 @@
 
 	async function deleteItem() {
 		const { id } = images[currentIndex];
-		await HttpService.delete(`/mediaItems/${JSON.stringify([id])}`);
+		await HttpService.delete(endpoints.mediaItem({ id }));
 
 		if (images.length === 1) {
 			images = [];
@@ -46,7 +49,9 @@
 		const { id } = images[currentIndex];
 		const isArchived = !images[currentIndex].isArchived;
 		images[currentIndex].isArchived = isArchived;
-		await HttpService.patch(`/mediaItems/${JSON.stringify([id])}`, { isArchived: isArchived });
+		await HttpService.patch(endpoints.mediaItem({ id: JSON.stringify([id]) }), {
+			isArchived: isArchived
+		});
 		images = images;
 		createToast(`Image ${isArchived ? 'archived' : 'un-archived'} successfully!`);
 	}
@@ -69,7 +74,7 @@
 	>
 		<img
 			class="bg-contain"
-			src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${images[currentIndex].fileName}.png`}
+			src={HttpService.buildGetImageUrl(images[currentIndex].fileName, 'png')}
 		/>
 	</div>
 {/if}
@@ -79,7 +84,7 @@
 			<img
 				on:click={() => onImageClick()}
 				class="bg-contain h-[50%] w-[50%] cursor-pointer z-10"
-				src={`${HttpService.BASE_URL}/images/${HttpService.getVaultId()}/${images[currentIndex].fileName}.png`}
+				src={HttpService.buildGetImageUrl(images[currentIndex].fileName, 'png')}
 				alt="gallery-img"
 			/>
 			<div class="absolute flex w-full h-full">

@@ -1,5 +1,5 @@
 <script>
-	import Breadcrumb from './Breadcrumb.svelte';
+	import { Breadcrumb } from '@lendruk/personal-svelte-ui-lib';
 	import CurrentVault from './CurrentVault.svelte';
 	import JobViewer from './JobViewer.svelte';
 </script>

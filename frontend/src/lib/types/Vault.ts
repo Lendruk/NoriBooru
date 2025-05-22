@@ -1,7 +1,10 @@
+import type { World } from './Worldbuilding/World';
+
 export type Vault = {
 	id: string;
 	name: string;
 	path: string;
-	hasInstalledSD: boolean;
+	port?: number;
 	civitaiApiKey: string | null;
+	world?: World;
 };

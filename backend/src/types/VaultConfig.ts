@@ -6,6 +6,5 @@ export type VaultConfig = {
 	name: string;
 	path: string;
 	createdAt: number;
-	hasInstalledSD: boolean;
 	civitaiApiKey: string | null;
 };
