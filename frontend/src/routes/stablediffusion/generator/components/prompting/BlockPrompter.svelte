@@ -68,6 +68,14 @@
 		});
 	}
 
+	function removeItem(index: number) {
+		currentPrompt.splice(index, 1);
+		// Update the IDs of the remaining items
+		currentPrompt.forEach((item, idx) => {
+			item.id = idx;
+		});
+	}
+
 	$effect(() => {
 		if (!showingActionList) {
 			actionListItems = [];
@@ -137,28 +145,28 @@
 					<BlockPromptTextItem
 						text={promptItem.text}
 						onDelete={() => {
-							currentPrompt.splice(index, 1);
+							removeItem(index);
 						}}
 					/>
 				{:else if 'tag' in promptItem}
 					<BlockPromptTagItem
 						tag={promptItem.tag}
 						onDelete={() => {
-							currentPrompt.splice(index, 1);
+							removeItem(index);
 						}}
 					/>
 				{:else if 'lora' in promptItem}
 					<BlockPromptLoraItem
 						promptLora={promptItem}
 						onDelete={() => {
-							currentPrompt.splice(index, 1);
+							removeItem(index);
 						}}
 					/>
 				{:else if 'wildcard' in promptItem}
 					<BlockPromptWildcardItem
 						promptWildcard={promptItem}
 						onDelete={() => {
-							currentPrompt.splice(index, 1);
+							removeItem(index);
 						}}
 					/>
 				{:else}

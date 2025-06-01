@@ -173,7 +173,7 @@
 						max={100}
 					/>
 				</LabeledComponent>
-				<LabeledComponent>
+				<!-- <LabeledComponent>
 					<div slot="label">Images per Iteration ({imagesPerGeneration})</div>
 					<input
 						slot="content"
@@ -183,7 +183,7 @@
 						min={1}
 						max={8}
 					/>
-				</LabeledComponent>
+				</LabeledComponent> -->
 			</div>
 		</LabeledComponent>
 

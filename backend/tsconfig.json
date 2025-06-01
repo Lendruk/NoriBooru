@@ -13,7 +13,7 @@
 		"outDir": "./dist",
 		"lib": ["ESNext"],
 		"types": ["reflect-metadata"],
-		"rootDir": "./"
+		"rootDirs": ["./", "../types"],
 	},
 	"exclude": ["./master.drizzle.config.ts", "./vault.drizzle.config.ts", "node_modules", "vaults"]
 }

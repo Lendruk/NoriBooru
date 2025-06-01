@@ -47,6 +47,7 @@
 		"tree-kill"
 	],
 	"devDependencies": {
+		"@nori/types": "file:../types",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/fluent-ffmpeg": "^2.1.27",
 		"@types/node": "^22.14.0",

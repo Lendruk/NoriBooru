@@ -1,3 +1,5 @@
+import { PromptBody } from '@nori/types/sd/SDPrompting';
+import { Text2ImgPromptBody } from '@nori/types/sd/Text2ImgPromptBody';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import { inject, injectable } from 'inversify';
@@ -9,7 +11,6 @@ import { MediaService } from '../MediaService';
 import { TagService } from '../TagService';
 import { VaultConfigService } from '../VaultConfigService';
 import { WebsocketService } from '../WebsocketService';
-import { PromptBody } from './PromptService';
 import { SDCheckpointService } from './SDCheckpointService';
 
 type PromptResponse = {
@@ -28,18 +29,6 @@ type ProcessEntry = {
 	isActive: boolean;
 	port: number;
 	authToken: string;
-};
-
-export type Text2ImgPromptBody = {
-	positive_prompt: PromptBody;
-	negative_prompt: PromptBody;
-	steps: number;
-	width: number;
-	height: number;
-	seed: number;
-	scheduler: string;
-	cfgScale: number;
-	iterations: number;
 };
 
 type SDServerLoraPayload = { path: string; strength: number };

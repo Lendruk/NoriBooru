@@ -1,3 +1,4 @@
+import { SDLora } from '@nori/types/sd/SDLora';
 import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import fs from 'fs/promises';
@@ -5,7 +6,6 @@ import { inject, injectable } from 'inversify';
 import { MediaItemSchema, sdLoras, SDLoraSchema, tagsToLoras } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
-import { SDLora } from '../../types/sd/SDLora';
 import { MediaService } from '../MediaService';
 import { PopulatedTag, TagService } from '../TagService';
 
@@ -72,6 +72,7 @@ export class SDLoraService extends VaultService {
 
 				finalLoraArr.push({
 					...savedLora,
+					type: this.mapSDLoraType(savedLora.type),
 					previewMediaItem: mediaItem,
 					activationWords: savedLora.activationWords ? JSON.parse(savedLora.activationWords) : [],
 					metadata: savedLora.metadata ? JSON.parse(savedLora.metadata) : {},
@@ -170,4 +171,13 @@ export class SDLoraService extends VaultService {
 		}
 		return true;
 	};
+
+	private mapSDLoraType(type: string | null): 'SLIDER' | 'MODIFIER' | 'NORMAL' {
+		if (type === 'SLIDER') {
+			return 'SLIDER';
+		} else if (type === 'MODIFIER') {
+			return 'MODIFIER';
+		}
+		return 'NORMAL';
+	}
 }

@@ -42,7 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@lendruk/personal-svelte-ui-lib": "^0.1.0",
+		"@lendruk/personal-svelte-ui-lib": "^0.1.1",
 		"exifreader": "^4.23.1",
 		"pixi.js": "^8.5.1",
 		"puppeteer": "^24.8.2",

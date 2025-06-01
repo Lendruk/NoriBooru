@@ -1,24 +1,10 @@
+import { PromptBody } from '@nori/types/sd/SDPrompting';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 import { sdPrompts, SDPromptSchema } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
-import { SDLora } from '../../types/sd/SDLora';
-import { PopulatedTag } from '../TagService';
-import { SDWildcard } from './WildcardService';
-
-export type PromptLora = { lora: SDLora; strength: number; activatedWords?: string[] };
-
-export type PromptText = { text: string };
-
-export type PromptTag = { tag: PopulatedTag };
-
-export type PromptWildcard = { wildcard: SDWildcard };
-
-export type PromptItem = PromptText | PromptTag | PromptLora | PromptWildcard;
-
-export type PromptBody = PromptItem[];
 
 type SDPrompt = {
 	id: string;

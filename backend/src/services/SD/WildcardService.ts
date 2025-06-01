@@ -1,15 +1,10 @@
+import { SDWildcard } from '@nori/types/sd/SDWildcard';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { inject } from 'inversify';
 import { sdWildcards, SDWildcardSchema } from '../../db/vault/schema';
 import { VaultDb } from '../../lib/VaultAPI';
 import { VaultService } from '../../lib/VaultService';
-
-export type SDWildcard = {
-	id: string;
-	name: string;
-	values: string[];
-};
 
 export class WildcardService extends VaultService {
 	public constructor(@inject('db') db: VaultDb) {

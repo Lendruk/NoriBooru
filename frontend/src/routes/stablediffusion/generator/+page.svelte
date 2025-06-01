@@ -419,7 +419,7 @@
 	</div>
 	<div class="flex flex-col flex-1">
 		{#if promptMode === 'SIMPLE'}
-			<SimplePrompt bind:negativePrompt bind:positivePrompt />
+			<SimplePrompt bind:negativePrompt bind:positivePrompt {loras} tags={allTags} {wildcards} />
 		{:else}
 			<BlockPrompt bind:positivePrompt bind:negativePrompt {loras} tags={allTags} {wildcards} />
 		{/if}
