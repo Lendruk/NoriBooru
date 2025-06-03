@@ -41,8 +41,9 @@ export class LoraRouter extends Router {
 	}
 
 	@Route.DELETE('/sd/loras/:id')
-	public async deleteLora(request: FastifyRequest) {
+	public async deleteLora(request: FastifyRequest, reply: FastifyReply) {
 		const { id } = request.params as { id: string };
 		await this.loraService.deleteLora(id);
+		return reply.status(204).send({ message: 'Lora deleted successfully' });
 	}
 }

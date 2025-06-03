@@ -203,20 +203,20 @@
 <div class="bg-zinc-900 p-2 rounded-md h-full flex flex-col">
 	<div class="flex w-full items-center">
 		<button
-			class={`${currentTab === 'CHECKPOINTS' ? ' border-red-950 ' : 'border-zinc-950 hover:text-red-800 hover:border-red-800 hover:transition'} border-b-2 pb-2 flex-[0.3]`}
+			class={`${currentTab === 'CHECKPOINTS' ? ' border-red-950 ' : 'border-zinc-950 hover:text-red-800 hover:border-red-800 hover:transition'} h-full border-b-2 pb-2 flex-[0.3]`}
 			on:click={() => {
 				currentTab = 'CHECKPOINTS';
 				closeEditWindow();
 			}}>Checkpoints</button
 		>
 		<button
-			class={`${currentTab === 'LORAS' ? ' border-red-950 ' : 'border-zinc-950 hover:text-red-800 hover:border-red-800 hover:transition'} border-b-2 pb-2 flex-[0.3]`}
+			class={`${currentTab === 'LORAS' ? ' border-red-950 ' : 'border-zinc-950 hover:text-red-800 hover:border-red-800 hover:transition'} h-full border-b-2 pb-2 flex-[0.3]`}
 			on:click={() => {
 				currentTab = 'LORAS';
 				closeEditWindow();
 			}}>Loras</button
 		>
-		<div class="border-b-2 border-zinc-950 flex-1 flex justify-end h-full">
+		<div class="border-b-2 border-zinc-950 flex-1 flex justify-end">
 			<Button onClick={() => (isCivitaiModalOpen = true)} class="mb-2">Civitai Import</Button>
 		</div>
 	</div>

@@ -55,9 +55,9 @@
 	async function setPreviewImage(lora: SDLora) {
 		if (lastGen && loraInEdit) {
 			await HttpService.put(endpoints.sdLora({ id: lora.id }), {
-				previewImage: lastGen.id
+				previewMediaItem: lastGen.id
 			});
-			loraInEdit.previewMediaItem = lastGen
+			loraInEdit.previewMediaItem = lastGen;
 			const index = loras.findIndex((l) => l.id === loraInEdit?.id);
 			loras[index].previewMediaItem = loraInEdit!.previewMediaItem;
 		}

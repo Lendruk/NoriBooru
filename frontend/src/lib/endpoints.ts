@@ -118,7 +118,7 @@ export const endpoints: Endpoints = {
 		isGlobal: false
 	}),
 	sdLoras: (options) => ({
-		url: `/sd/loras${options?.params ? `?${options.params}` : ''}`,
+		url: `/sd/loras${options?.id ? `/${options.id}` : ''}${options?.params ? `?${options.params}` : ''}`,
 		isGlobal: false
 	}),
 	sdLora: (options) => ({
