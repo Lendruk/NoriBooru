@@ -17,12 +17,15 @@ huggingface_path = base_storage_path + '/huggingface/'
 # Setting the cache directory for Hugging Face before importing diffusers
 os.environ["HF_HOME"] = huggingface_path
 from flask import Flask, request, jsonify
-from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline, EulerDiscreteScheduler, HeunDiscreteScheduler, UniPCMultistepScheduler, DPMSolverMultistepScheduler, DDIMScheduler
+from diffusers import EulerAncestralDiscreteScheduler, AutoPipelineForText2Image, StableDiffusionXLPipeline, EulerDiscreteScheduler, HeunDiscreteScheduler, UniPCMultistepScheduler, DPMSolverMultistepScheduler, DDIMScheduler
 import torch
 from io import BytesIO
 import base64
 from typing import cast
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from_original_stable_diffusion_ckpt
+import uuid
+from safetensors.torch import load_file
+import subprocess
 
 app = Flask('sd-client')
 loaded_models_dict = {}
@@ -106,7 +109,7 @@ def text2img():
                 result.save_pretrained(checkpoint_path + model_name)
             print(f"Loading model from {sd_model}")
             model_path = checkpoint_path + model_name
-            pipe: StableDiffusionXLPipeline  = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
+            pipe: AutoPipelineForText2Image  = AutoPipelineForText2Image.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
             loaded_models_dict[sd_model] = pipe
         else:
             print('Invalid model path, must be .ckpt or .safetensors')
@@ -114,7 +117,7 @@ def text2img():
 
 
         print("Setting up scheduler...")
-        pipe = cast(StableDiffusionXLPipeline, pipe)
+        pipe = cast(AutoPipelineForText2Image, pipe)
 
         # Setup scheduler
 
@@ -135,11 +138,21 @@ def text2img():
 
         # Setup loras
         for idx, lora in enumerate(loras):
+            print(f"Iterating loras {idx} of {len(loras)}")
             lora_path = os.path.expanduser(lora['path'])
             strength = lora['strength']
-            adapter_name = f"lora_{idx}"
+            adapter_name = f"lora_{idx}_{str(uuid.uuid4())}"
             print(f"Loading lora {lora_path} with strength {strength}")
-            pipe.load_lora_weights(lora_path, adapter_name=adapter_name)
+            # lora_weights = load_file(lora_path)
+            # filtered_weights = {
+            #     k: v for k, v in lora_weights.items()
+            #     if not any(substring in k for substring in ['label_emb', '.alpha'])
+            # }
+            try:
+                pipe.load_lora_weights(lora_path, adapter_name=adapter_name)
+            except Exception as e:
+                print(f"Error loading lora {lora_path}: {e}")
+                
             pipe.set_adapters([adapter_name], adapter_weights=[strength])
         
         print("Generating image...")

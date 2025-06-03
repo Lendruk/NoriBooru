@@ -111,6 +111,8 @@
 		<div>
 			<SliderInput
 				bind:value={cfgScale}
+				hasNumericInput={true}
+				step={0.5}
 				hasValueInLabel={true}
 				min={1}
 				max={14}

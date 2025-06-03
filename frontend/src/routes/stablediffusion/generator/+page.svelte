@@ -255,7 +255,7 @@
 		width = prompt.width;
 		height = prompt.height;
 		cfgScale = prompt.cfgScale;
-		scheduler = prompt.sampler;
+		scheduler = prompt.scheduler;
 		checkpointId = prompt.checkpoint;
 		promptName = prompt.name;
 		positivePrompt = prompt.positivePrompt;

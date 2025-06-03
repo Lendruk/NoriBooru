@@ -143,7 +143,7 @@
 			<div class="p-2" data-id={promptItem.id}>
 				{#if 'text' in promptItem}
 					<BlockPromptTextItem
-						text={promptItem.text}
+						bind:text={promptItem.text}
 						onDelete={() => {
 							removeItem(index);
 						}}

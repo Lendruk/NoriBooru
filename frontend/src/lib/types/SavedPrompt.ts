@@ -6,7 +6,7 @@ export type SavedPrompt = {
 	previewMediaItem: number;
 	positivePrompt: PromptBody;
 	negativePrompt: PromptBody;
-	sampler: string;
+	scheduler: string;
 	steps: number;
 	width: number;
 	height: number;
