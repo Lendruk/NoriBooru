@@ -26,6 +26,7 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from
 import uuid
 from safetensors.torch import load_file
 import subprocess
+from apply_exif import apply_exif_to_image
 
 app = Flask('sd-client')
 loaded_models_dict = {}
@@ -109,7 +110,7 @@ def text2img():
                 result.save_pretrained(checkpoint_path + model_name)
             print(f"Loading model from {sd_model}")
             model_path = checkpoint_path + model_name
-            pipe: AutoPipelineForText2Image  = AutoPipelineForText2Image.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
+            pipe: StableDiffusionXLPipeline  = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=torch.float16, use_safetensors=True, safety_checker=None)
             loaded_models_dict[sd_model] = pipe
         else:
             print('Invalid model path, must be .ckpt or .safetensors')
@@ -117,7 +118,7 @@ def text2img():
 
 
         print("Setting up scheduler...")
-        pipe = cast(AutoPipelineForText2Image, pipe)
+        pipe = cast(StableDiffusionXLPipeline, pipe)
 
         # Setup scheduler
 
@@ -176,11 +177,9 @@ def text2img():
             if image.mode not in ('RGB', 'RGBA'):
                 image = image.convert('RGBA')
 
-            img_io = BytesIO()
-            image.save(img_io, 'PNG')
-            img_io.seek(0)
-            # Convert the image to base64
-            img_base64 = base64.b64encode(img_io.read()).decode('utf-8')
+            image = apply_exif_to_image(image, positive_prompt, negative_prompt, width, height, sd_model, scheduler, seed, steps, cfg_scale)
+
+            img_base64 = base64.b64encode(image.read()).decode('utf-8')
             result_images.append(img_base64)
 
         pipe.unload_lora_weights()

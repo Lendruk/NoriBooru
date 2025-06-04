@@ -21,7 +21,7 @@ import {
 } from '../db/vault/schema';
 import { VaultDb } from '../lib/VaultAPI';
 import { VaultService } from '../lib/VaultService';
-import { ParsedExif } from '../types/Exif';
+import { GenerationInfoPayload, ParsedExif } from '../types/Exif';
 import { VaultConfig } from '../types/VaultConfig';
 import { generateRandomColor } from '../utils/generateRandomColor';
 import { PopulatedTag, TagService } from './TagService';
@@ -510,7 +510,8 @@ export class MediaService extends VaultService {
 		hash.update(Uint8Array.from(buffer));
 		const hexHash = hash.digest('hex').toString();
 		// Exif
-		const exif = fileType === 'image' ? ((await ExifReader.load(buffer)) as ParsedExif) : null;
+		const exif =
+			fileType === 'image' ? ((await ExifReader.load(buffer)) as unknown as ParsedExif) : null;
 		const [newMediaItem] = await this.db
 			.insert(mediaItems)
 			.values({
@@ -644,15 +645,6 @@ export class MediaService extends VaultService {
 		mediaItemId: number,
 		exif: ParsedExif
 	): Promise<MediaItemMetadataSchema> {
-		let parsedPrompt: string = '';
-		if (exif.UserComment) {
-			parsedPrompt = String.fromCharCode(...exif.UserComment.value.filter((v) => v)).replace(
-				'UNICODE',
-				''
-			);
-		} else if (exif.parameters) {
-			parsedPrompt = exif.parameters.value;
-		}
 		const metadataPayload: MediaItemMetadataSchema = {
 			id: randomUUID(),
 			mediaItem: mediaItemId,
@@ -671,49 +663,71 @@ export class MediaService extends VaultService {
 			upscaler: null,
 			vae: null
 		};
+		let parsedPrompt: string = '';
+		if (exif.GenerationInfo) {
+			const generationInfoPayload = JSON.parse(exif.GenerationInfo.value) as GenerationInfoPayload;
+			metadataPayload.positivePrompt = generationInfoPayload.positive_prompt;
+			metadataPayload.negativePrompt = generationInfoPayload.negative_prompt;
+			metadataPayload.width = generationInfoPayload.width;
+			metadataPayload.height = generationInfoPayload.height;
+			metadataPayload.model = generationInfoPayload.model;
+			metadataPayload.sampler = generationInfoPayload.sampler;
+			metadataPayload.seed = generationInfoPayload.seed;
+			metadataPayload.steps = generationInfoPayload.steps;
+			metadataPayload.cfgScale = generationInfoPayload.cfg_scale;
+		} else {
+			if (exif.UserComment) {
+				parsedPrompt = String.fromCharCode(...exif.UserComment.value.filter((v) => v)).replace(
+					'UNICODE',
+					''
+				);
+			} else if (exif.parameters) {
+				parsedPrompt = exif.parameters.value;
+			}
 
-		const splitPrompt = parsedPrompt.split('\n');
-		if (splitPrompt.length > 0) {
-			metadataPayload.positivePrompt = splitPrompt[0];
-			for (let i = 1; i < splitPrompt.length; i++) {
-				const value = splitPrompt[i];
-				if (value.includes('Negative prompt:')) {
-					metadataPayload.negativePrompt = value.split(': ')[1];
-				} else {
-					const settingsObject: Record<string, string> = {};
-					for (const part of value.split(',')) {
-						const splitPart = part.split(': ');
-						settingsObject[splitPart[0].trim()] = splitPart[1];
+			const splitPrompt = parsedPrompt.split('\n');
+			if (splitPrompt.length > 0) {
+				metadataPayload.positivePrompt = splitPrompt[0];
+				for (let i = 1; i < splitPrompt.length; i++) {
+					const value = splitPrompt[i];
+					if (value.includes('Negative prompt:')) {
+						metadataPayload.negativePrompt = value.split(': ')[1];
+					} else {
+						const settingsObject: Record<string, string> = {};
+						for (const part of value.split(',')) {
+							const splitPart = part.split(': ');
+							settingsObject[splitPart[0].trim()] = splitPart[1];
+						}
+						metadataPayload.seed = Number.parseInt(settingsObject.Seed);
+						metadataPayload.model = settingsObject.Model;
+						metadataPayload.sampler = settingsObject.Sampler;
+						metadataPayload.steps = Number.parseInt(settingsObject.Steps);
+						metadataPayload.cfgScale = Number.parseInt(settingsObject['CFG scale']);
+						metadataPayload.vae = settingsObject.VAE ? settingsObject.VAE.split('.')[0] : null;
+
+						if (settingsObject['Hires upscaler']) {
+							metadataPayload.upscaler = settingsObject['Hires upscaler'];
+							// isHighResEnabled = true;
+							metadataPayload.denoisingStrength = Number.parseFloat(
+								settingsObject['Denoising strength']
+							);
+							metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
+						} else if (settingsObject['Tiled Diffusion upscaler']) {
+							metadataPayload.upscaler = settingsObject['Tiled Diffusion upscaler'];
+							metadataPayload.upscaleBy = Number.parseFloat(
+								settingsObject['Tiled Diffusion scale factor']
+							);
+							metadataPayload.denoisingStrength = Number.parseFloat(
+								settingsObject['Denoising strength']
+							);
+						}
+
+						// if (settingsObject.Refiner) {
+						// 	isRefinerEnabled = true;
+						// 	refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
+						// 	refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
+						// }
 					}
-					metadataPayload.seed = Number.parseInt(settingsObject.Seed);
-					metadataPayload.model = settingsObject.Model;
-					metadataPayload.sampler = settingsObject.Sampler;
-					metadataPayload.steps = Number.parseInt(settingsObject.Steps);
-					metadataPayload.cfgScale = Number.parseInt(settingsObject['CFG scale']);
-					metadataPayload.vae = settingsObject.VAE ? settingsObject.VAE.split('.')[0] : null;
-
-					if (settingsObject['Hires upscaler']) {
-						metadataPayload.upscaler = settingsObject['Hires upscaler'];
-						// isHighResEnabled = true;
-						metadataPayload.denoisingStrength = Number.parseFloat(
-							settingsObject['Denoising strength']
-						);
-						metadataPayload.upscaleBy = Number.parseFloat(settingsObject['Hires upscale']);
-					} else if (settingsObject['Tiled Diffusion upscaler']) {
-						metadataPayload.upscaler = settingsObject['Tiled Diffusion upscaler'];
-						metadataPayload.upscaleBy = Number.parseFloat(
-							settingsObject['Tiled Diffusion scale factor']
-						);
-						metadataPayload.denoisingStrength = Number.parseFloat(
-							settingsObject['Denoising strength']
-						);
-					}
-
-					// if (settingsObject.Refiner) {
-					// 	isRefinerEnabled = true;
-					// 	refinerCheckpoint = settingsObject.Refiner.trim().split(' ')[0];
-					// 	refinerSwitchAt = Number.parseFloat(settingsObject['Refiner switch at']);
-					// }
 				}
 			}
 		}
