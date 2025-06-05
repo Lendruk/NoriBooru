@@ -136,8 +136,17 @@
 			cfgScale = parsedMetadata.cfgScale;
 			steps = parsedMetadata.steps;
 
+			function extractModelName(metadata: MediaItemMetadata): string {
+				if (metadata.model.endsWith('.safetensors')) {
+					return metadata.model.split('/').pop()?.replace('.safetensors', '') ?? '';
+				} else {
+					return metadata.model;
+				}
+			}
+			let modelName = extractModelName(parsedMetadata);
+
 			const installedSDCheckpointId = checkpoints.find(
-				(chk) => chk.name === parsedMetadata.model
+				(chk) => chk.name === modelName || chk.name.split('.')[0] === modelName
 			)?.id;
 
 			if (installedSDCheckpointId) {
