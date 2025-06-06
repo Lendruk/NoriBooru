@@ -96,21 +96,21 @@
 
 	$: {
 		pathName = $page.url.pathname.slice() + $page.url.search;
-			stableDiffusionRoutes = [
-				{
-					icon: FolderClosedIcon,
-					name: 'Resources',
-					path: '/stablediffusion/resource-manager',
-					navHref: '/stablediffusion/resource-manager'
-				},
-				{
-					icon: PenIcon,
-					addon: SdUiStatusDisplay,
-					name: 'Generator',
-					path: '/stablediffusion/generator',
-					navHref: '/stablediffusion/generator'
-				}
-			];
+		stableDiffusionRoutes = [
+			{
+				icon: FolderClosedIcon,
+				name: 'Resources',
+				path: '/stablediffusion/resource-manager',
+				navHref: '/stablediffusion/resource-manager'
+			},
+			{
+				icon: PenIcon,
+				addon: SdUiStatusDisplay,
+				name: 'Generator',
+				path: /stablediffusion\/generator\/(.+)/g,
+				navHref: '/stablediffusion/generator/new'
+			}
+		];
 
 		let worldBuildingRoutes: any[] = [];
 		if ($vaultStore?.world) {

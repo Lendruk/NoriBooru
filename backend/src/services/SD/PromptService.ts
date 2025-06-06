@@ -90,7 +90,6 @@ export class PromptService extends VaultService {
 					createdAt: new Date().getTime(),
 					height: options.height,
 					width: options.width,
-					id: randomUUID(),
 					negativePrompt: JSON.stringify(options.negativePrompt),
 					positivePrompt: JSON.stringify(options.positivePrompt),
 					isHighResEnabled: options.highRes ? 1 : 0,
@@ -131,6 +130,38 @@ export class PromptService extends VaultService {
 					}
 				: null
 		}));
+	}
+
+	public async getPrompt(promptId: string): Promise<SDPrompt | null> {
+		const prompt = await this.db.query.sdPrompts.findFirst({
+			where: eq(sdPrompts.id, promptId)
+		});
+
+		if (!prompt) {
+			return null;
+		}
+
+		return {
+			id: prompt.id,
+			name: prompt.name,
+			previewMediaItem: prompt.previewMediaItem,
+			positivePrompt: JSON.parse(prompt.positivePrompt),
+			negativePrompt: JSON.parse(prompt.negativePrompt),
+			scheduler: prompt.scheduler,
+			steps: prompt.steps,
+			width: prompt.width,
+			height: prompt.height,
+			checkpoint: prompt.checkpoint,
+			cfgScale: prompt.cfgScale,
+			highRes: prompt.isHighResEnabled
+				? {
+						upscaler: prompt.highResUpscaler,
+						steps: prompt.highResSteps,
+						denoisingStrength: prompt.highResDenoisingStrength,
+						upscaleBy: prompt.highResUpscaleBy
+					}
+				: null
+		};
 	}
 
 	public async deletePrompt(promptId: string): Promise<void> {

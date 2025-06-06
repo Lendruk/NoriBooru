@@ -20,6 +20,12 @@ export class PromptRouter extends Router {
 		return await this.promptService.createPrompt(body);
 	}
 
+	@Route.GET('/sd/prompts/:id')
+	public async getPrompt(request: FastifyRequest) {
+		const { id } = request.params as { id: string };
+		return await this.promptService.getPrompt(id);
+	}
+
 	@Route.PUT('/sd/prompts/:id')
 	public async updatePrompt(request: FastifyRequest) {
 		const { id } = request.params as { id: string };

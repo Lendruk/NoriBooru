@@ -13,7 +13,6 @@
 	import type { SDScheduler } from '$lib/types/SD/SDSchedulers';
 	import type { SDUpscaler } from '$lib/types/SD/SDUpscaler';
 	import type { SDWildcard } from '$lib/types/SD/SDWildcard';
-	import type { Vault } from '$lib/types/Vault';
 	import { SDPromptBuilder } from '$lib/utils/SDPromptBuilder';
 	import {
 		Button,
@@ -27,16 +26,16 @@
 		Tooltip
 	} from '@lendruk/personal-svelte-ui-lib';
 	import { onMount } from 'svelte';
-	import { isSdStarting, isSdStopping, vaultStore } from '../../../store';
-	import PreviewImages from './components/PreviewImages.svelte';
-	import BlockPrompt from './components/prompting/BlockPrompt.svelte';
-	import SimplePrompt from './components/prompting/SimplePrompt.svelte';
-	import PromptSaveModal from './components/PromptSaveModal.svelte';
-	import PromptSearch from './components/PromptSearch.svelte';
-	import GeneralSettings from './views/GeneralSettings.svelte';
-	import HighResSettings from './views/HighResSettings.svelte';
-	import LoraSelector from './views/LoraSelector.svelte';
-	import WildcardManager from './views/WildcardManager.svelte';
+	import { isSdStarting, isSdStopping } from '../../../../store';
+	import PreviewImages from '../components/PreviewImages.svelte';
+	import BlockPrompt from '../components/prompting/BlockPrompt.svelte';
+	import SimplePrompt from '../components/prompting/SimplePrompt.svelte';
+	import PromptSaveModal from '../components/PromptSaveModal.svelte';
+	import PromptSearch from '../components/PromptSearch.svelte';
+	import GeneralSettings from '../views/GeneralSettings.svelte';
+	import HighResSettings from '../views/HighResSettings.svelte';
+	import LoraSelector from '../views/LoraSelector.svelte';
+	import WildcardManager from '../views/WildcardManager.svelte';
 
 	let checkpoints = $state<SDCheckpoint[]>([]);
 	let schedulers = $state<SDScheduler[]>([]);
@@ -44,6 +43,8 @@
 	let loras = $state<SDLora[]>([]);
 	let wildcards = $state<SDWildcard[]>([]);
 	let allTags = $state<PopulatedTag[]>([]);
+
+	let currentPromptId = $state<string>($page.params.id);
 
 	let generatedImages = $state<
 		{ fileName: string; id: number; isArchived: boolean; metadata: MediaItemMetadata }[] | undefined
@@ -60,7 +61,6 @@
 	let isGeneratingImage = $state(false);
 
 	// General settings
-	let promptId: string = $state<string>('');
 	let promptName: string = $state<string>('');
 	let positivePrompt = $state<PromptBody>([]);
 	let negativePrompt = $state<PromptBody>([]);
@@ -88,7 +88,7 @@
 
 	let usedLoras: string[] = [];
 
-	async function setup(vault: Vault) {
+	async function setup() {
 		$isSdStarting = true;
 		await HttpService.post(endpoints.sdStart());
 		const [
@@ -164,6 +164,15 @@
 		}
 
 		$isSdStarting = false;
+
+		if (currentPromptId !== 'new') {
+			const prompt = await HttpService.get<SavedPrompt>(
+				endpoints.sdPrompt({ id: currentPromptId })
+			);
+			loadPrompt(prompt);
+		} else {
+			clearPrompt();
+		}
 	}
 
 	async function generate() {
@@ -233,12 +242,14 @@
 					}
 				: undefined
 		});
-		promptId = newPrompt.id!;
+		// promptId = newPrompt.id!;
+		goto(`/stablediffusion/generator/${newPrompt.id}`);
+		currentPromptId = newPrompt.id!;
 		createToast('Prompt saved successfully!');
 	}
 
 	async function updatePrompt() {
-		await HttpService.put(endpoints.sdPrompt({ id: promptId }), {
+		await HttpService.put(endpoints.sdPrompt({ id: currentPromptId }), {
 			name: promptName,
 			cfgScale,
 			checkpoint: checkpointId,
@@ -271,7 +282,6 @@
 		negativePrompt = prompt.negativePrompt;
 		steps = prompt.steps;
 		isHighResEnabled = !!prompt.highRes;
-		promptId = prompt.id ?? '';
 		refinerCheckpoint =
 			checkpoints.find((checkpoint) => checkpoint.name !== prompt.checkpoint)?.name ??
 			prompt.checkpoint;
@@ -282,10 +292,13 @@
 			upscaleBy = prompt.highRes.upscaleBy;
 			highResUpscaler = prompt.highRes.upscaler;
 		}
+
+		goto(`/stablediffusion/generator/${prompt.id}`);
+		currentPromptId = prompt.id!;
 	}
 
 	function clearPrompt() {
-		promptId = '';
+		goto('/stablediffusion/generator/new');
 		promptName = '';
 		positivePrompt = [];
 		negativePrompt = [];
@@ -304,7 +317,7 @@
 	}
 
 	function onDeletePrompt(prompt: SavedPrompt) {
-		if (prompt.id === promptId) {
+		if (prompt.id === currentPromptId) {
 			clearPrompt();
 		}
 	}
@@ -329,12 +342,12 @@
 		await HttpService.post(endpoints.maskSDInactive());
 	});
 
+	function doesPromptExist(): boolean {
+		return currentPromptId !== 'new';
+	}
+
 	onMount(() => {
-		vaultStore.subscribe((vault) => {
-			if (vault) {
-				void setup(vault);
-			}
-		});
+		void setup();
 	});
 </script>
 
@@ -371,7 +384,7 @@
 				<Tooltip>
 					<Button
 						onClick={() => {
-							if (promptId) {
+							if (doesPromptExist()) {
 								updatePrompt();
 							} else {
 								isSavingPrompt = true;
@@ -381,7 +394,7 @@
 						class="flex gap-2 rounded-tr-none rounded-br-none"
 					>
 						<div>
-							{#if promptId}
+							{#if currentPromptId !== 'new'}
 								Update Prompt
 							{:else}
 								Save Prompt
@@ -393,11 +406,11 @@
 				</Tooltip>
 				<Button
 					onClick={() => {
-						if (promptId) {
+						if (doesPromptExist()) {
 							areSaveOptionsExpanded = !areSaveOptionsExpanded;
 						}
 					}}
-					class={`${!promptId && 'cursor-not-allowed fill-zinc-900'} rounded-tl-none rounded-bl-none border-l-2 border-zinc-800`}
+					class={`${!doesPromptExist() && 'cursor-not-allowed fill-zinc-900'} rounded-tl-none rounded-bl-none border-l-2 border-zinc-800`}
 				>
 					{#if areSaveOptionsExpanded}
 						<ChevronUp />
